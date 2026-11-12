@@ -86,7 +86,72 @@ The standard XIAO has 11 GPIO — not enough. The **Plus** adds 9 castellated pa
 GPIO42 in another); **take it from the Plus schematic, not the wiki**, before routing. Avoid the
 strapping pins (GPIO0, 3, 45, 46) for STEP/DIR/ENN — a pulse at boot moves a motor.
 
-### 0.3 OLED
+### 0.3 Sensors: an IMU yes, shaft encoders no (footprint only)
+
+Discussed 2026-11-12. The error budget of a polargraph, in orders of magnitude (31.9 mm pulley
+circumference):
+
+| Error source | Size | Seen by a shaft encoder? |
+|---|---|---|
+| step resolution at 1/16 | 0.01 mm | yes — already negligible |
+| microstep angle error (±5 % of a full step) | ±0.01 mm, not cumulative | yes — irrelevant |
+| lost steps | zero or catastrophic | **yes** |
+| effective pulley diameter off by 0.5 % | ~5 mm over 1 m of belt | no |
+| anchor distance d mismeasured by ±2 mm | several mm distortion at the edges | no |
+| belt length at homing (stop screw) | ±0.5 mm | no |
+| tilt γ, belt elongation | mm range, modelled | no |
+| pen friction on the wall, sway | ~0.5–1 mm hysteresis | no |
+
+A shaft encoder measures what the stepper already knows; everything between the shaft and the pen
+tip — pulley, belt, geometry, tilt, friction — is invisible to it, and that is where the
+millimetres are. (Rotator was the opposite case: gearing and backlash sat *behind* the motor, and
+the output angle was the quantity that mattered.) What encoders could still do — detect lost steps,
+and tell after a power cut whether the bot pulled the belts while the drivers were off — is covered
+by StallGuard and, for the power cut, only within half a turn of ~30 turns per metre, so it does not
+replace homing either. They would also need double-shaft motors, since the pulley sits on the only
+shaft of a typical pancake stepper.
+
+Decisions:
+
+- **IMU on the board** (LIS3DH or BMI270 class, on the OLED's I2C bus — no extra pin). The
+  electronics ride on the bot, so an accelerometer measures γ directly — the quantity the kinematic
+  model only estimates. Uses: validate the model; self-calibration (measured vs. predicted γ over the
+  area points at a wrong d or pulley diameter); detect sway and limit acceleration accordingly;
+  detect "taken off the wall" and a slipped belt.
+- **No shaft encoders in the concept.** Footprints for two (MT6701 or AS5047P) under the motor
+  shafts as an **unpopulated option**, so the experiment stays possible without the design depending
+  on it.
+- **Driver choice stays open** — see §0.4.
+
+### 0.4 Driver: TMC2209 (UART) or TMC2240 (SPI or UART)
+
+The TMC2209 has **no SPI**; going to SPI means changing the driver. The candidate is the
+**TMC2240**: SPI or UART, up to 36 V / 2.1 A, StallGuard 2 and 4, and **integrated current
+sensing — no sense resistors**, which removes the part of the §0.2 circuit with the most to get
+wrong. Not yet checked: JLCPCB stock and price.
+
+Pin budget with SPI (two drivers, plus the optional encoders):
+
+| Function | Pins |
+|---|---|
+| SCK, MOSI, MISO | 3 |
+| CS × 2 drivers (+ 2 encoders) | 2 (4) |
+| STEP/DIR × 2, ENN | 5 |
+| DIAG × 2 (optional) | 2 |
+| Servo | 1 |
+| I2C (OLED, IMU) | 2 |
+| microSD — **SD_MMC 1-bit, never on the shared SPI bus** | 3 |
+| **Total** | **16–20** |
+
+Twenty is everything the XIAO Plus has. The SD card stays off the shared bus regardless: it needs a
+slow clock during init, some cards do not release MISO cleanly, and long writes hold the bus while
+the motion task needs the drivers.
+
+The firmware hides the choice behind a thin driver layer (`Driver::begin`, `setCurrent`,
+`setMicrosteps`, `status`, `stallValue`), so the breadboard rig with TMC2209 StepSticks stays
+valid whichever driver the board gets.
+
+### 0.5 OLED
 
 Part of the build: 0.91" SSD1306, 128 × 32, I2C (as in Mural). It shows what the web UI cannot when
 there is no network: in portal mode the AP name and `192.168.4.1`; otherwise hostname/IP, state,
@@ -167,6 +232,8 @@ Firmware modules (new ones; the house modules keep their names):
 | `Motion.*` | the motion task, FastAccelStepper, TMC2209 setup, enable, position bookkeeping, homing | the place the job file is parsed |
 | `Pen.*` | servo angle, up/down with ramp, the pen-down angle | blocking — the planner waits for it via a pen segment |
 | `Display.*` | the SSD1306: one screen per state, refreshed on change, not per frame | required — absent display = no-op |
+| `Imu.*` | the accelerometer: tilt γ, sway, "off the wall" | an input to the kinematics — it validates and calibrates, it does not steer |
+| `Driver.*` | the TMC behind a thin interface: current, microsteps, status, stall value | step generation — that is FastAccelStepper in `Motion` |
 | `JobRunner.*` | reading the job from SD, progress by distance, pause/resume/stop, checkpoints | a file manager — `/jobs/*` and the explorer do that |
 | `PlotterState.*` | the state enum, the transition table, `canDo()`, the refusal codes | where anything moves |
 | `SdStore.*` | mounting the card, the third store in the storage explorer | required for boot — the device runs without a card, it just cannot plot |
@@ -253,6 +320,9 @@ the README and in the header of `Kinematics.*`. (Not legal advice.)
 
 ## 5. Suggestions beyond the port
 
+- **Self-calibration from the IMU.** Visit a handful of points across the area, compare the measured
+  tilt with the model's, fit d and the pulley diameter — replaces the tape measure and the drawn test
+  square for most of the error budget in §0.3.
 - **Sensorless retract (StallGuard).** Retract both belts until the driver reports a stall instead
   of watching the stop screw — the first step towards "hang it up, press one button".
 - **Wall-position sanity check.** After homing, a two-second wiggle that measures belt tension via
@@ -275,7 +345,8 @@ without credentials, and the first-flash page needs Pages); OLED is part of the 
 
 1. **Board** — (A) or (B), see §0. Leaning towards (B); the breadboard rig makes the choice
    non-blocking for the firmware.
-2. **TMC2209-LA or TMC2226-SA** — decided by JLCPCB stock and price when the schematic starts.
+2. **Driver** — TMC2209-LA / TMC2226-SA over UART, or TMC2240 over SPI/UART (§0.4); decided by
+   JLCPCB stock and price when the schematic starts.
 3. **Motor voltage** — 15 V or 20 V from PD (20 V: more torque at speed; 15 V: works with more
    chargers). Decides the CH224K resistor and the capacitor voltage ratings (≥ 35 V either way).
 4. **Setup portal** — own portal (house default) assumed. **UI languages** — de + en assumed.

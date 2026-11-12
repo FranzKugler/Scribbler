@@ -50,6 +50,11 @@ here once it is wired.
 The XIAO Plus's back-pad GPIO mapping (D11–D19) is inconsistent across Seeed's wiki pages — use
 the schematic. Keep STEP/DIR/ENN off strapping pins (GPIO0, 3, 45, 46).
 
+An accelerometer on the I2C bus measures the bot's tilt γ (validation and calibration of the
+kinematics, sway, "off the wall"). Shaft encoders are deliberately not part of the concept — the
+reasoning is in PLAN.md §0.3. The TMC driver (TMC2209 via UART or TMC2240 via SPI/UART) is open and
+sits behind `Driver.*`; nothing outside that module talks to a driver register.
+
 The OLED is always optional at runtime: missing display = no-op, never a boot failure. In portal
 mode it shows the AP name and `192.168.4.1`.
 
