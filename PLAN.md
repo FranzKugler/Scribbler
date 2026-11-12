@@ -113,11 +113,22 @@ shaft of a typical pancake stepper.
 
 Decisions:
 
-- **IMU on the board** (LIS3DH or BMI270 class, on the OLED's I2C bus — no extra pin). The
-  electronics ride on the bot, so an accelerometer measures γ directly — the quantity the kinematic
+- **IMU on the board: Bosch BMI270** (accelerometer + gyro, on the OLED's I2C bus — no extra pin;
+  in stock). The electronics ride on the bot, so it measures γ directly — the quantity the kinematic
   model only estimates. Uses: validate the model; self-calibration (measured vs. predicted γ over the
   area points at a wrong d or pulley diameter); detect sway and limit acceleration accordingly;
   detect "taken off the wall" and a slipped belt.
+  - Why not the ADXL345 (the Klipper classic): it is accelerometer-only, and while the bot moves an
+    accelerometer sees path acceleration on top of gravity, so it yields γ only at standstill. The
+    BMI270's gyro measures the rate of γ itself (rotation about the wall normal); a complementary /
+    Mahony filter gives γ during motion and separates sway from tilt. The ADXL345's strength, a
+    3.2 kHz data rate for resonance measurement, is not needed — the bot sways at a few Hz.
+  - Resolution needed: 0.1° of γ at a ~40 mm lever to the pen tip is ~0.07 mm — comfortably within
+    the BMI270 (16 bit, ~0.06 mg/LSB at ±2 g) with averaging.
+  - The BMI270 needs Bosch's ~8 kB config blob uploaded on every power-up (Bosch API / SparkFun
+    library do this) — flash cost and a few ms at boot.
+  - Mounting offset: the board is never exactly parallel to the bot's axis. Calibrate it once, at a
+    point where the model predicts γ ≈ 0 or from two positions 180° apart, and store it in NVS.
 - **No shaft encoders in the concept.** Footprints for two (MT6701 or AS5047P) under the motor
   shafts as an **unpopulated option**, so the experiment stays possible without the design depending
   on it.
