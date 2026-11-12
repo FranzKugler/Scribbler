@@ -36,7 +36,14 @@ data/       build output of web/, flashed as LittleFS (gitignored)
 docs/       first-flash page (GitHub Pages)
 scripts/    version stamping, manifests, icons
 server.js   mock of the device's REST API
+hardware/pcb/     KiCad project for the own board (Scribbler.kicad_pro)
 ```
+
+**KiCad files are never edited as text** (`*.kicad_sch`, `*.kicad_pcb`, `*.kicad_pro`, libraries,
+lib tables) — every change goes through the Konnect MCP tools, see the `konnect` skill. The
+board's design rules live in [hardware/pcb/.konnect/project.json](hardware/pcb/.konnect/project.json)
+(added with `add_design_rule`, read with `list_design_rules`) and restate PLAN.md §0.2–0.4; change
+both together.
 
 ## Hardware target
 

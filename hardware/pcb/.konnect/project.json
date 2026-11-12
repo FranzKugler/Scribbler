@@ -1,0 +1,12 @@
+{
+  "design_rules": [
+    "MCU is a Seeed XIAO ESP32-S3 Plus. Take the back-pad GPIO mapping (D11-D19) from the Plus schematic, not the wiki. Keep STEP, DIR and ENN off strapping pins GPIO0, 3, 45, 46.",
+    "Each stepper driver gets >=100uF low-ESR bulk capacitance near its VS pins plus 100nF at every VS pin; all capacitors on the motor rail rated >=35 V. This protects the driver when the USB-C PD supply is hot-plugged.",
+    "Driver ENN is one shared MCU pin with a 10k pull-up to VCC_IO, so the motors stay disabled while the ESP32 boots and its pins float. Driver VCC_IO comes from the XIAO 3V3, not from the driver's 5VOUT.",
+    "The board's 5 V rail reaches the XIAO 5V pin only through a Schottky or ideal diode, because the XIAO ties its 5V pin to USB VBUS and would otherwise back-feed into a connected PC.",
+    "microSD runs in SD_MMC 1-bit mode on its own pins, never on a shared SPI bus with the drivers or encoders. I2C bus carries the SSD1306 OLED (0x3C) and the BMI270 IMU (0x68/0x69); one set of pull-ups for the bus.",
+    "Driver exposed pad: at least 9 thermal vias into a bottom-side GND plane. Shaft encoders (MT6701 or AS5047P) are footprints only, marked DNP, centred under the motor shafts. Driver choice (TMC2209/TMC2226 via UART or TMC2240 via SPI) is open - see PLAN.md 0.4."
+  ],
+  "fab_constraints": {},
+  "naming_conventions": {}
+}
