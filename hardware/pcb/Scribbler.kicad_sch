@@ -5176,6 +5176,166 @@
 			)
 			(embedded_fonts no)
 		)
+	
+		(symbol
+		  "Scribbler:CH224A"
+		  (pin_numbers)
+		  (pin_names
+		    (offset 1.016))
+		  (in_bom yes)
+		  (on_board yes)
+		  (property "Reference" "U"
+		    (at 0 10.1600 0)
+		    (effects
+		      (font
+		        (size 1.27 1.27))))
+		  (property "Value" "CH224A"
+		    (at 0 -10.1600 0)
+		    (effects
+		      (font
+		        (size 1.27 1.27))))
+		  (property "Footprint" ""
+		    (at 0 0 0)
+		    (effects
+		      (font
+		        (size 1.27 1.27)) hide))
+		  (property "Datasheet" "~"
+		    (at 0 0 0)
+		    (effects
+		      (font
+		        (size 1.27 1.27)) hide))
+
+		  (symbol "CH224A_0_1"
+		    (rectangle
+		      (start -7.6200 -7.6200)
+		      (end 7.6200 7.6200)
+		      (stroke
+		        (width 0.254)
+		        (type default))
+		      (fill
+		        (type background)))
+		    (pin power_in line
+		      (at 2.54 10.16 270)
+		      (length 2.54)
+		      (name "VHV"
+		        (effects
+		          (font
+		            (size 1.27 1.27))))
+		      (number "1"
+		        (effects
+		          (font
+		            (size 1.27 1.27)))))
+		    (pin passive line
+		      (at 0 10.16 270)
+		      (length 2.54)
+		      (name "VBUS"
+		        (effects
+		          (font
+		            (size 1.27 1.27))))
+		      (number "8"
+		        (effects
+		          (font
+		            (size 1.27 1.27)))))
+		    (pin bidirectional line
+		      (at -10.16 5.08 0)
+		      (length 2.54)
+		      (name "CC1"
+		        (effects
+		          (font
+		            (size 1.27 1.27))))
+		      (number "7"
+		        (effects
+		          (font
+		            (size 1.27 1.27)))))
+		    (pin bidirectional line
+		      (at -10.16 2.54 0)
+		      (length 2.54)
+		      (name "CC2"
+		        (effects
+		          (font
+		            (size 1.27 1.27))))
+		      (number "6"
+		        (effects
+		          (font
+		            (size 1.27 1.27)))))
+		    (pin bidirectional line
+		      (at -10.16 -2.54 0)
+		      (length 2.54)
+		      (name "DM"
+		        (effects
+		          (font
+		            (size 1.27 1.27))))
+		      (number "5"
+		        (effects
+		          (font
+		            (size 1.27 1.27)))))
+		    (pin bidirectional line
+		      (at -10.16 -5.08 0)
+		      (length 2.54)
+		      (name "DP"
+		        (effects
+		          (font
+		            (size 1.27 1.27))))
+		      (number "4"
+		        (effects
+		          (font
+		            (size 1.27 1.27)))))
+		    (pin open_collector line
+		      (at 10.16 5.08 180)
+		      (length 2.54)
+		      (name "PG"
+		        (effects
+		          (font
+		            (size 1.27 1.27))))
+		      (number "10"
+		        (effects
+		          (font
+		            (size 1.27 1.27)))))
+		    (pin passive line
+		      (at 10.16 0 180)
+		      (length 2.54)
+		      (name "CFG1"
+		        (effects
+		          (font
+		            (size 1.27 1.27))))
+		      (number "9"
+		        (effects
+		          (font
+		            (size 1.27 1.27)))))
+		    (pin passive line
+		      (at 10.16 -2.54 180)
+		      (length 2.54)
+		      (name "CFG2/SCL"
+		        (effects
+		          (font
+		            (size 1.27 1.27))))
+		      (number "2"
+		        (effects
+		          (font
+		            (size 1.27 1.27)))))
+		    (pin passive line
+		      (at 10.16 -5.08 180)
+		      (length 2.54)
+		      (name "CFG3/SDA"
+		        (effects
+		          (font
+		            (size 1.27 1.27))))
+		      (number "3"
+		        (effects
+		          (font
+		            (size 1.27 1.27)))))
+		    (pin power_in line
+		      (at 0 -10.16 90)
+		      (length 2.54)
+		      (name "GND"
+		        (effects
+		          (font
+		            (size 1.27 1.27))))
+		      (number "11"
+		        (effects
+		          (font
+		            (size 1.27 1.27))))))
+		)
 	)
 	(text "Aux interface idle: ASDx/ASCx 10k pull-ups, OCSB high, OSDO NC."
 		(exclude_from_sim no)
@@ -5186,26 +5346,6 @@
 			)
 		)
 		(uuid "0ffc1a81-ee1f-460d-b368-d23a9a815b43")
-	)
-	(text "CH_VDD = internal 3.3V shunt reg via R1 1k from VS; VBUS pin = sense input via R2 10k."
-		(exclude_from_sim no)
-		(at 55 16 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-		)
-		(uuid "118fcc81-7082-4512-a500-f9a772500ec8")
-	)
-	(text "USB-C PD: CH224K requests 20V on VS. CFG1 open = 20V; fit R3 56k = 15V (PLAN 6.3)."
-		(exclude_from_sim no)
-		(at 55 12 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-		)
-		(uuid "247c85a3-b3b7-46c7-80c2-3d3bb1f7280a")
 	)
 	(text "microSD: SD_MMC 1-bit (CLK/CMD/DAT0), own pins, never on the driver SPI bus."
 		(exclude_from_sim no)
@@ -8941,7 +9081,7 @@
 				)
 			)
 		)
-		(property "Value" "56k (DNP=20V)"
+		(property "Value" "120k"
 			(at 95.25 73.66 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -11677,7 +11817,7 @@
 				)
 			)
 		)
-		(property "Value" "10k"
+		(property "Value" "0R"
 			(at 95.25 58.42 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -12511,7 +12651,7 @@
 				)
 			)
 		)
-		(property "Value" "1k"
+		(property "Value" "0R"
 			(at 59.69 34.29 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -13141,7 +13281,7 @@
 				)
 			)
 		)
-		(property "Value" "1u"
+		(property "Value" "1u 50V"
 			(at 95.25 41.91 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -13151,7 +13291,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 95.25 38.1 0)
 			(hide yes)
 			(show_name no)
@@ -13780,7 +13920,7 @@
 				)
 			)
 		)
-		(property "Value" "1k"
+		(property "Value" "10k"
 			(at 110.49 43.18 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -13916,7 +14056,7 @@
 		)
 	)
 	(symbol
-		(lib_id "Interface_USB:CH224K")
+		(lib_id "Scribbler:CH224A")
 		(at 74.93 54.61 0)
 		(unit 1)
 		(body_style 1)
@@ -13936,7 +14076,7 @@
 				)
 			)
 		)
-		(property "Value" "CH224K"
+		(property "Value" "CH224A"
 			(at 74.93 58.42 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14831,4 +14971,29 @@
 		)
 	)
 	(embedded_fonts no)
-)
+
+  (text "USB-C PD: CH224A requests 20V on VS. Rset R3 120k = 20V, 56k = 15V (PLAN 6.3)."
+    (at 55 12 0)
+    (effects (font (size 1.27 1.27)))
+    (uuid "987ffcc7-53a2-4279-90e7-350cab343fe0")
+  )
+  (text "CH224A pin 1 is VHV (32V): fed from VS directly, so R1 and R2 are 0R links."
+    (at 55 16 0)
+    (effects (font (size 1.27 1.27)))
+    (uuid "1ff9d7e3-7eb2-4770-a337-dfe966d5b61f")
+  )
+  (text "CH_VDD is therefore the VS rail - C1 rated for VS, PG LED current set by R4 10k."
+    (at 55 20 0)
+    (effects (font (size 1.27 1.27)))
+    (uuid "1e470fb8-381f-45a6-b383-618a65acabc9")
+  )
+  (text "CH224K fits the same footprint: then R1 1k, R2 10k, R3 open (=20V), R4 1k."
+    (at 55 24 0)
+    (effects (font (size 1.27 1.27)))
+    (uuid "acc04ffa-779f-4b66-967f-2e37214ccd1a")
+  )
+  (text "CFG2/SCL + CFG3/SDA are I2C (0x22/0x23) on CH224A - open here, optional bus link."
+    (at 190 20 0)
+    (effects (font (size 1.27 1.27)))
+    (uuid "641b24ee-d0e8-43fd-acbb-add8ab3896a0")
+  ))
