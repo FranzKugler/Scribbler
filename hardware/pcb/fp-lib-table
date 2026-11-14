@@ -1,0 +1,5 @@
+(fp_lib_table
+  (version 7)
+
+  (lib (name "seed_xiao") (type "KiCad") (uri "c:/Users/Franz/Workspace/Scribbler/hardware/pcb/libs/footprints/XIAO_Series_Footprints.pretty") (options "") (descr ""))
+)
