@@ -137,8 +137,8 @@ export default {
   jobResume: 'Resume',
   jobStop: 'Cancel',
   jobStopHint:
-    'Pause and cancel finish the current millimetre and lift the pen - the position stays known. ' +
-    'Stop halts at once; the belts then have to be wound in again.',
+    'Pause and cancel finish what is already planned (64 moves at most) and lift the pen - the ' +
+    'position stays known. Stop halts at once; the belts then have to be wound in again.',
   jobsCard: 'SD card',
   jobsNoCard: 'No SD card - insert one and restart the device.',
   jobsCardUsage: (used, total) => `${used} of ${total} used.`,
@@ -154,8 +154,7 @@ export default {
   jobsSpeedTitle: 'Speed',
   jobsSpeed: 'Drawing (mm/s)',
   jobsSpeedHint:
-    'Until the planner arrives the bot stops briefly after every millimetre - faster than ~20 mm/s ' +
-    'buys shaking rather than time.',
+    'Straight lines run through without stopping, corners slow down. Moves with the pen up run faster.',
 
   // --- setup tab ---
   setupUnavailable: 'Plotter status unavailable',

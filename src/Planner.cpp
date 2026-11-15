@@ -101,6 +101,15 @@ namespace Planner
         replan();
     }
 
+    void Queue::clear()
+    {
+        _head = 0;
+        _count = 0;
+        _time = 0.0;
+        _headEntry = 0.0;
+        _finishing = false;
+    }
+
     void Queue::replan()
     {
         if (_count == 0) return;

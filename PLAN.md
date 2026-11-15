@@ -342,6 +342,13 @@ Each phase ends with something checkable on the device, not with a green build.
    pause/cancel at the end of a millimetre, the Plot tab. The first plot of a Mural file
    waits for hardware.
 6. **Planner** — trapezoid + lookahead; compare plot time and quality against phase 5 on the same file.
+   *Built 2026-11-15, not yet on hardware:* `Planner` (GRBL-style junction deviation, look-ahead
+   over 64 blocks, trapezoids, time slices; 9 host tests that measure speed and acceleration
+   from the slices themselves) and `Path` (a task on core 1 feeding both belts with 5 ms
+   `moveTimed()` slices in lockstep). Mural's 1 mm stop-and-go is gone from jobs. Open: the
+   comparison on a wall; pause/cancel stopping sooner than the end of the planned buffer
+   (needs the planner to cut a block short); a belt-speed limit from the kinematics' Jacobian
+   near the edges (§5).
 7. **Own SVG pipeline** in the Jobs tab, with preview and time estimate.
 8. **Polish** — checkpoint/resume after power loss, first-flash page, README, release.
 

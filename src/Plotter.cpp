@@ -28,6 +28,7 @@
 #include "Imu.h"
 #include "Kinematics.h"
 #include "JobRunner.h"
+#include "Path.h"
 
 extern Settings settings;
 void scheduleSettingsSave();
@@ -60,10 +61,10 @@ namespace
     constexpr double PULLEY_MM_S = 20.0;
     constexpr double PULLEY_MM_S2 = 100.0;
 
-    // Drawing: Mural's 1 mm increment, and a "ramp" so steep it is none - a
-    // piece is too short for one. The planner replaces both.
-    constexpr double DRAW_PIECE_MM = 1.0;
-    constexpr double DRAW_ACCEL_MM_S2 = 20000.0;
+    // Commands read from the job per loop() pass: enough to keep the
+    // planner's buffer full at any drawing speed, few enough that the web
+    // server is not kept waiting.
+    constexpr int LINES_PER_POLL = 32;
 
     // Lines of the job file checked per loop() pass: a few milliseconds of SD
     // reading, so the web server keeps answering during a long check.
@@ -72,12 +73,20 @@ namespace
     State current = State::Unconfigured;
     Kinematics::Model model;
 
-    // The job's drawing state: the segment being drawn, the pen as the file
-    // last set it, and the requests waiting for the current piece to end.
-    bool segmentActive = false;
-    double segX = 0.0, segY = 0.0;
+    // The job's drawing state. Moves go to Path; anything that needs
+    // standstill - a pen change, a pause, the end - first lets Path run dry
+    // ("draining") and then does `after`.
+    enum class After : uint8_t { Nothing, PenDown, PenUp, Pause, Stop, Finish };
+    After after = After::Nothing;
+    bool draining = false;
+    bool waitingPen = false;
     bool jobPenDown = false;
     bool pauseRequested = false, stopRequested = false;
+    // A move read from the file that did not fit into the planner yet.
+    bool havePending = false;
+    double pendX = 0.0, pendY = 0.0, pendSpeed = 0.0;
+    // Where the last pushed move ends - for the progress count.
+    double pushX = 0.0, pushY = 0.0;
 
     // The pen's image coordinates once Ready; where a move is going while
     // one runs (the position is the target's once it has stopped).
@@ -101,22 +110,45 @@ namespace
         current = next;
     }
 
-    /** Pen up, job closed, back to Ready - the position is the last piece's end. */
+    /** Pen up, job closed, the path handed back. The caller sets the state. */
     void endJob()
     {
         JobRunner::close();
+        if (Path::active()) Path::end();
         Pen::up();
-        segmentActive = false;
         jobPenDown = false;
         pauseRequested = stopRequested = false;
+        draining = waitingPen = havePending = false;
+        after = After::Nothing;
     }
 
-    void applyGeometry()
+    Kinematics::Geometry geometry()
     {
         Kinematics::Geometry g;
         g.anchorDistance = settings.getAnchorDistance();
         g.pulleyDiameter = settings.getPulleyDiameter();
-        model.setGeometry(g);
+        return g;
+    }
+
+    /** Hands the steppers to Path from the current pen position. */
+    bool startPath()
+    {
+        Driver::enable(true);
+        pushX = posX;
+        pushY = posY;
+        return Path::start(posX, posY, geometry(), Motion::stepsPerMm());
+    }
+
+    void drainThen(After next)
+    {
+        Path::finish();
+        draining = true;
+        after = next;
+    }
+
+    void applyGeometry()
+    {
+        model.setGeometry(geometry());
     }
 
     /** Solves (x, y) and starts both belts there; nullptr or a refusal code. */
@@ -138,37 +170,9 @@ namespace
     }
 
     /**
-     * The next millimetre of the segment being drawn: solved, and run at the
-     * drawing speed. The belt with the longer way sets the pace, so the pen
-     * moves at drawSpeed along the chord. False when the move was refused.
+     * One pass of a running job, every loop(): check the file, keep the
+     * planner fed, and do what needs standstill once the path has run dry.
      */
-    bool drawPiece()
-    {
-        const double dx = segX - posX, dy = segY - posY;
-        const double left = hypot(dx, dy);
-        const double piece = left < DRAW_PIECE_MM ? left : DRAW_PIECE_MM;
-        const double nx = left > 0.0 ? posX + dx / left * piece : segX;
-        const double ny = left > 0.0 ? posY + dy / left * piece : segY;
-
-        const Kinematics::Pose pose = model.solve(nx, ny);
-        if (!pose.converged) return false;
-
-        const double wayL = fabs(pose.left - Motion::millimetres(Driver::LEFT));
-        const double wayR = fabs(pose.right - Motion::millimetres(Driver::RIGHT));
-        const double longest = wayL > wayR ? wayL : wayR;
-        if (piece > 0.0 && longest > 0.0)
-        {
-            const double beltSpeed = settings.getDrawSpeed() * longest / piece;
-            if (!Motion::moveBelts(pose.left, pose.right, beltSpeed, DRAW_ACCEL_MM_S2)) return false;
-        }
-        JobRunner::moved(piece);
-        posX = nx;
-        posY = ny;
-        if (left <= DRAW_PIECE_MM) segmentActive = false;
-        return true;
-    }
-
-    /** One step of a running job, called whenever nothing moves. */
     void runJob()
     {
         using JobRunner::Phase;
@@ -182,80 +186,138 @@ namespace
                 return;
             }
             JobRunner::check(CHECK_LINES_PER_POLL);
-            if (JobRunner::phase() == Phase::Failed) enter(State::Ready);
-            return;
-        }
-
-        if (stopRequested)
-        {
-            endJob();
-            enter(State::Ready);
-            return;
-        }
-        if (pauseRequested)
-        {
-            pauseRequested = false;
-            Pen::up();
-            enter(State::Paused);
-            return;
-        }
-
-        if (segmentActive)
-        {
-            if (!drawPiece())
+            if (JobRunner::phase() == Phase::Failed)
             {
-                debugE("Plotter: no pose for (%.1f, %.1f) - job given up", segX, segY);
+                endJob();
+                enter(State::Ready);
+            }
+            else if (JobRunner::phase() == Phase::Running && !startPath())
+            {
+                debugE("Plotter: the steppers are busy - job not started");
                 endJob();
                 enter(State::Ready);
             }
             return;
         }
 
-        JobFormat::Line line;
-        if (!JobRunner::next(line))
+        if (const char *fault = Path::fault())
         {
-            // The end - or a read error, which JobRunner has recorded. Pen up
-            // and back home, as Mural does, unless something failed.
-            const bool finished = JobRunner::phase() == Phase::Finished;
+            // The path stopped somewhere along a move: the position is gone.
+            debugE("Plotter: path fault (%s) - job given up", fault);
+            Path::abort();
             endJob();
-            enter(State::Ready);
-            if (finished) travelTo(model.width() / 2.0, HOME_Y_MM);
+            Plotter::forgetPosition();
             return;
         }
 
-        switch (line.kind)
+        if (waitingPen)
         {
-            case JobFormat::Kind::PenDown:
-                jobPenDown = true;
-                Pen::down();
-                break;
-            case JobFormat::Kind::PenUp:
-                jobPenDown = false;
-                Pen::up();
-                break;
-            case JobFormat::Kind::Move:
-                if (jobPenDown)
+            if (!Pen::settled()) return;
+            waitingPen = false;
+        }
+
+        if (draining)
+        {
+            if (!Path::idle()) return;
+            draining = false;
+            posX = Path::x();
+            posY = Path::y();
+            const After what = after;
+            after = After::Nothing;
+            switch (what)
+            {
+                case After::PenDown:
+                    Pen::down();
+                    jobPenDown = true;
+                    waitingPen = true;
+                    break;
+                case After::PenUp:
+                    Pen::up();
+                    jobPenDown = false;
+                    waitingPen = true;
+                    break;
+                case After::Pause:
+                    Path::end();
+                    Pen::up();
+                    enter(State::Paused);
+                    break;
+                case After::Stop:
+                    endJob();
+                    enter(State::Ready);
+                    break;
+                case After::Finish:
                 {
-                    segX = line.x;
-                    segY = line.y;
-                    segmentActive = true;
+                    // The end - or a read error JobRunner has recorded. Back
+                    // home as Mural does, unless something failed.
+                    const bool finished = JobRunner::phase() == Phase::Finished;
+                    endJob();
+                    enter(State::Ready);
+                    if (finished) travelTo(model.width() / 2.0, HOME_Y_MM);
+                    break;
                 }
-                else
-                {
-                    // Travel: one ramped move, straightness does not matter.
-                    const double way = hypot(line.x - posX, line.y - posY);
-                    if (travelTo(line.x, line.y) != nullptr)
+                case After::Nothing:
+                    break;
+            }
+            return;
+        }
+
+        if (stopRequested)
+        {
+            stopRequested = false;
+            drainThen(After::Stop);
+            return;
+        }
+        if (pauseRequested)
+        {
+            pauseRequested = false;
+            drainThen(After::Pause);
+            return;
+        }
+
+        for (int n = 0; n < LINES_PER_POLL; n++)
+        {
+            if (havePending)
+            {
+                if (!Path::push(pendX, pendY, pendSpeed)) return;   // full: next pass
+                JobRunner::moved(hypot(pendX - pushX, pendY - pushY));
+                pushX = pendX;
+                pushY = pendY;
+                havePending = false;
+            }
+
+            JobFormat::Line line;
+            if (!JobRunner::next(line))
+            {
+                drainThen(After::Finish);
+                return;
+            }
+            switch (line.kind)
+            {
+                case JobFormat::Kind::PenDown:
+                    if (!jobPenDown)
                     {
-                        debugE("Plotter: cannot travel to (%.1f, %.1f) - job given up", line.x, line.y);
-                        endJob();
-                        enter(State::Ready);
+                        drainThen(After::PenDown);
                         return;
                     }
-                    JobRunner::moved(way);
-                }
-                break;
-            default:
-                break;
+                    break;
+                case JobFormat::Kind::PenUp:
+                    if (jobPenDown)
+                    {
+                        drainThen(After::PenUp);
+                        return;
+                    }
+                    break;
+                case JobFormat::Kind::Move:
+                    // Drawn moves at the drawing speed, pen-up moves at travel
+                    // speed - both straight now, the planner does not care.
+                    pendX = line.x;
+                    pendY = line.y;
+                    pendSpeed = jobPenDown ? settings.getDrawSpeed() : TRAVEL_MM_S;
+                    havePending = true;
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }
@@ -271,14 +333,18 @@ namespace Plotter
 
     void poll()
     {
+        // A job feeds the path while it moves, so it runs before the
+        // "nothing moves" gate below.
+        if (current == State::Plotting)
+        {
+            runJob();
+            return;
+        }
+
         if (Motion::moving()) return;
 
         if (current == State::ExtendingHome) enter(State::AtHome);
         moveRunning = false;
-
-        // The pen is part of the sequence: nothing moves on until it has
-        // arrived (Pen::settled() includes the servo's time to get there).
-        if (current == State::Plotting && Pen::settled()) runJob();
 
         if (pendingDiameter > 0.0)
         {
@@ -351,6 +417,10 @@ namespace Plotter
         if (r.present && !isnan(r.tilt)) out["tiltImu"] = r.tilt * 180.0 / PI;
         out["penDown"] = Pen::isDown();
         out["drawSpeed"] = settings.getDrawSpeed();
+        // Slices that found a step queue already empty since boot - the motor
+        // stopped between two of them. Should stay 0; the first number to
+        // look at if a plot judders.
+        out["underruns"] = Path::underruns();
 
         // The job: the running one, or the record of the last one (finished,
         // failed or stopped), so the UI can say how it ended.
@@ -492,7 +562,7 @@ namespace Plotter
     const char *startJob(const char *name)
     {
         if (current != State::Ready) return "wrongState";
-        if (Motion::moving()) return "busy";
+        if (Motion::moving() || Path::active()) return "busy";
 
         const char *refused = JobRunner::open(name, posX, posY, model.width(),
                                               MAX_Y_FRACTION * settings.getAnchorDistance());
@@ -501,8 +571,10 @@ namespace Plotter
         Driver::enable(true);
         Pen::up();
         jobPenDown = false;
-        segmentActive = false;
         pauseRequested = stopRequested = false;
+        draining = waitingPen = havePending = false;
+        after = After::Nothing;
+        // The path is taken over once the check has passed - see runJob().
         enter(State::Plotting);
         return nullptr;
     }
@@ -517,8 +589,13 @@ namespace Plotter
     const char *resumeJob()
     {
         if (current != State::Paused) return "wrongState";
-        // Back down where the file had it; poll() waits for the pen.
-        if (jobPenDown) Pen::down();
+        if (!startPath()) return "busy";
+        // Back down where the file had it; runJob() waits for the pen.
+        if (jobPenDown)
+        {
+            Pen::down();
+            waitingPen = true;
+        }
         enter(State::Plotting);
         return nullptr;
     }
@@ -546,7 +623,8 @@ namespace Plotter
 
     void stop()
     {
-        const bool wasMoving = Motion::moving();
+        const bool wasMoving = Motion::moving() || Path::active();
+        if (Path::active()) Path::abort();
         Motion::stop();
         if (current == State::Plotting || current == State::Paused) endJob();
         // A move cut short ends somewhere along its way, not at its target.
@@ -558,6 +636,7 @@ namespace Plotter
     {
         if (current == State::Unconfigured || current == State::NeedsRetract) return;
         debugW("Plotter: position no longer known - back to winding in");
+        if (Path::active()) Path::abort();
         if (current == State::Plotting || current == State::Paused) endJob();
         pulleyRun = 0.0;
         pendingDiameter = 0.0;

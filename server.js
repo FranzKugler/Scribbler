@@ -715,7 +715,8 @@ function plotterState() {
     pulleyRun: plotter.pulleyRun,
     microsteps: hw.microsteps,
     penDown: penNow().down,
-    drawSpeed: plotter.drawSpeed
+    drawSpeed: plotter.drawSpeed,
+    underruns: 0
   };
   const job = jobNow();
   if (job) out.job = job;

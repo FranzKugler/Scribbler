@@ -4,12 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Status
 
-**Phases 1–5 built (PLAN.md section 3).** What exists: the house scaffolding copied from
+**Phases 1–6 built (PLAN.md section 3).** What exists: the house scaffolding copied from
 DoorOpener and renamed (portal, SPA, OTA, expert lock, log ring, storage explorer, mock server,
 release workflow, first-flash page), `src/Board.h` from the schematic's netlist,
 `src/Kinematics.*` with host tests, the hardware modules with a bring-up tab, and the
 calibration flow (state machine, Setup tab), and jobs from the SD card in Mural's format (Plot
-tab). Drawing is still Mural's 1 mm stop-and-go - no planner yet. None of it has run on hardware. [PLAN.md](PLAN.md) is the source of truth for everything not
+tab), drawn through a look-ahead planner sliced onto both belts by a task of its own. None of
+it has run on hardware. [PLAN.md](PLAN.md) is the source of truth for everything not
 built; this file describes what is, plus the rules. Do not describe here what has not been built.
 
 ## Project overview
@@ -106,6 +107,8 @@ The house modules (`Portal`, `WebRoutes`, `OtaUpdate`, `Expert`, `LogBuffer`, `F
 | [src/HardwareRoutes.cpp](src/HardwareRoutes.cpp) | `Hw::` — `/hardware*`, all behind the lock | state-aware; a raw jog or motors-off makes Plotter forget its position |
 | [src/Plotter.cpp](src/Plotter.cpp) | `Plotter::` — the state machine, what each state allows, the calibration flow, the Kinematics model | the job runner or the planner |
 | [src/PlotRoutes.cpp](src/PlotRoutes.cpp) | `Plot::` — `/calib/*`, `/jog`, `/home`, `/stop`, `/pen`, `/plot/*`; open | a second state table — every handler asks Plotter |
+| [src/Planner.cpp](src/Planner.cpp) | `Planner::Queue` — junction speeds, look-ahead, trapezoids, time slices; pure C++ with host tests | aware of belts, pen or time |
+| [src/Path.cpp](src/Path.cpp) | `Path::` — the planner plus a task on core 1 (prio 5) that slices it every 2 ms, solves each slice and feeds both belts with `moveTimed()` in lockstep; only FastAccelStepper caller while active | aware of jobs or the pen |
 | [src/JobFormat.cpp](src/JobFormat.cpp) | one job line, parsed; pure C++ with host tests | aware of files |
 | [src/JobRunner.cpp](src/JobRunner.cpp) | `JobRunner::` — a job on the card: the sliced dry-run check, commands one by one, progress by distance | the executor (that is Plotter, and later the planner) |
 | [src/SdStore.cpp](src/SdStore.cpp) | `SdStore::` — the card, SD_MMC 1-bit, mounted at boot in app mode | required: no card = no plotting, not no boot |
@@ -130,9 +133,11 @@ the servo pulse range.
 Changing the anchor distance, jogging a belt, a raw jog or motors-off from the Hardware tab, an
 emergency `/stop` during a move, and a restart all go back to `needsRetract`; the position is
 not persisted yet. Pausing or cancelling a job waits for the current millimetre and keeps the
-position. Moves before the planner are point-to-point in belt space (`Motion::moveBelts`: both
-belts on scaled copies of one ramp); a drawn segment is cut into 1 mm pieces at `drawSpeed`
-(Mural's way - straight, but stop-and-go). A finished job returns home.
+position. Moves outside a job (homing, jogs) are point-to-point in belt space
+(`Motion::moveBelts`: both belts on scaled copies of one ramp). A job goes through `Path`:
+pen-down moves at `drawSpeed`, pen-up at travel speed, both straight; a pen change, pause or
+cancel first lets the path run dry (so pause/cancel finish up to 64 planned moves). A finished
+job returns home. `plotter.underruns` counts slices that found a step queue empty — should be 0.
 
 ### REST: plotter (open; firmware, `server.js` and `api.js` share it)
 
@@ -205,8 +210,12 @@ right driver is absent on purpose, to show that card.
 
 ## Motion
 
-- Step pulses come from FastAccelStepper, fed by a motion task pinned to core 1. Nothing on the
-  web/loop side may block that task or call the stepper API directly — go through the segment queue.
+- Step pulses come from FastAccelStepper. While a job runs, `Path`'s task (core 1, priority 5) is
+  its only caller: slices of 5 ms, kept 50 ms ahead, each a `moveTimed()` of the same duration on
+  both belts, with the rounding drift carried per belt. Outside a job, `loop()` calls it
+  (`Motion::jog`, `moveBelts`). Never both: `Path::start()` refuses while a belt moves.
+- Pen limits are the planner's (300 mm/s², junction deviation 0.05 mm); belt speeds follow from
+  where the bot hangs - near the edges a belt can be faster than the pen.
 - Pen moves are segments in the same queue, so ordering between pen and motion is never a race.
 - The device states and the actions each state allows are in one table (`PlotterState`); every
   refusal is a code (`notHomed`, `busy`, `noCard`, …), never a sentence.
@@ -251,7 +260,7 @@ types that older parsers skip, not in changed semantics.
 npm install && npm run build      # web/ -> data/
 npm run dev / npm run mock        # UI against the mock, no hardware
 pio run / -t upload / -t uploadfs # the device (env seeed_xiao_esp32s3)
-pio test -e native                # host tests (Kinematics, JobFormat) - needs gcc/clang on PATH
+pio test -e native                # host tests (Kinematics, JobFormat, Planner) - needs gcc/clang on PATH
 python scripts/kinematics_reference.py [--check]   # regenerate / verify the reference table
 python scripts/icon.py            # regenerate the icons (then copy three of them to docs/)
 ```

@@ -144,8 +144,8 @@ export default {
   jobResume: 'Weiter',
   jobStop: 'Abbrechen',
   jobStopHint:
-    'Pause und Abbrechen warten den laufenden Millimeter ab und heben den Stift – die Position bleibt ' +
-    'bekannt. Stopp hält sofort an; danach müssen die Riemen neu eingezogen werden.',
+    'Pause und Abbrechen fahren das schon Geplante zu Ende (höchstens 64 Strecken) und heben den Stift – ' +
+    'die Position bleibt bekannt. Stopp hält sofort an; danach müssen die Riemen neu eingezogen werden.',
   jobsCard: 'SD-Karte',
   jobsNoCard: 'Keine SD-Karte – Karte einlegen und das Gerät neu starten.',
   jobsCardUsage: (used, total) => `${used} von ${total} belegt.`,
@@ -161,8 +161,8 @@ export default {
   jobsSpeedTitle: 'Geschwindigkeit',
   jobsSpeed: 'Zeichnen (mm/s)',
   jobsSpeedHint:
-    'Bis der Planer da ist, hält der Bot nach jedem Millimeter kurz an – schneller als ~20 mm/s bringt ' +
-    'eher Zittern als Zeit.',
+    'Gerade Linien laufen ohne Halt durch, Ecken werden abgebremst. Leerfahrten mit gehobenem Stift ' +
+    'laufen schneller.',
 
   // --- setup tab ---
   setupUnavailable: 'Plotter-Status nicht verfügbar',

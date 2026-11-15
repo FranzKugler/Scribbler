@@ -103,6 +103,12 @@ namespace Planner
         /** No more segments are coming for now: plan the buffer to a stop. */
         void finish();
 
+        /**
+         * Forgets everything buffered, at once - for an emergency stop, after
+         * which the caller no longer knows where the pen is anyway.
+         */
+        void clear();
+
         /** Advances by up to dt seconds. Returns false (and dt 0) when idle. */
         bool slice(double dt, Slice &out);
 

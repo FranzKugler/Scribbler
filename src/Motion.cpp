@@ -201,4 +201,9 @@ namespace Motion
     {
         return steps(side) / perMm;
     }
+
+    FastAccelStepper *stepperFor(Driver::Side side)
+    {
+        return stepper[side];
+    }
 }

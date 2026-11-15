@@ -45,6 +45,8 @@
 #include <Arduino.h>
 #include "Driver.h"
 
+class FastAccelStepper;
+
 namespace Motion
 {
     /** Connects both steppers. Call after Driver::begin(). */
@@ -87,6 +89,12 @@ namespace Motion
 
     int32_t steps(Driver::Side side);
     double millimetres(Driver::Side side);
+
+    /**
+     * The step generator itself, for Path - which feeds it timed moves while a
+     * job runs and is then its only caller. Nobody else.
+     */
+    FastAccelStepper *stepperFor(Driver::Side side);
 }
 
 #endif

@@ -31,12 +31,12 @@
  * or stopping a job does not: both wait for the current millimetre to end, so
  * the position stays known.
  *
- * Drawing, until the planner (phase 6): Mural's way - each drawn segment cut
- * into 1 mm pieces, each a point-to-point belt move at the drawing speed with
- * no ramp to speak of; travel with the pen up is one ramped move. That makes
- * lines straight to within the chord of a millimetre, and makes the bot stop
- * and start every millimetre, which is the vibration the planner removes. The
- * executor is the one part the planner replaces; JobRunner stays.
+ * Drawing: every move of a job, pen up or down, goes to Path - the planner
+ * with look-ahead and a task that slices it onto both belts (Path.h). A pen
+ * change needs standstill, so the path runs dry first; so do pause and cancel,
+ * which therefore finish what is already planned (at most Planner's 64
+ * buffered moves) before the pen lifts - the position stays known. Moves
+ * outside a job (homing, jogs) are still point-to-point in belt space.
  *
  * @mc       ESP32S3
  * @author   Franz Kugler / franz _AT_ franz _MINUS_ kugler _DOT_ de
@@ -114,11 +114,11 @@ namespace Plotter
     /** Ready only: checks /jobs/<name> and draws it. */
     const char *startJob(const char *name);
 
-    /** At the end of the current millimetre, pen up, wait. */
+    /** Once the planned moves have run out, pen up, wait. */
     const char *pauseJob();
     const char *resumeJob();
 
-    /** At the end of the current millimetre, pen up, give the job up - position kept. */
+    /** Once the planned moves have run out, pen up, give the job up - position kept. */
     const char *stopJob();
 
     /** Drawing speed of the pen [mm/s]. */
