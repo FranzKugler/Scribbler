@@ -345,6 +345,20 @@ Each phase ends with something checkable on the device, not with a green build.
 7. **Own SVG pipeline** in the Jobs tab, with preview and time estimate.
 8. **Polish** — checkpoint/resume after power loss, first-flash page, README, release.
 
+**Release and first flash — requested 2026-11-15, not urgent, not to be forgotten.** The house
+pipeline is already in the repository (from DoorOpener): `release.yml` builds both images on
+every push to `main` (edge pre-release, running since the first push) and on a `v*` tag (stable
+release + the GitHub Pages flashing page in `docs/`). What is still to do:
+- GitHub settings, which the repository cannot carry (xiao-esp32s3-project skill,
+  `references/github-setup.md`): **Pages source = GitHub Actions**, and on the `github-pages`
+  environment a **deployment rule for `v*` tags** — without it the first stable release
+  publishes and then fails at deploy-pages.
+- `docs/index.html`: the lede and the steps still read as DoorOpener's text with the name
+  swapped; rewrite for the plotter (what the board is, what to do after flashing: the
+  `Scribbler` access point, then Setup).
+- Check `scripts/web_tools_manifest.py` against `partitions.csv` once more, then tag
+  **`v0.1.0`** and open the flashing page in a browser against a blank board.
+
 In parallel with phases 2–6, if board (B) is chosen: **KiCad board** per §0.2 — schematic,
 review, layout, JLCPCB order. It replaces the breadboard rig when it arrives; the only firmware
 change should be `Board.h`.
