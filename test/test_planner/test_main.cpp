@@ -39,15 +39,34 @@ struct Sample
     double x, y, dt, speed;
 };
 
-/** Slices until idle and returns every slice. */
-static std::vector<Sample> drain(Planner::Queue &q)
+/** Slices until idle and appends every slice to `out`. */
+static void drainInto(Planner::Queue &q, std::vector<Sample> &out)
 {
-    std::vector<Sample> out;
     q.finish();
     Planner::Slice s;
     for (int guard = 0; guard < 2000000 && q.slice(DT, s); guard++)
         out.push_back({s.x, s.y, s.dt, s.speed});
+}
+
+static std::vector<Sample> drain(Planner::Queue &q)
+{
+    std::vector<Sample> out;
+    drainInto(q, out);
     return out;
+}
+
+/**
+ * Pushes the way the firmware will: when the buffer is full, slice until
+ * there is room - and keep those slices, they are part of the motion.
+ */
+static void pushInto(Planner::Queue &q, double x, double y, double speed, std::vector<Sample> &out)
+{
+    Planner::Slice s;
+    while (!q.push(x, y, speed))
+    {
+        TEST_ASSERT_TRUE(q.slice(DT, s));
+        out.push_back({s.x, s.y, s.dt, s.speed});
+    }
 }
 
 static Planner::Queue queue()
@@ -61,9 +80,18 @@ static Planner::Queue queue()
 }
 
 /**
- * Speed and acceleration measured from consecutive slice end points. A slice
- * that crosses a block boundary averages over a corner, so the measured
- * speed is a lower bound there - which is what keeps the checks honest.
+ * The two limits, each checked with the number that cannot flatter it:
+ *
+ *   speed  from the chord between consecutive slice ends. A chord is never
+ *          longer than the path it spans - across a corner it is shorter - so
+ *          a chord speed over the limit is a real violation.
+ *   accel  from the speed the planner reports at each slice end. Chord speeds
+ *          dip at every corner a slice straddles, and their differences would
+ *          blame the planner for a geometric effect.
+ *
+ * And the two are tied together: the chord speed may not exceed the larger of
+ * the reported speeds at its ends, so the reported numbers cannot quietly
+ * understate how fast the pen went.
  */
 static void checkLimits(const std::vector<Sample> &samples, double x0, double y0, double vMax)
 {
@@ -72,15 +100,13 @@ static void checkLimits(const std::vector<Sample> &samples, double x0, double y0
     {
         const Sample &s = samples[i];
         TEST_ASSERT_TRUE(s.dt > 0.0);
-        const double v = std::hypot(s.x - px, s.y - py) / s.dt;
-        // 0.1 % for rounding
-        TEST_ASSERT_TRUE_MESSAGE(v <= vMax * 1.001, "speed limit");
-        // Average speeds of neighbouring slices may differ by a*dt, plus a
-        // little where one of them is shortened at the very end.
-        if (i > 0) TEST_ASSERT_TRUE_MESSAGE(std::fabs(v - pv) <= ACCEL * DT * 1.05 + 1e-9, "accel limit");
+        const double chord = std::hypot(s.x - px, s.y - py) / s.dt;
+        TEST_ASSERT_TRUE_MESSAGE(chord <= vMax * 1.001, "speed limit");
+        TEST_ASSERT_TRUE_MESSAGE(chord <= std::fmax(pv, s.speed) * 1.001 + 1e-9, "reported speed too low");
+        TEST_ASSERT_TRUE_MESSAGE(std::fabs(s.speed - pv) <= ACCEL * s.dt * 1.001 + 1e-9, "accel limit");
         px = s.x;
         py = s.y;
-        pv = v;
+        pv = s.speed;
     }
 }
 
@@ -127,16 +153,11 @@ static void test_short_segment_is_a_triangle()
 static void test_straight_pieces_run_through()
 {
     Planner::Queue q = queue();
-    for (int i = 1; i <= 100; i++)
-    {
-        while (!q.push(i * 1.0, 0.0, 50.0))
-        {
-            Planner::Slice s;
-            q.slice(DT, s);
-        }
-    }
-    const auto samples = drain(q);
+    std::vector<Sample> samples;
+    for (int i = 1; i <= 100; i++) pushInto(q, i * 1.0, 0.0, 50.0, samples);
+    drainInto(q, samples);
     TEST_ASSERT_DOUBLE_WITHIN(1e-9, 100.0, samples.back().x);
+    checkLimits(samples, 0.0, 0.0, 50.0);
     TEST_ASSERT_DOUBLE_WITHIN(1e-6, 0.1 + 95.0 / 50.0 + 0.1, totalTime(samples));
 }
 
@@ -153,16 +174,14 @@ static void test_corner_slows_reversal_stops()
     auto samples = drain(q);
     checkLimits(samples, 0.0, 0.0, 50.0);
 
-    // The slowest slice near the corner is about the junction speed.
-    double px = 0.0, py = 0.0, slowest = 1e9;
+    // The slowest reported speed near the corner: the junction speed, or up
+    // to one slice of acceleration above it - a slice rarely ends exactly on
+    // the corner.
+    double slowest = 1e9;
     for (const Sample &s : samples)
-    {
-        const double v = std::hypot(s.x - px, s.y - py) / s.dt;
-        if (std::hypot(s.x - 50.0, s.y) < 2.0) slowest = std::fmin(slowest, v);
-        px = s.x;
-        py = s.y;
-    }
-    TEST_ASSERT_DOUBLE_WITHIN(1.0, vCorner, slowest);
+        if (std::hypot(s.x - 50.0, s.y) < 2.0) slowest = std::fmin(slowest, s.speed);
+    TEST_ASSERT_TRUE(slowest >= vCorner - 1e-6);
+    TEST_ASSERT_TRUE(slowest <= vCorner + ACCEL * DT + 1e-6);
 
     // Straight back: the pen must stand at the turning point.
     Planner::Queue r = queue();
@@ -210,7 +229,7 @@ static void test_streaming_circle()
     for (int i = 1; i <= n; i++)
     {
         const double a = 2.0 * M_PI * i / n;
-        TEST_ASSERT_TRUE(q.push(r * std::cos(a), r * std::sin(a), 40.0));
+        pushInto(q, r * std::cos(a), r * std::sin(a), 40.0, samples);
         // Two slices per piece: slower than the pen eats them, so the buffer
         // stays short and the look-ahead is thin - the hard case.
         for (int k = 0; k < 2 && q.ready(); k++)
@@ -219,8 +238,7 @@ static void test_streaming_circle()
             samples.push_back({s.x, s.y, s.dt, s.speed});
         }
     }
-    const auto rest = drain(q);
-    samples.insert(samples.end(), rest.begin(), rest.end());
+    drainInto(q, samples);
 
     TEST_ASSERT_DOUBLE_WITHIN(1e-9, r, samples.back().x);
     TEST_ASSERT_DOUBLE_WITHIN(1e-9, 0.0, samples.back().y);
