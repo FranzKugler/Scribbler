@@ -3,7 +3,9 @@
  * See HardwareRoutes.h.
  *
  * Refusals are codes, never sentences: badValue (with the field in
- * errorDetail), the expert lock's own codes from Expert::guard().
+ * errorDetail), busy (a belt is moving and the request needs standstill),
+ * motorsOff (a jog with the drivers disabled would count steps the motor
+ * never makes), and the expert lock's own codes from Expert::guard().
  *
  * @mc       ESP32S3
  * @author   Franz Kugler / franz _AT_ franz _MINUS_ kugler _DOT_ de
@@ -20,6 +22,7 @@
 #include "Expert.h"
 #include "LogBuffer.h"
 #include "Driver.h"
+#include "Motion.h"
 #include "Pen.h"
 #include "Imu.h"
 #include "Display.h"
@@ -40,6 +43,14 @@ namespace
         String out;
         serializeJson(doc, out);
         server.send(400, "application/json", out);
+    }
+
+    void refuseCode(int status, const char *code)
+    {
+        String out = "{\"error\":\"";
+        out += code;
+        out += "\"}";
+        server.send(status, "application/json", out);
     }
 
     void sendOk()
@@ -63,6 +74,23 @@ namespace
         doc["motorCurrent"] = settings.getMotorCurrent();
         doc["maxCurrent"] = Driver::maxCurrentMa();
         doc["microsteps"] = settings.getMicrosteps();
+        doc["pulleyDiameter"] = settings.getPulleyDiameter();
+
+        JsonObject motion = doc["motion"].to<JsonObject>();
+        motion["ready"] = Motion::ready();
+        motion["moving"] = Motion::moving();
+        motion["stepsPerMm"] = Motion::stepsPerMm();
+        JsonArray belts = motion["belts"].to<JsonArray>();
+        for (uint8_t i = 0; i < Driver::COUNT; i++)
+        {
+            JsonObject b = belts.add<JsonObject>();
+            b["side"] = i == Driver::LEFT ? "left" : "right";
+            b["steps"] = Motion::steps((Driver::Side)i);
+            // Relative to wherever the belt was at boot - there is no homing
+            // yet, so this is distance travelled, not belt length.
+            b["mm"] = Motion::millimetres((Driver::Side)i);
+            b["moving"] = Motion::moving((Driver::Side)i);
+        }
 
         JsonArray drivers = doc["drivers"].to<JsonArray>();
         for (uint8_t i = 0; i < Driver::COUNT; i++)
@@ -127,7 +155,40 @@ namespace
         JsonDocument doc;
         deserializeJson(doc, server.arg("plain"));
         if (!doc["enabled"].is<bool>()) return refuse("enabled");
-        Driver::enable(doc["enabled"].as<bool>());
+        const bool on = doc["enabled"].as<bool>();
+        // Cutting the outputs under a moving belt: the step generator would
+        // go on counting steps the motor no longer makes.
+        if (!on && Motion::moving()) return refuseCode(409, "busy");
+        Driver::enable(on);
+        sendOk();
+    }
+
+    void jog()
+    {
+        if (!Expert::guard()) return;
+        JsonDocument doc;
+        deserializeJson(doc, server.arg("plain"));
+
+        const char *side = doc["side"] | "";
+        Driver::Side which;
+        if (strcmp(side, "left") == 0) which = Driver::LEFT;
+        else if (strcmp(side, "right") == 0) which = Driver::RIGHT;
+        else return refuse("side");
+
+        // A belt is at most a few metres; anything beyond is a typo.
+        if (!doc["mm"].is<float>()) return refuse("mm");
+        const double mm = doc["mm"].as<double>();
+        if (!(mm >= -1000.0 && mm <= 1000.0)) return refuse("mm");
+
+        if (!Driver::enabled()) return refuseCode(409, "motorsOff");
+        if (!Motion::jog(which, mm)) return refuseCode(409, "busy");
+        sendOk();
+    }
+
+    void stopMotion()
+    {
+        if (!Expert::guard()) return;
+        Motion::stop();
         sendOk();
     }
 
@@ -161,6 +222,7 @@ namespace
         // half applied is harder to reason about than one refused whole.
         uint16_t current = settings.getMotorCurrent();
         uint16_t microsteps = settings.getMicrosteps();
+        double pulley = settings.getPulleyDiameter();
         uint8_t up = settings.getPenUp();
         uint8_t down = settings.getPenDown();
 
@@ -175,6 +237,12 @@ namespace
             const int v = doc["microsteps"] | -1;
             if (v < 1 || v > 256 || (v & (v - 1)) != 0) return refuse("microsteps");
             microsteps = (uint16_t)v;
+        }
+        if (!doc["pulleyDiameter"].isNull())
+        {
+            const double v = doc["pulleyDiameter"] | -1.0;
+            if (!(v >= 5.0 && v <= 40.0)) return refuse("pulleyDiameter");
+            pulley = v;
         }
         if (!doc["penUp"].isNull())
         {
@@ -191,13 +259,21 @@ namespace
 
         const bool driverChanged = current != settings.getMotorCurrent() ||
                                    microsteps != settings.getMicrosteps();
+        const bool scaleChanged = microsteps != settings.getMicrosteps() ||
+                                  pulley != settings.getPulleyDiameter();
+        // The step positions are rescaled with the scale, which needs both
+        // belts standing still - checked before anything is changed.
+        if (scaleChanged && Motion::moving()) return refuseCode(409, "busy");
+
         settings.setMotorCurrent(current);
         settings.setMicrosteps(microsteps);
+        settings.setPulleyDiameter(pulley);
         settings.setPenUp(up);
         settings.setPenDown(down);
         scheduleSettingsSave();
 
         if (driverChanged) Driver::configure(current, microsteps);
+        if (scaleChanged) Motion::setScale(microsteps, pulley);
         Pen::setAngles(up, down);
         sendOk();
     }
@@ -209,6 +285,8 @@ namespace Hw
     {
         server.on("/hardware", HTTP_GET, sendHardware);
         server.on("/hardware/motors", HTTP_POST, updateMotors);
+        server.on("/hardware/jog", HTTP_POST, jog);
+        server.on("/hardware/stop", HTTP_POST, stopMotion);
         server.on("/hardware/pen", HTTP_POST, updatePen);
         server.on("/hardware/config", HTTP_POST, updateConfig);
     }

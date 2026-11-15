@@ -33,6 +33,8 @@
   // Edited copies, so a poll does not overwrite what is being typed.
   let current = $state(null);
   let microsteps = $state(null);
+  let pulley = $state(null);
+  let jogStep = $state(10);
   let angle = $state(90);
 
   let timer = null;
@@ -46,6 +48,7 @@
       error = null;
       if (current === null) current = hw.motorCurrent;
       if (microsteps === null) microsteps = hw.microsteps;
+      if (pulley === null) pulley = hw.pulleyDiameter;
     } catch (err) {
       error = err.message;
     } finally {
@@ -84,6 +87,11 @@
   }
 
   const MICROSTEPS = [1, 2, 4, 8, 16, 32, 64, 128, 256];
+  const JOG_STEPS = [1, 10, 50, 200];
+
+  const scaleUnchanged = $derived(
+    hw && current === hw.motorCurrent && microsteps === hw.microsteps && pulley === hw.pulleyDiameter
+  );
 </script>
 
 {#if error && !hw}
@@ -121,15 +129,54 @@
       </select>
     </div>
     <div class="field">
+      <label for="pulley">{t.hwPulley}</label>
+      <input id="pulley" type="number" min="5" max="40" step="0.001" bind:value={pulley} />
+    </div>
+    <div class="field">
       <span class="hint">{t.hwCurrentHint(hw.maxCurrent)}</span>
       <button
         type="button"
         class="primary"
-        disabled={busy || (current === hw.motorCurrent && microsteps === hw.microsteps)}
-        onclick={() => act(() => api.setHardwareConfig({ motorCurrent: current, microsteps }))}
+        disabled={busy || scaleUnchanged}
+        onclick={() =>
+          act(() => api.setHardwareConfig({ motorCurrent: current, microsteps, pulleyDiameter: pulley }))}
         >{t.hwApply}</button
       >
     </div>
+  </section>
+
+  <section class="card">
+    <h2>{t.hwJog}</h2>
+    {#if !hw.motion.ready}
+      <p class="banner">{t.hwMotionNotReady}</p>
+    {:else}
+      <div class="field">
+        <label for="jogstep">{t.hwJogStep}</label>
+        <select id="jogstep" bind:value={jogStep}>
+          {#each JOG_STEPS as s (s)}
+            <option value={s}>{s} mm</option>
+          {/each}
+        </select>
+      </div>
+      {#each hw.motion.belts as b (b.side)}
+        <div class="field">
+          <span class="key">{t.hwBelt(b.side === 'left' ? t.hwLeft : t.hwRight)}</span>
+          <span>{fmt(b.mm, 2)} mm {b.moving ? '…' : ''}</span>
+          <span>
+            <button type="button" class="secondary" disabled={busy || !hw.motorsEnabled || b.moving}
+              onclick={() => act(() => api.jogBelt(b.side, -jogStep))}>−</button
+            >
+            <button type="button" class="secondary" disabled={busy || !hw.motorsEnabled || b.moving}
+              onclick={() => act(() => api.jogBelt(b.side, jogStep))}>+</button
+            >
+          </span>
+        </div>
+      {/each}
+      <div class="field">
+        <span class="hint">{hw.motorsEnabled ? t.hwJogHint(fmt(hw.motion.stepsPerMm, 2)) : t.hwJogNeedsMotors}</span>
+        <button type="button" class="primary" onclick={() => act(() => api.stopMotion())}>{t.hwStop}</button>
+      </div>
+    {/if}
   </section>
 
   {#each hw.drivers as d (d.side)}

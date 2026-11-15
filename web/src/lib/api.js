@@ -221,6 +221,8 @@ export async function fetchHardware() {
 }
 
 export const setMotors = (enabled) => post('/hardware/motors', { enabled });
+export const jogBelt = (side, mm) => post('/hardware/jog', { side, mm });
+export const stopMotion = () => post('/hardware/stop', {});
 export const setPen = (body) => post('/hardware/pen', body);
 export const setHardwareConfig = (config) => post('/hardware/config', config);
 

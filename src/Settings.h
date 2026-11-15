@@ -87,6 +87,12 @@ public:
     void setPenDown(byte angle) { this->PenDown = angle; }
     byte getPenDown() { return this->PenDown; }
 
+    // Effective pulley diameter, belt included [mm]. Mural's default for a
+    // GT2 16T pulley; the e-steps calibration (phase 4) refines it, and every
+    // belt length in millimetres depends on it.
+    void   setPulleyDiameter(double mm) { this->PulleyDiameter = mm; }
+    double getPulleyDiameter() { return this->PulleyDiameter; }
+
     // How far the IMU's zero is off the bot's level [rad]; see Imu::setOffset().
     void  setImuOffset(float radians) { this->ImuOffset = radians; }
     float getImuOffset() { return this->ImuOffset; }
@@ -108,6 +114,7 @@ private:
     uint16_t Microsteps;      // per full step
     byte     PenUp;           // degrees
     byte     PenDown;         // degrees
+    double   PulleyDiameter;  // mm
     float    ImuOffset;       // rad
 };
 

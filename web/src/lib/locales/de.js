@@ -136,6 +136,15 @@ export default {
   hwCurrentHint: (max) => `Höchstens ${max} mA bei diesem Messwiderstand.`,
   hwMicrosteps: 'Mikroschritte',
   hwApply: 'Übernehmen',
+  hwPulley: 'Pulley-Durchmesser (mm)',
+  hwJog: 'Riemen fahren',
+  hwMotionNotReady: 'Kein Schrittgenerator – siehe Debug-Log.',
+  hwJogStep: 'Schrittweite',
+  hwBelt: (side) => `Riemen ${side}`,
+  hwJogHint: (perMm) =>
+    `Plus verlängert den Riemen. ${perMm} Schritte/mm. Die Anzeige zählt ab dem Start, nicht ab einem Nullpunkt.`,
+  hwJogNeedsMotors: 'Erst die Motoren einschalten.',
+  hwStop: 'Stopp',
   hwDriver: (side) => `Treiber ${side}`,
   hwLeft: 'links',
   hwRight: 'rechts',
@@ -304,6 +313,8 @@ export default {
     'wählen und die genannte Adresse aufrufen.',
 
   // --- what the device can refuse with ---
+  err_busy: 'Ein Riemen fährt noch – erst anhalten.',
+  err_motorsOff: 'Die Motoren sind ausgeschaltet.',
   err_badValue: (field) => `Kein gültiger Wert: ${field}.`,
   err_wifiConnect: (ssid) => `Verbindung zu ${ssid} nicht möglich.`,
   err_wifiFallback: (ssid) => `Auch das vorherige Netz (${ssid}) antwortet nicht mehr.`,

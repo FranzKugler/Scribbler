@@ -13,8 +13,11 @@
  *
  *   GET  /hardware            everything below, read fresh
  *   POST /hardware/motors     {enabled}
+ *   POST /hardware/jog        {side: "left"|"right", mm} - one belt, ramped
+ *   POST /hardware/stop       both belts, ramped
  *   POST /hardware/pen        {state: "up"|"down"} or {angle}
- *   POST /hardware/config     {motorCurrent, microsteps, penUp, penDown}, each optional
+ *   POST /hardware/config     {motorCurrent, microsteps, pulleyDiameter, penUp,
+ *                              penDown}, each optional
  *
  * @mc       ESP32S3
  * @author   Franz Kugler / franz _AT_ franz _MINUS_ kugler _DOT_ de

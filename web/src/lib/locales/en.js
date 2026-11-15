@@ -129,6 +129,15 @@ export default {
   hwCurrentHint: (max) => `At most ${max} mA with this reference resistor.`,
   hwMicrosteps: 'Microsteps',
   hwApply: 'Apply',
+  hwPulley: 'Pulley diameter (mm)',
+  hwJog: 'Move belts',
+  hwMotionNotReady: 'No step generator - see the debug log.',
+  hwJogStep: 'Step',
+  hwBelt: (side) => `Belt ${side}`,
+  hwJogHint: (perMm) =>
+    `Plus lengthens the belt. ${perMm} steps/mm. Counted from boot, not from a zero point.`,
+  hwJogNeedsMotors: 'Switch the motors on first.',
+  hwStop: 'Stop',
   hwDriver: (side) => `Driver ${side}`,
   hwLeft: 'left',
   hwRight: 'right',
@@ -297,6 +306,8 @@ export default {
     'open the address above.',
 
   // --- what the device can refuse with ---
+  err_busy: 'A belt is still moving - stop it first.',
+  err_motorsOff: 'The motors are switched off.',
   err_badValue: (field) => `Not a valid value: ${field}.`,
   err_wifiConnect: (ssid) => `Could not join ${ssid}.`,
   err_wifiFallback: (ssid) => `The previous network (${ssid}) does not answer either.`,

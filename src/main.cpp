@@ -46,6 +46,7 @@
 #include "Portal.h"
 #include "Board.h"
 #include "Driver.h"
+#include "Motion.h"
 #include "Pen.h"
 #include "Display.h"
 #include "Imu.h"
@@ -395,6 +396,7 @@ void setup()
     // not ours, and the sooner they are replaced the less there is to wonder
     // about if something moves during a boot.
     Driver::begin(settings.getMotorCurrent(), settings.getMicrosteps());
+    Motion::begin(settings.getMicrosteps(), settings.getPulleyDiameter());
     Pen::begin(settings.getPenUp(), settings.getPenDown());
 
     // One bus for the display and the IMU, started here once rather than by

@@ -35,6 +35,7 @@
 #define DEFAULT_MICROSTEPS    16
 #define DEFAULT_PEN_UP        90
 #define DEFAULT_PEN_DOWN      70
+#define DEFAULT_PULLEY        10.14926
 
 Settings::Settings()
 {
@@ -47,6 +48,7 @@ Settings::Settings()
     Microsteps   = DEFAULT_MICROSTEPS;
     PenUp        = DEFAULT_PEN_UP;
     PenDown      = DEFAULT_PEN_DOWN;
+    PulleyDiameter = DEFAULT_PULLEY;
     ImuOffset    = 0.0f;
 }
 
@@ -88,7 +90,11 @@ void Settings::loadSettings()
     Microsteps   = doc["Microsteps"] | DEFAULT_MICROSTEPS;
     PenUp        = doc["PenUp"] | DEFAULT_PEN_UP;
     PenDown      = doc["PenDown"] | DEFAULT_PEN_DOWN;
+    PulleyDiameter = doc["PulleyDiameter"] | DEFAULT_PULLEY;
     ImuOffset    = doc["ImuOffset"] | 0.0f;
+
+    // A pulley of 0 would divide every belt length by zero.
+    if (!(PulleyDiameter >= 5.0 && PulleyDiameter <= 40.0)) PulleyDiameter = DEFAULT_PULLEY;
 
     // Only powers of two are microstep settings the driver has; anything else
     // in the record is not something to guess the meaning of.
@@ -112,6 +118,7 @@ void Settings::fillDocument(JsonDocument &doc)
     doc["Microsteps"]       = Microsteps;
     doc["PenUp"]            = PenUp;
     doc["PenDown"]          = PenDown;
+    doc["PulleyDiameter"]   = PulleyDiameter;
     doc["ImuOffset"]        = ImuOffset;
 }
 

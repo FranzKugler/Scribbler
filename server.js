@@ -532,6 +532,10 @@ const hw = {
   motorsEnabled: false,
   motorCurrent: 700,
   microsteps: 16,
+  pulleyDiameter: 10.14926,
+  // Each belt: where it was when the current jog started, where it is going,
+  // and when it set off. Moves at the firmware's jog speed, without the ramp.
+  belts: { left: { from: 0, to: 0, at: 0 }, right: { from: 0, to: 0, at: 0 } },
   pen: { angle: 90, target: 90, upAngle: 90, downAngle: 70, movedAt: 0, from: 90 }
 };
 
@@ -554,6 +558,16 @@ function movePen(angle) {
 
 const refuse = (res, field) => res.status(400).json({ error: 'badValue', errorDetail: field });
 
+const JOG_MM_S = 30;
+const stepsPerMm = () => (200 * hw.microsteps) / (Math.PI * hw.pulleyDiameter);
+
+function beltNow(b) {
+  const span = b.to - b.from;
+  const done = span === 0 ? 1 : Math.min(1, ((Date.now() - b.at) / 1000) * JOG_MM_S / Math.abs(span));
+  return { mm: b.from + span * done, moving: done < 1 };
+}
+const anyMoving = () => Object.values(hw.belts).some((b) => beltNow(b).moving);
+
 app.get('/hardware', (req, res) => {
   if (!guard(res)) return;
   const t = Date.now() / 1000;
@@ -564,6 +578,16 @@ app.get('/hardware', (req, res) => {
     motorCurrent: hw.motorCurrent,
     maxCurrent: MAX_CURRENT,
     microsteps: hw.microsteps,
+    pulleyDiameter: hw.pulleyDiameter,
+    motion: {
+      ready: true,
+      moving: anyMoving(),
+      stepsPerMm: stepsPerMm(),
+      belts: ['left', 'right'].map((side) => {
+        const now = beltNow(hw.belts[side]);
+        return { side, steps: Math.round(now.mm * stepsPerMm()), mm: now.mm, moving: now.moving };
+      })
+    },
     drivers: [
       { side: 'left', present: true, version: 0x40, temperature: 31.5 + Math.sin(t / 20),
         supply: 19.94, stallGuard: hw.motorsEnabled ? 312 : 0, currentScale: hw.motorsEnabled ? 16 : 0,
@@ -583,8 +607,31 @@ app.get('/hardware', (req, res) => {
 app.post('/hardware/motors', (req, res) => {
   if (!guard(res)) return;
   if (typeof req.body?.enabled !== 'boolean') return refuse(res, 'enabled');
+  if (!req.body.enabled && anyMoving()) return res.status(409).json({ error: 'busy' });
   hw.motorsEnabled = req.body.enabled;
   say(3, `Motors ${hw.motorsEnabled ? 'on' : 'off'}`);
+  res.json({ ok: true });
+});
+
+app.post('/hardware/jog', (req, res) => {
+  if (!guard(res)) return;
+  const { side, mm } = req.body ?? {};
+  if (side !== 'left' && side !== 'right') return refuse(res, 'side');
+  if (typeof mm !== 'number' || !(mm >= -1000 && mm <= 1000)) return refuse(res, 'mm');
+  if (!hw.motorsEnabled) return res.status(409).json({ error: 'motorsOff' });
+  const belt = hw.belts[side];
+  const now = beltNow(belt);
+  if (now.moving) return res.status(409).json({ error: 'busy' });
+  Object.assign(belt, { from: now.mm, to: now.mm + mm, at: Date.now() });
+  res.json({ ok: true });
+});
+
+app.post('/hardware/stop', (req, res) => {
+  if (!guard(res)) return;
+  for (const belt of Object.values(hw.belts)) {
+    const now = beltNow(belt);
+    Object.assign(belt, { from: now.mm, to: now.mm, at: Date.now() });
+  }
   res.json({ ok: true });
 });
 
@@ -608,12 +655,18 @@ app.post('/hardware/config', (req, res) => {
   if (b.motorCurrent !== undefined && !(Number.isInteger(b.motorCurrent) &&
       b.motorCurrent >= 100 && b.motorCurrent <= MAX_CURRENT)) return refuse(res, 'motorCurrent');
   if (b.microsteps !== undefined && !isPow2(b.microsteps)) return refuse(res, 'microsteps');
+  if (b.pulleyDiameter !== undefined && !(typeof b.pulleyDiameter === 'number' &&
+      b.pulleyDiameter >= 5 && b.pulleyDiameter <= 40)) return refuse(res, 'pulleyDiameter');
+  const scaleChanges = (b.microsteps !== undefined && b.microsteps !== hw.microsteps) ||
+    (b.pulleyDiameter !== undefined && b.pulleyDiameter !== hw.pulleyDiameter);
+  if (scaleChanges && anyMoving()) return res.status(409).json({ error: 'busy' });
   for (const key of ['penUp', 'penDown']) {
     if (b[key] !== undefined && !(Number.isInteger(b[key]) && b[key] >= 0 && b[key] <= 180))
       return refuse(res, key);
   }
   if (b.motorCurrent !== undefined) hw.motorCurrent = b.motorCurrent;
   if (b.microsteps !== undefined) hw.microsteps = b.microsteps;
+  if (b.pulleyDiameter !== undefined) hw.pulleyDiameter = b.pulleyDiameter;
   if (b.penUp !== undefined) hw.pen.upAngle = b.penUp;
   if (b.penDown !== undefined) hw.pen.downAngle = b.penDown;
   res.json({ ok: true });
