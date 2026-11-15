@@ -3,10 +3,11 @@
  * The pin map and the fixed facts of the board - the only file that knows
  * which GPIO does what.
  *
- * Taken from the netlist of hardware/pcb/Scribbler.kicad_sch (rev. of
- * 15.11.2026), not from the XIAO wiki: Seeed's pages disagree about the Plus's
- * back pads D11-D19, and the schematic symbol is what the board will actually
- * be routed from. If the schematic changes, regenerate the netlist and compare
+ * Taken from the netlist of hardware/pcb/Scribbler_pretty.kicad_sch (the
+ * finished schematic, 15.11.2026; the GPIO map is identical to the earlier
+ * Scribbler.kicad_sch), not from the XIAO wiki: Seeed's pages disagree about
+ * the Plus's back pads D11-D19, and the schematic symbol is what the board
+ * will actually be routed from. If the schematic changes, regenerate the netlist and compare
  * - nothing checks this file against it automatically.
  *
  * It is not configurable at runtime. A setting for a pin number is a way to
@@ -49,7 +50,8 @@ namespace Board
 
     // Shared by both drivers, active low, with a 10k pull-up on the board: the
     // motors stay off while the ESP32 boots and this pin still floats. Drive it
-    // low only once the drivers have been configured.
+    // low only once the drivers have been configured. (The net is spelled
+    // DVR_ENN in the schematic.)
     constexpr uint8_t DRV_ENN = 42;    // D15
 
     // DIAG0 of each driver. GPIO3 is a strapping pin (JTAG source select),
@@ -62,10 +64,9 @@ namespace Board
     // K_IFS / R_REF, with K_IFS set by DRV_CONF.CURRENT_RANGE - see Driver.cpp.
     constexpr float DRIVER_RREF_KOHM = 12.0f;
 
-    // The quadrature encoders (J7/J8, not populated) go to each driver's own
-    // ENCA/ENCB/ENCN inputs, not to the ESP32: they cost no GPIO, and the
-    // driver counts them in X_ENC. PLAN.md section 0.3 says why they are an
-    // option only.
+    // No shaft encoders: the finished schematic dropped the optional J7/J8 and
+    // ties each driver's ENCA/ENCB/ENCN to GND. PLAN.md section 0.3 says why
+    // they were never more than an option.
 
     // ------ pen ------
 
@@ -85,11 +86,11 @@ namespace Board
     // On its own pins, never on the drivers' SPI bus: the card wants a slow
     // clock during init, some cards do not release MISO cleanly, and the job
     // runner reads continuously while the motion side talks to the drivers.
-    // DAT1..DAT3 are pulled up on the board and unused.
+    // CMD and DAT0..DAT3 have 10k pull-ups on the board; DAT1..DAT3 are unused.
 
     constexpr uint8_t SD_CLK  = 13;    // D17
     constexpr uint8_t SD_CMD  = 12;    // D18
-    constexpr uint8_t SD_DAT0 = 11;    // D19
+    constexpr uint8_t SD_DAT0 = 11;    // D19 (net SD_DATA0)
 
     // GPIO43/44 (D6/D7, the UART0 pins) are deliberately left free: a serial
     // console that does not depend on USB is worth two pins on a device that

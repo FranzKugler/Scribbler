@@ -50,7 +50,8 @@ both together.
 
 ## Hardware target
 
-The own board in [hardware/pcb](hardware/pcb): **XIAO ESP32-S3 Plus** (16 MB, house standard
+The own board in [hardware/pcb](hardware/pcb) — `Scribbler_pretty.kicad_sch` is the finished
+schematic: **XIAO ESP32-S3 Plus** (16 MB, house standard
 unchanged), **2 × TMC2240 in SPI mode** on a shared bus with one CS each, BMI270 IMU and SSD1306
 display on I2C, microSD in SD_MMC 1-bit mode, servo on 5 V, USB-C PD input (CH224A). The pin map
 is [src/Board.h](src/Board.h), taken from the schematic's netlist — the XIAO Plus's back-pad
@@ -59,8 +60,8 @@ authority. When the schematic changes, export the netlist (`kicad-cli sch export
 compare it with `Board.h`; nothing does that automatically. Keep STEP/DIR/ENN off strapping pins
 (GPIO0, 3, 45, 46). GPIO43/44 stay free for a UART console.
 
-The optional quadrature encoders (J7/J8, not populated) go to the TMC2240's own ENCA/B/N inputs,
-not to the ESP32. Shaft encoders are deliberately not part of the concept — PLAN.md §0.3. The
+No shaft encoders: the finished schematic dropped the optional J7/J8 and grounds the TMC2240's
+ENCA/B/N inputs — PLAN.md §0.3. The
 BMI270 measures the bot's tilt γ (validation and calibration of the kinematics, sway, "off the
 wall"). Driver registers are touched only by `Driver.*` (planned).
 
