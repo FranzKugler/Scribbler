@@ -207,6 +207,23 @@ export async function fetchLog(since = 0) {
   return res.json();
 }
 
+/* ------ hardware ------ */
+
+/**
+ * Drivers, pen, IMU and display, read fresh. Behind the expert lock. Throws,
+ * because the hardware tab polls it and a device that is briefly busy must not
+ * become a permanent banner.
+ */
+export async function fetchHardware() {
+  const res = await fetch('/hardware');
+  if (!res.ok) throw new Error(await failure(res, '/hardware'));
+  return res.json();
+}
+
+export const setMotors = (enabled) => post('/hardware/motors', { enabled });
+export const setPen = (body) => post('/hardware/pen', body);
+export const setHardwareConfig = (config) => post('/hardware/config', config);
+
 /* ------ updates ------ */
 
 /**

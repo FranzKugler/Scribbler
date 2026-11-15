@@ -36,6 +36,7 @@ const API_ROUTES = [
   '/wifi',
   '/ota',
   '/portal',
+  '/hardware',
   // Built by the device, not shipped in the image: it carries the device name.
   '/manifest.webmanifest'
 ];

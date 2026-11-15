@@ -453,7 +453,8 @@ app.post('/fs/upload', (req, res) => {
 
 const nvs = [
   { ns: 'scribbler', key: 'conf', type: 'str',
-    value: '{"Schema":1,"Hostname":"Scribbler","OtaChannel":0,"OtaAutoUpdate":false,"OtaCheckInterval":24}' },
+    value: '{"Schema":1,"Hostname":"Scribbler","OtaChannel":0,"OtaAutoUpdate":false,"OtaCheckInterval":24,' +
+      '"MotorCurrent":700,"Microsteps":16,"PenUp":90,"PenDown":70,"ImuOffset":0}' },
   { ns: 'scribexpert', key: 'on', type: 'u8', value: '1' },
   { ns: 'scribexpert', key: 'hash', type: 'blob', value: null, protected: true },
   { ns: 'scribexpert', key: 'salt', type: 'blob', value: null, protected: true },
@@ -517,6 +518,105 @@ app.post('/nvs/delete', (req, res) => {
   if (at < 0) return res.status(404).json({ error: 'nvsNotFound' });
   nvs.splice(at, 1);
   res.json({ ns, key });
+});
+
+/* ------ hardware ------ */
+
+// Same contract as src/HardwareRoutes.cpp: all of it behind the lock, refusals
+// as badValue with the field in errorDetail. The right driver is "missing" on
+// purpose, so the absent-driver card can be looked at without unplugging one.
+
+const MAX_CURRENT = 1414; // 2 A range, 12k R_REF: 2 A peak = 1.41 A RMS
+
+const hw = {
+  motorsEnabled: false,
+  motorCurrent: 700,
+  microsteps: 16,
+  pen: { angle: 90, target: 90, upAngle: 90, downAngle: 70, movedAt: 0, from: 90 }
+};
+
+function penNow() {
+  // The firmware ramps at 120 degrees per second and waits 200 ms after.
+  const p = hw.pen;
+  const elapsed = (Date.now() - p.movedAt) / 1000;
+  const span = Math.abs(p.target - p.from);
+  const done = Math.min(1, span === 0 ? 1 : (elapsed * 120) / span);
+  p.angle = p.from + (p.target - p.from) * done;
+  return { angle: p.angle, target: p.target, down: p.target === p.downAngle && p.target !== p.upAngle,
+           settled: done >= 1 && elapsed - span / 120 >= 0.2, upAngle: p.upAngle, downAngle: p.downAngle };
+}
+
+function movePen(angle) {
+  hw.pen.from = penNow().angle;
+  hw.pen.target = angle;
+  hw.pen.movedAt = Date.now();
+}
+
+const refuse = (res, field) => res.status(400).json({ error: 'badValue', errorDetail: field });
+
+app.get('/hardware', (req, res) => {
+  if (!guard(res)) return;
+  const t = Date.now() / 1000;
+  // A bot swinging gently by a degree, so the IMU card has something to show.
+  const tilt = Math.sin(t * 1.3) * 1.2;
+  res.json({
+    motorsEnabled: hw.motorsEnabled,
+    motorCurrent: hw.motorCurrent,
+    maxCurrent: MAX_CURRENT,
+    microsteps: hw.microsteps,
+    drivers: [
+      { side: 'left', present: true, version: 0x40, temperature: 31.5 + Math.sin(t / 20),
+        supply: 19.94, stallGuard: hw.motorsEnabled ? 312 : 0, currentScale: hw.motorsEnabled ? 16 : 0,
+        standstill: true, overtemperature: false, overtemperatureWarn: false, shortToGround: false,
+        openLoad: false, globalStatus: 0, drvStatus: 0x80100138 },
+      { side: 'right', present: false, version: 0x00 }
+    ],
+    pen: penNow(),
+    imu: { present: true, tilt, tiltAccel: tilt + (Math.random() - 0.5) * 0.4,
+           rate: Math.cos(t * 1.3) * 1.56, // the derivative of the swing above
+           accel: [Math.sin(tilt / 57.3), Math.cos(tilt / 57.3), 0.01],
+           gyro: [0.1, -0.05, -Math.cos(t * 1.3) * 1.56], samples: Math.floor(t * 100) },
+    display: { present: true }
+  });
+});
+
+app.post('/hardware/motors', (req, res) => {
+  if (!guard(res)) return;
+  if (typeof req.body?.enabled !== 'boolean') return refuse(res, 'enabled');
+  hw.motorsEnabled = req.body.enabled;
+  say(3, `Motors ${hw.motorsEnabled ? 'on' : 'off'}`);
+  res.json({ ok: true });
+});
+
+app.post('/hardware/pen', (req, res) => {
+  if (!guard(res)) return;
+  const { angle, state } = req.body ?? {};
+  if (Number.isInteger(angle)) {
+    if (angle < 0 || angle > 180) return refuse(res, 'angle');
+    movePen(angle);
+  } else if (state === 'up') movePen(hw.pen.upAngle);
+  else if (state === 'down') movePen(hw.pen.downAngle);
+  else return refuse(res, 'state');
+  res.json({ ok: true });
+});
+
+app.post('/hardware/config', (req, res) => {
+  if (!guard(res)) return;
+  const b = req.body ?? {};
+  // Validate all, then apply all - as the firmware does.
+  const isPow2 = (v) => Number.isInteger(v) && v >= 1 && v <= 256 && (v & (v - 1)) === 0;
+  if (b.motorCurrent !== undefined && !(Number.isInteger(b.motorCurrent) &&
+      b.motorCurrent >= 100 && b.motorCurrent <= MAX_CURRENT)) return refuse(res, 'motorCurrent');
+  if (b.microsteps !== undefined && !isPow2(b.microsteps)) return refuse(res, 'microsteps');
+  for (const key of ['penUp', 'penDown']) {
+    if (b[key] !== undefined && !(Number.isInteger(b[key]) && b[key] >= 0 && b[key] <= 180))
+      return refuse(res, key);
+  }
+  if (b.motorCurrent !== undefined) hw.motorCurrent = b.motorCurrent;
+  if (b.microsteps !== undefined) hw.microsteps = b.microsteps;
+  if (b.penUp !== undefined) hw.pen.upAngle = b.penUp;
+  if (b.penDown !== undefined) hw.pen.downAngle = b.penDown;
+  res.json({ ok: true });
 });
 
 /* ------ the manifest the device builds itself ------ */

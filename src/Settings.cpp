@@ -29,12 +29,25 @@
 // sees of this device.
 #define DEFAULT_HOSTNAME "Scribbler"
 
+// The plotter's defaults, in one place so the constructor and the fallbacks in
+// loadSettings() cannot drift apart. Reasons are in Settings.h.
+#define DEFAULT_MOTOR_CURRENT 700
+#define DEFAULT_MICROSTEPS    16
+#define DEFAULT_PEN_UP        90
+#define DEFAULT_PEN_DOWN      70
+
 Settings::Settings()
 {
     strlcpy(Hostname, DEFAULT_HOSTNAME, sizeof(Hostname));
     OtaChannel = 0;         // stable
     OtaAutoUpdate = false;  // opt-in, see Settings.h
     OtaCheckInterval = 24;
+
+    MotorCurrent = DEFAULT_MOTOR_CURRENT;
+    Microsteps   = DEFAULT_MICROSTEPS;
+    PenUp        = DEFAULT_PEN_UP;
+    PenDown      = DEFAULT_PEN_DOWN;
+    ImuOffset    = 0.0f;
 }
 
 void Settings::loadSettings()
@@ -71,6 +84,17 @@ void Settings::loadSettings()
     OtaAutoUpdate    = doc["OtaAutoUpdate"] | false;
     OtaCheckInterval = doc["OtaCheckInterval"] | 24;
 
+    MotorCurrent = doc["MotorCurrent"] | DEFAULT_MOTOR_CURRENT;
+    Microsteps   = doc["Microsteps"] | DEFAULT_MICROSTEPS;
+    PenUp        = doc["PenUp"] | DEFAULT_PEN_UP;
+    PenDown      = doc["PenDown"] | DEFAULT_PEN_DOWN;
+    ImuOffset    = doc["ImuOffset"] | 0.0f;
+
+    // Only powers of two are microstep settings the driver has; anything else
+    // in the record is not something to guess the meaning of.
+    if (Microsteps == 0 || Microsteps > 256 || (Microsteps & (Microsteps - 1)) != 0)
+        Microsteps = DEFAULT_MICROSTEPS;
+
     // A record from the future, or a corrupted one, must not put the update
     // module on a channel it has no URL for.
     if (OtaChannel > 1) OtaChannel = 0;
@@ -83,6 +107,12 @@ void Settings::fillDocument(JsonDocument &doc)
     doc["OtaChannel"]       = OtaChannel;
     doc["OtaAutoUpdate"]    = OtaAutoUpdate;
     doc["OtaCheckInterval"] = OtaCheckInterval;
+
+    doc["MotorCurrent"]     = MotorCurrent;
+    doc["Microsteps"]       = Microsteps;
+    doc["PenUp"]            = PenUp;
+    doc["PenDown"]          = PenDown;
+    doc["ImuOffset"]        = ImuOffset;
 }
 
 void Settings::storeSettings()

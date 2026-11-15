@@ -44,6 +44,14 @@
 #include "NvsRoutes.h"
 #include "OtaUpdate.h"
 #include "Portal.h"
+#include "Board.h"
+#include "Driver.h"
+#include "Pen.h"
+#include "Display.h"
+#include "Imu.h"
+#include "HardwareRoutes.h"
+
+#include <Wire.h>
 
 #if __has_include("Secrets.h")
 #include "Secrets.h"
@@ -252,6 +260,13 @@ static bool connectStoredNetwork(bool &hadCredentials)
 static void announceServices()
 {
     MDNS.end();
+    // What the display shows while nothing is plotting: where to find the
+    // device. Here because this runs once per connection, with the address
+    // that actually holds.
+    char host[40];
+    snprintf(host, sizeof host, "%s.local", settings.getHostname());
+    Display::show(settings.getHostname(), WiFi.localIP().toString().c_str(), host);
+
     if (MDNS.begin(settings.getHostname()))
     {
         MDNS.addService("http", "tcp", 80);
@@ -375,6 +390,21 @@ void setup()
 
     settings.loadSettings();
 
+    // The drivers before anything slow: ENN has a pull-up and the motors are
+    // off until this point anyway, but the drivers' own register defaults are
+    // not ours, and the sooner they are replaced the less there is to wonder
+    // about if something moves during a boot.
+    Driver::begin(settings.getMotorCurrent(), settings.getMicrosteps());
+    Pen::begin(settings.getPenUp(), settings.getPenDown());
+
+    // One bus for the display and the IMU, started here once rather than by
+    // whichever of the two happens to come first.
+    Wire.begin(Board::I2C_SDA, Board::I2C_SCL, 400000);
+    Display::begin();
+    Display::show(settings.getHostname(), "starting ...");
+    Imu::begin();
+    Imu::setOffset(settings.getImuOffset());
+
     // Reads the stored lock state and opens the reset window if this run
     // started at the plug. Before the server, so no request can arrive while
     // the answer to "is this device unlocked" is still the default.
@@ -393,6 +423,10 @@ void setup()
         // Setup mode. Nothing but the portal is registered - see Portal.h for
         // why the rest of the endpoints stay away from an open access point.
         Portal::begin(hadCredentials);
+        // The one moment the display is indispensable: a device on no network
+        // has no other way to say where to go.
+        Display::show("Setup: join WLAN", settings.getHostname(), "then open",
+                      WiFi.softAPIP().toString().c_str());
         return;
     }
 
@@ -410,6 +444,7 @@ void setup()
     Web::begin();
     Files::begin();
     Nvs::begin();
+    Hw::begin();
     server.begin();
 
     startArduinoOta();
@@ -448,6 +483,9 @@ void loop()
     server.handleClient();
     ArduinoOTA.handle();
     Debug.handle();
+
+    Pen::poll();
+    Imu::poll();
 
     // The network switch requested by the WLAN tab, step by step.
     Web::poll();

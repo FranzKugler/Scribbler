@@ -16,7 +16,7 @@
  */
 export default {
   // --- shell ---
-  tabs: ['Status', 'WLAN', 'Update', 'Debug', 'Speicher'],
+  tabs: ['Status', 'WLAN', 'Hardware', 'Update', 'Debug', 'Speicher'],
   loading: 'Einstellungen werden geladen …',
   loadingShort: 'wird geladen …',
   deviceUnreachable: 'Gerät nicht erreichbar',
@@ -124,6 +124,61 @@ export default {
     'von beiden hochgeladen wurde, erkennt das Gerät am ersten Byte.',
   connectionLost: 'Verbindung abgebrochen',
   uploadAborted: 'Upload abgebrochen',
+
+  // --- hardware tab ---
+  hwUnavailable: 'Hardware-Status nicht verfügbar',
+  hwMotors: 'Motoren',
+  hwMotorsEnabled: 'Motoren eingeschaltet',
+  hwMotorsHint:
+    'Hängt der Bot an der Wand, halten ihn die Motoren. Ausschalten lässt ihn ' +
+    'an den Riemen absacken – vorher abnehmen oder festhalten.',
+  hwCurrent: 'Motorstrom (mA RMS)',
+  hwCurrentHint: (max) => `Höchstens ${max} mA bei diesem Messwiderstand.`,
+  hwMicrosteps: 'Mikroschritte',
+  hwApply: 'Übernehmen',
+  hwDriver: (side) => `Treiber ${side}`,
+  hwLeft: 'links',
+  hwRight: 'rechts',
+  hwAbsent: (version) =>
+    `Kein TMC2240 am Bus (Version 0x${Number(version).toString(16).padStart(2, '0')}) – ` +
+    'Versorgung, Chip-Select und SPI-Leitungen prüfen.',
+  hwTemperature: 'Temperatur',
+  hwSupply: 'Versorgung',
+  hwStallGuard: 'StallGuard',
+  hwCurrentScale: 'Stromskala',
+  hwStandstill: 'Stillstand',
+  hwFaults: 'Fehler',
+  hwNone: 'keine',
+  hwOt: 'Übertemperatur – abgeschaltet',
+  hwOtpw: 'Temperaturwarnung',
+  hwS2g: 'Kurzschluss nach Masse',
+  hwOl: 'offene Wicklung',
+  hwReset: 'Treiber neu gestartet',
+  hwDrvErr: 'Treiberfehler',
+  hwUvCp: 'Unterspannung Ladungspumpe',
+  hwPen: 'Stift',
+  hwPenAngle: 'Servo',
+  hwPenUp: 'Hoch',
+  hwPenDown: 'Runter',
+  hwPenTry: 'Winkel',
+  hwPenMove: 'Anfahren',
+  hwPenSaveUp: 'Als „hoch“ speichern',
+  hwPenSaveDown: 'Als „runter“ speichern',
+  hwImu: 'IMU',
+  hwImuAbsent: 'Keine IMU gefunden.',
+  hwTilt: 'Neigung',
+  hwTiltAccel: 'Neigung (nur Beschleunigung)',
+  hwRate: 'Drehrate',
+  hwAccel: 'Beschleunigung [g]',
+  hwGyro: 'Drehrate [°/s]',
+  hwImuHint:
+    'Waagrecht hängend muss die Neigung ~0° zeigen, nach rechts geneigt positiv. ' +
+    'Stimmt das Vorzeichen nicht, sind die Achsen in Imu.cpp falsch zugeordnet.',
+  hwDisplay: 'Display',
+  hwFound: 'gefunden',
+  hwMissing: 'nicht gefunden',
+  yes: 'ja',
+  no: 'nein',
 
   // --- debug tab ---
   deviceState: 'Zustand',
@@ -249,6 +304,7 @@ export default {
     'wählen und die genannte Adresse aufrufen.',
 
   // --- what the device can refuse with ---
+  err_badValue: (field) => `Kein gültiger Wert: ${field}.`,
   err_wifiConnect: (ssid) => `Verbindung zu ${ssid} nicht möglich.`,
   err_wifiFallback: (ssid) => `Auch das vorherige Netz (${ssid}) antwortet nicht mehr.`,
   err_wifiNoSsid: 'Es wurde kein Netz angegeben.',

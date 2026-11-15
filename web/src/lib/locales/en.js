@@ -11,7 +11,7 @@
  */
 export default {
   // --- shell ---
-  tabs: ['Status', 'WiFi', 'Update', 'Debug', 'Storage'],
+  tabs: ['Status', 'WiFi', 'Hardware', 'Update', 'Debug', 'Storage'],
   loading: 'Loading the settings …',
   loadingShort: 'loading …',
   deviceUnreachable: 'Device unreachable',
@@ -117,6 +117,61 @@ export default {
     'works out which one it was handed from the first byte.',
   connectionLost: 'Connection lost',
   uploadAborted: 'Upload aborted',
+
+  // --- hardware tab ---
+  hwUnavailable: 'Hardware status unavailable',
+  hwMotors: 'Motors',
+  hwMotorsEnabled: 'Motors on',
+  hwMotorsHint:
+    'On the wall, the motors are what holds the bot. Switching them off lets it ' +
+    'sag on its belts - take it down or hold it first.',
+  hwCurrent: 'Motor current (mA RMS)',
+  hwCurrentHint: (max) => `At most ${max} mA with this reference resistor.`,
+  hwMicrosteps: 'Microsteps',
+  hwApply: 'Apply',
+  hwDriver: (side) => `Driver ${side}`,
+  hwLeft: 'left',
+  hwRight: 'right',
+  hwAbsent: (version) =>
+    `No TMC2240 on the bus (version 0x${Number(version).toString(16).padStart(2, '0')}) - ` +
+    'check its supply, chip select and the SPI lines.',
+  hwTemperature: 'Temperature',
+  hwSupply: 'Supply',
+  hwStallGuard: 'StallGuard',
+  hwCurrentScale: 'Current scale',
+  hwStandstill: 'Standstill',
+  hwFaults: 'Faults',
+  hwNone: 'none',
+  hwOt: 'overtemperature - shut down',
+  hwOtpw: 'temperature warning',
+  hwS2g: 'short to ground',
+  hwOl: 'open coil',
+  hwReset: 'driver restarted',
+  hwDrvErr: 'driver error',
+  hwUvCp: 'charge pump undervoltage',
+  hwPen: 'Pen',
+  hwPenAngle: 'Servo',
+  hwPenUp: 'Up',
+  hwPenDown: 'Down',
+  hwPenTry: 'Angle',
+  hwPenMove: 'Move',
+  hwPenSaveUp: 'Save as up',
+  hwPenSaveDown: 'Save as down',
+  hwImu: 'IMU',
+  hwImuAbsent: 'No IMU found.',
+  hwTilt: 'Tilt',
+  hwTiltAccel: 'Tilt (accelerometer only)',
+  hwRate: 'Tilt rate',
+  hwAccel: 'Acceleration [g]',
+  hwGyro: 'Rotation [°/s]',
+  hwImuHint:
+    'Hanging level, the tilt must read ~0°, leaning right it must be positive. ' +
+    'If the sign is wrong, the axes in Imu.cpp are mapped wrongly.',
+  hwDisplay: 'Display',
+  hwFound: 'found',
+  hwMissing: 'not found',
+  yes: 'yes',
+  no: 'no',
 
   // --- debug tab ---
   deviceState: 'State',
@@ -242,6 +297,7 @@ export default {
     'open the address above.',
 
   // --- what the device can refuse with ---
+  err_badValue: (field) => `Not a valid value: ${field}.`,
   err_wifiConnect: (ssid) => `Could not join ${ssid}.`,
   err_wifiFallback: (ssid) => `The previous network (${ssid}) does not answer either.`,
   err_wifiNoSsid: 'No network was named.',

@@ -67,6 +67,30 @@ public:
     void setOtaCheckInterval(byte hours) { this->OtaCheckInterval = hours; }
     byte getOtaCheckInterval() { return this->OtaCheckInterval; }
 
+    // ------ the plotter ------
+
+    // Motor run current, RMS [mA]. Mural's pancake steppers are rated 1 A;
+    // 700 mA is what Mural runs them at. Clamped to what the drivers' current
+    // range allows by whoever applies it (Driver::maxCurrentMa()).
+    void     setMotorCurrent(uint16_t ma) { this->MotorCurrent = ma; }
+    uint16_t getMotorCurrent() { return this->MotorCurrent; }
+
+    // Microsteps per full step, a power of two 1..256. 16 is the plan's choice
+    // (PLAN.md section 1); the drivers interpolate to 256 regardless.
+    void     setMicrosteps(uint16_t steps) { this->Microsteps = steps; }
+    uint16_t getMicrosteps() { return this->Microsteps; }
+
+    // Pen servo angles [degrees, 0..180]. Up must clear the wall; down is
+    // found in the pen calibration step and differs with every pen.
+    void setPenUp(byte angle) { this->PenUp = angle; }
+    byte getPenUp() { return this->PenUp; }
+    void setPenDown(byte angle) { this->PenDown = angle; }
+    byte getPenDown() { return this->PenDown; }
+
+    // How far the IMU's zero is off the bot's level [rad]; see Imu::setOffset().
+    void  setImuOffset(float radians) { this->ImuOffset = radians; }
+    float getImuOffset() { return this->ImuOffset; }
+
 private:
     // Fills a document with the stored representation. Kept separate so the
     // field list exists once, next to the one that reads it back.
@@ -79,6 +103,12 @@ private:
     byte    OtaChannel;       // 0 = stable, 1 = edge
     boolean OtaAutoUpdate;    // install without asking
     byte    OtaCheckInterval; // hours between checks, 0 = never
+
+    uint16_t MotorCurrent;    // mA RMS
+    uint16_t Microsteps;      // per full step
+    byte     PenUp;           // degrees
+    byte     PenDown;         // degrees
+    float    ImuOffset;       // rad
 };
 
 #endif
