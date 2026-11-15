@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <!-- Only fetched when the page is added to a home screen, so the load
+         still costs the files it always did. -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <!-- Replaced at runtime with the device's own name, see lib/appname.svelte.js.
+         This is only the fallback for the moment before the settings arrive. -->
+    <meta name="apple-mobile-web-app-title" content="Scribbler" />
+    <!-- Android goes by this instead of the icon above. The device serves it
+         itself, so the name in it is the name that device answers to. -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#0d0d0d" />
+    <title>Scribbler</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

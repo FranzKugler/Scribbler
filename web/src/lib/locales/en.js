@@ -1,0 +1,302 @@
+/**
+ * en
+ * English texts of the web UI. Same keys, same order and same grouping as
+ * de.js, which is the reference - a key added there and forgotten here shows
+ * up as `undefined` on screen, so the two are meant to be diffed side by side.
+ *
+ * @author   Franz Kugler / franz _AT_ franz _MINUS_ kugler _DOT_ de
+ * @version  1.0
+ * @created  31.8.2026
+ * @updated  31.8.2026
+ */
+export default {
+  // --- shell ---
+  tabs: ['Status', 'WiFi', 'Update', 'Debug', 'Storage'],
+  loading: 'Loading the settings …',
+  loadingShort: 'loading …',
+  deviceUnreachable: 'Device unreachable',
+  retry: 'Try again',
+  writeFailed: 'Could not save',
+
+  // --- status tab ---
+  statusTitle: 'Device',
+  deviceName: 'Name',
+  address: 'Address',
+  firmware: 'Firmware',
+  webUi: 'Web interface',
+  uptime: 'Uptime',
+  statusHint:
+    'The plotter functions are not implemented yet. What is shown here is the ' +
+    'device itself - its name, its address and the two images that are ' +
+    'updated independently of one another.',
+
+  // --- wifi tab ---
+  connection: 'Connection',
+  network: 'Network',
+  signal: 'Signal',
+  hostname: 'Hostname',
+  mac: 'MAC address',
+  quality: ['weak', 'fair', 'good', 'excellent'],
+  encrypted: 'encrypted',
+  statusUnavailable: 'Status unavailable',
+
+  name: 'Name',
+  saveAndRestart: 'Save and restart',
+  restarting: 'Restarting …',
+  hostnameSaved: (name) => `Stored as "${name}".`,
+  hostnameHint: () =>
+    'The name decides the address the device answers to (<name>.local), how ' +
+    'the router lists it, and what the setup network is called. Letters, ' +
+    'digits and hyphens only. Two devices on one network need two names.',
+
+  availableNetworks: 'Available networks',
+  scanning: 'Scanning …',
+  noNetworks: 'No network found.',
+  rescan: 'Scan again',
+
+  switchNetwork: 'Switch network',
+  password: 'Password',
+  passwordPlaceholder: 'leave empty if open',
+  connect: 'Connect',
+  connecting: 'Connecting …',
+  connectedTo: (ssid) => `Connected to ${ssid}.`,
+  noResponse: 'No answer from the device.',
+  wifiHint: (hostname) =>
+    `The device is briefly unreachable while it switches. If the new network ` +
+    `does not come up it returns to the old one by itself, and this page is ` +
+    `back at http://${hostname}.local/.`,
+
+  // --- update tab ---
+  installed: 'Installed',
+  used: 'In use',
+  roomForUpdate: 'Room for an update',
+  runningFrom: 'Running from',
+  unknown: 'unknown',
+
+  updateSource: 'Update source',
+  channel: 'Channel',
+  channelStable: 'Stable (tagged releases)',
+  channelEdge: 'Edge (every commit)',
+  checkInterval: 'Check every',
+  checkNever: 'never',
+  hours: (n) => (n === 1 ? '1 hour' : `${n} hours`),
+  autoUpdate: 'Install automatically',
+  autoUpdateHint:
+    'Installs between 2 and 5 in the morning. Off by default: an image that ' +
+    'flashes cleanly and then crashes can only be recovered over USB.',
+  available: 'Available',
+  downloading: (percent) => `Downloading … ${percent} %`,
+  installNow: 'Install now',
+  upToDate: 'Up to date.',
+  neverChecked: 'never checked',
+  justNow: 'checked just now',
+  minutesAgo: (n) => `checked ${n} min ago`,
+  hoursAgo: (n) => `checked ${n} h ago`,
+  checking: 'Checking …',
+  checkNow: 'Check now',
+
+  uploadImage: 'Upload an image',
+  file: 'File',
+  noFile: 'none chosen',
+  chooseFile: 'Choose a file',
+  detectedAs: 'Detected as',
+  firmwareImage: 'Firmware',
+  filesystemImage: 'Web interface',
+  filesystemHint:
+    'The filesystem image replaces the web interface wholesale. The settings ' +
+    'live in NVS and are not affected.',
+  writing: (percent) => `Writing … ${percent} %`,
+  rebooting: 'The device is restarting …',
+  running: 'Running …',
+  upload: 'Upload',
+  updateDone: (firmware, webUi) =>
+    `Done. Firmware ${firmware ?? '—'}, web interface ${webUi}.`,
+  noResponseAfterReboot: 'The device did not come back after the restart.',
+  buildHint:
+    'firmware.bin is the program, littlefs.bin the web interface. The device ' +
+    'works out which one it was handed from the first byte.',
+  connectionLost: 'Connection lost',
+  uploadAborted: 'Upload aborted',
+
+  // --- debug tab ---
+  deviceState: 'State',
+  lastReset: 'Last restart',
+  heapFree: 'Free heap',
+  heapMin: 'Lowest since boot',
+  heapBlock: 'Largest block',
+  heapHint:
+    'The largest contiguous block is the number that matters when an update ' +
+    'fails - not the free heap as a whole.',
+  resetReasons: {
+    'power-on': 'power-on',
+    external: 'external',
+    software: 'software (ESP.restart)',
+    panic: 'crash (panic)',
+    'watchdog-int': 'watchdog (interrupt)',
+    'watchdog-task': 'watchdog (task)',
+    watchdog: 'watchdog',
+    brownout: 'brownout',
+    sdio: 'SDIO',
+    'deep-sleep': 'deep sleep',
+    usb: 'USB (flashing)',
+    jtag: 'JTAG',
+    efuse: 'eFuse',
+    'power-glitch': 'power glitch',
+    'cpu-lockup': 'CPU lockup',
+    unknown: 'unknown'
+  },
+
+  logTitle: 'Log',
+  logPause: 'Pause',
+  logResume: 'Resume',
+  logClear: 'Clear the window',
+  logMissed: (n) => `${n} lines scrolled out of the ring and are missing here.`,
+  logEmpty: 'Nothing logged yet.',
+  logHint:
+    'The ring on the device holds 200 lines and starts at the first line of ' +
+    'setup() - including the seconds after a restart that nobody is ever in ' +
+    'time to watch. The time is elapsed time since boot, not the time of day.',
+
+  // --- storage tab ---
+  storageTitle: 'Storage',
+  storageFs: 'LittleFS',
+  storageNvs: 'NVS',
+  storageFsHint:
+    'The filesystem this page itself is served from: the web interface, the ' +
+    'setup portal, the icons, version.json.',
+  storageFsWarn:
+    'A filesystem update overwrites this partition wholesale. Delete ' +
+    'index.html and the device still answers every REST endpoint and shows ' +
+    'nothing in a browser - the way back is "pio run -t uploadfs" over USB.',
+  storageNvsHint:
+    'The key-value store: the settings and expert mode live here. Namespaces ' +
+    'are shown as folders and keys as files, which is a reading aid rather ' +
+    'than a fact.',
+  storageNvsWarn:
+    'The firmware holds its settings in RAM and writes them back on the next ' +
+    'change. An edit here is only durable if the device restarts before ' +
+    'anything else overwrites it.',
+
+  // --- explorer, shared by both stores ---
+  fsRoot: '/',
+  fsEmpty: 'Empty.',
+  fsTruncated: '… further entries not shown',
+  fsUpload: 'Upload',
+  fsUploading: (percent) => `Uploading … ${percent} %`,
+  fsNewFolder: 'New folder',
+  fsNewFolderHere: 'New folder here',
+  fsFolderName: 'Folder name',
+  fsSave: 'Save',
+  fsCancel: 'Cancel',
+  fsSaved: 'Saved.',
+  fsDelete: 'Delete',
+  fsDownload: 'Download',
+  fsEdit: 'Edit',
+  fsBinary: 'Not editable as text',
+  fsProtected: 'Protected',
+  fsConfirmDelete: (name) => `Really delete "${name}"?`,
+  fsGesture: 'Right-click, or press and hold, to open an entry’s menu.',
+  fsUsage: (used, total) => `${used} of ${total} used`,
+  fsUsageEntries: (used, total) => `${used} of ${total} entries used`,
+  fsKeys: (n) => (n === 1 ? '1 key' : `${n} keys`),
+  fsCompact: 'save compact',
+  fsNotJson: 'not valid JSON',
+  fsConfirmRestart: 'Restart the device now?',
+  fsRestart: 'Restart',
+  fsRestarting: 'Restarting …',
+  fsRestarted: 'Restart requested - the device will be back shortly.',
+
+  // --- expert mode ---
+  expertTitle: 'Expert mode',
+  expertUnlocked: 'The device is unlocked. Update, debug and storage are open.',
+  expertLock: 'Lock',
+  expertEnterHint: 'Enter the password to open update, debug and storage.',
+  expertSetHint:
+    'No password has been set on this device yet. The first one entered here ' +
+    'is the one that counts.',
+  expertPassword: 'Password',
+  expertUnlock: 'Unlock',
+  expertSet: 'Set the password',
+  expertMinLength: (n) => `At least ${n} characters.`,
+  expertLockedOut:
+    'Too many wrong answers. The device will not take another one for a few ' +
+    'minutes.',
+  expertForgotten: 'Forgotten the password',
+  expertResetHint: (time) =>
+    `For five minutes after the device is switched on at the plug, the ` +
+    `password can be cleared without knowing it. ${time} left. After that, ` +
+    `pull the plug and put it back.`,
+  expertReset: 'Clear the password',
+
+  // --- setup portal ---
+  portalTitle: 'Setup',
+  portalIntro: (apName) =>
+    `This device is not on a network yet, so it has put up one of its own ` +
+    `("${apName}"). Pick a network, enter its password - the device then ` +
+    `restarts and is reachable on the network you chose.`,
+  portalConnecting: (ssid) => `Connecting to ${ssid} …`,
+  portalConnected: (ssid, ip) =>
+    `Connected to ${ssid}. The device is restarting and will be reachable at ${ip}.`,
+  portalDone:
+    'This setup network is about to disappear. Rejoin your usual network and ' +
+    'open the address above.',
+
+  // --- what the device can refuse with ---
+  err_wifiConnect: (ssid) => `Could not join ${ssid}.`,
+  err_wifiFallback: (ssid) => `The previous network (${ssid}) does not answer either.`,
+  err_wifiNoSsid: 'No network was named.',
+  err_hostnameInvalid: 'The name has no usable characters in it.',
+  err_portalBusy: 'A connection attempt is already running.',
+  err_connectionLost: 'Lost the connection to the device.',
+
+  err_expertLocked: 'The device is locked.',
+  err_expertLockedOut: 'Too many wrong answers - wait a few minutes.',
+  err_expertWrongPassword: 'Wrong password.',
+  err_expertPasswordShort: 'That password is too short.',
+  err_expertNoGrace: 'The reset window has closed.',
+
+  err_otaBegin: 'The update could not be started.',
+  err_otaWrite: 'Writing to flash failed.',
+  err_otaIncomplete: 'The image was not accepted.',
+  err_otaAborted: 'The upload was aborted.',
+  err_otaNoImage: 'The request carried no image.',
+  err_otaNoUpdate: 'There is no update to install.',
+  err_otaBusy: 'An update is already running.',
+  err_otaServer: 'The update server cannot be reached.',
+  err_otaManifestHttp: 'The manifest could not be fetched.',
+  err_otaManifestParse: 'The manifest is unreadable.',
+  err_otaDownload: 'The download failed.',
+  err_otaConnectionLost: 'The connection dropped during the download.',
+  err_otaSize: 'The image is not the size it was announced as.',
+  err_otaChecksum: 'The checksum does not match - the image was discarded.',
+
+  err_fsPath: 'Not a usable path.',
+  err_fsBody: 'The request was unreadable.',
+  err_fsNotFound: 'Not found.',
+  err_fsNotDir: 'That is not a folder.',
+  err_fsIsDir: 'That is a folder.',
+  err_fsOpen: 'The file could not be opened.',
+  err_fsWrite: 'Writing failed - the partition is probably full.',
+  err_fsRename: 'The finished file could not be moved into place.',
+  err_fsDelete: 'Deleting failed.',
+  err_fsMkdir: 'The folder could not be created.',
+  err_fsExists: 'Already exists.',
+  err_fsNotEmpty: 'The folder is not empty.',
+  err_fsTooBig: 'Too big for the editor - download it and upload it back.',
+  err_fsAborted: 'The upload was aborted.',
+
+  err_nvsNamespace: 'No such namespace.',
+  err_nvsRead: 'The value could not be read.',
+  err_nvsWrite: 'The value could not be written.',
+  err_nvsDelete: 'The key could not be erased.',
+  err_nvsTooBig: 'Too big.',
+  err_nvsBinary: 'A blob has no text form - download it instead.',
+  err_nvsNotFound: 'No such key.',
+  err_nvsMemory: 'Not enough memory to fetch the value.',
+  err_nvsProtected: 'This value is not handed out.',
+  err_nvsPath: 'Namespace or key missing.',
+  err_nvsBody: 'The request was unreadable.',
+  err_nvsNotANumber: 'The key holds a number and the text is not one.',
+  err_nvsNamespaceDelete:
+    'A namespace cannot be deleted; it goes with its last key.'
+};

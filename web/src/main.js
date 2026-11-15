@@ -1,0 +1,14 @@
+/**
+ * main
+ * Entry point of the configuration SPA: mounts the app into index.html.
+ *
+ * @author   Franz Kugler / franz _AT_ franz _MINUS_ kugler _DOT_ de
+ * @version  1.0
+ * @created  31.8.2026
+ * @updated  31.8.2026
+ */
+import './app.css';
+import { mount } from 'svelte';
+import App from './App.svelte';
+
+export default mount(App, { target: document.getElementById('app') });

@@ -1,0 +1,636 @@
+/**
+ * app
+ * Styling of the web UI. Self-contained, so the page also works on a network
+ * without internet access, and follows the system's light/dark preference.
+ *
+ * Loaded by both entry points - the configuration SPA and the setup portal.
+ * That is the whole mechanism behind "the portal looks like the app": there is
+ * one stylesheet, one set of card, field and button rules, and the portal is a
+ * page that uses them rather than a page that imitates them.
+ *
+ * @author   Franz Kugler / franz _AT_ franz _MINUS_ kugler _DOT_ de
+ * @version  1.0
+ * @created  31.8.2026
+ * @updated  31.8.2026
+ */
+:root {
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --text: #1c1f23;
+  --muted: #6b7280;
+  --border: #d9dce1;
+  --accent: #3b6ea5;
+  --accent-text: #ffffff;
+  --danger: #b3261e;
+  --danger-bg: #fdecea;
+  --radius: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16181c;
+    --surface: #1f2228;
+    --text: #e6e8eb;
+    --muted: #9aa1ab;
+    --border: #343941;
+    --accent: #6ea8dc;
+    --accent-text: #10131a;
+    --danger: #f2b8b5;
+    --danger-bg: #3b1f1d;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.app {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+/*
+ * Stays put while the rest scrolls. The negative top margin cancels the
+ * padding of .app so the initial layout is unchanged, while the padding makes
+ * that space part of the sticky box - and the space below the separator is
+ * padding rather than margin for the same reason: anything left as margin is
+ * unpainted, and scrolling content would show through the gap.
+ */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--bg);
+  margin-top: -1rem;
+  padding-top: 1rem;
+  padding-bottom: 1.25rem;
+}
+
+header h1 {
+  margin: 0.25rem 0 1rem;
+  font-size: 1.35rem;
+  letter-spacing: 0.02em;
+}
+
+/* ---------- tabs ---------- */
+
+nav {
+  border-bottom: 1px solid var(--border);
+}
+
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.tabs button {
+  appearance: none;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  padding: 0.6rem 0.9rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.tabs button:hover {
+  color: var(--text);
+}
+
+.tabs button[aria-current="page"] {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+
+/* The menu button only exists on narrow screens; see the media query below. */
+.menu-toggle {
+  display: none;
+  appearance: none;
+  border: none;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.7rem 0.2rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+/* Three bars, drawn rather than loaded - nothing here may need the network. */
+.burger {
+  position: relative;
+  display: block;
+  width: 1.15rem;
+  height: 2px;
+  background: currentColor;
+  border-radius: 1px;
+  transition: background-color 0.15s;
+}
+
+.burger::before,
+.burger::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: currentColor;
+  border-radius: inherit;
+  transition: transform 0.15s;
+}
+
+.burger::before {
+  transform: translateY(-6px);
+}
+
+.burger::after {
+  transform: translateY(6px);
+}
+
+/* Open: the bars fold into a cross. */
+nav.open .burger {
+  background-color: transparent;
+}
+
+nav.open .burger::before {
+  transform: rotate(45deg);
+}
+
+nav.open .burger::after {
+  transform: rotate(-45deg);
+}
+
+/*
+ * Below this the tabs no longer fit on one line. The threshold is set for the
+ * longest translation, so the row never wraps in either language.
+ *
+ * Vertical space is the scarce resource on a phone, so the title and the menu
+ * button share one bar, and the menu opens as a floating panel rather than
+ * pushing the content down.
+ */
+@media (max-width: 40rem) {
+  .app {
+    padding: 0.75rem;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: -0.75rem;
+    padding-top: 0.75rem;
+    /* 0.4rem down to the separator, 0.9rem below it - both painted. */
+    padding-bottom: 1.3rem;
+  }
+
+  /*
+   * The separator, drawn inside the padding instead of as a border, so the gap
+   * beneath it still belongs to the sticky box. Absolutely positioned, so it is
+   * not a flex item of the bar.
+   */
+  header::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.9rem;
+    height: 1px;
+    background: var(--border);
+  }
+
+  header h1 {
+    margin: 0;
+    font-size: 1.1rem;
+  }
+
+  nav {
+    position: relative;
+    border-bottom: none;
+  }
+
+  .menu-toggle {
+    display: flex;
+    width: auto;
+    padding: 0.3rem 0.1rem;
+    color: var(--muted);
+  }
+
+  .tabs {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.55rem);
+    z-index: 10;
+    flex-direction: column;
+    gap: 0;
+    min-width: 11rem;
+    padding: 0.3rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.22);
+  }
+
+  nav.open .tabs {
+    display: flex;
+  }
+
+  .tabs button {
+    padding: 0.55rem 0.7rem;
+    text-align: left;
+    border-bottom: none;
+    border-left: 2px solid transparent;
+    border-radius: 6px;
+    margin-bottom: 0;
+  }
+
+  .tabs button[aria-current="page"] {
+    border-bottom-color: transparent;
+    border-left-color: var(--accent);
+  }
+
+  .card {
+    padding: 0.85rem 0.9rem;
+    margin-bottom: 0.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .burger,
+  .burger::before,
+  .burger::after {
+    transition: none;
+  }
+}
+
+/* ---------- cards & fields ---------- */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.card > h2 {
+  margin: 0 0 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.4rem 0;
+}
+
+.field > label,
+.field > .key {
+  flex: 0 0 auto;
+}
+
+.hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+input[type="text"],
+input[type="number"],
+input[type="password"],
+select {
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 0.4rem 0.55rem;
+  min-width: 0;
+}
+
+/* Controls in a field row share one width, so a card reads as an aligned
+   column instead of each control sizing itself to its longest option.
+   Shrinkable, so they still fit on narrow screens. */
+.field > select,
+.field > input[type="text"],
+.field > input[type="number"],
+.field > input[type="password"] {
+  flex: 0 1 15rem;
+}
+
+input[type="text"]:focus-visible,
+input[type="number"]:focus-visible,
+input[type="password"]:focus-visible,
+select:focus-visible,
+nav button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+input:disabled,
+select:disabled {
+  opacity: 0.45;
+}
+
+/* radio list */
+
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.3rem 0;
+  cursor: pointer;
+}
+
+.choice input {
+  accent-color: var(--accent);
+  width: 1.05rem;
+  height: 1.05rem;
+  margin: 0;
+}
+
+/* switch */
+
+.switch {
+  position: relative;
+  width: 2.6rem;
+  height: 1.5rem;
+  flex: 0 0 auto;
+}
+
+.switch input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+
+.switch span {
+  position: absolute;
+  inset: 0;
+  background: var(--border);
+  border-radius: 999px;
+  transition: background 0.15s;
+  pointer-events: none;
+}
+
+.switch span::after {
+  content: "";
+  position: absolute;
+  top: 0.17rem;
+  left: 0.17rem;
+  width: 1.16rem;
+  height: 1.16rem;
+  background: var(--surface);
+  border-radius: 50%;
+  transition: transform 0.15s;
+}
+
+.switch input:checked + span {
+  background: var(--accent);
+}
+
+.switch input:checked + span::after {
+  transform: translateX(1.1rem);
+}
+
+.switch input:focus-visible + span {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------- network list ---------- */
+
+/* Used by the WLAN tab and by the setup portal, which is the point: the list
+   of networks is the one screen both of them have, and it is the same
+   component drawing it - see lib/NetworkList.svelte. */
+
+.netlist {
+  list-style: none;
+  margin: 0 0 0.75rem;
+  padding: 0;
+}
+
+.netname {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 0.9rem;
+}
+
+.bars i {
+  width: 3px;
+  background: var(--border);
+  border-radius: 1px;
+}
+
+.bars i:nth-child(1) { height: 25%; }
+.bars i:nth-child(2) { height: 50%; }
+.bars i:nth-child(3) { height: 75%; }
+.bars i:nth-child(4) { height: 100%; }
+
+.bars i.on {
+  background: var(--accent);
+}
+
+.lock {
+  font-size: 0.8rem;
+  opacity: 0.65;
+}
+
+/* ---------- buttons ---------- */
+
+button[type="submit"],
+button.primary,
+button.secondary {
+  font: inherit;
+  line-height: 1.5;
+  padding: 0.5rem 1.1rem;
+  border-radius: 7px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+button.secondary {
+  background: var(--surface);
+  color: var(--text);
+}
+
+button[type="submit"]:disabled,
+button.primary:disabled,
+button.secondary:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ---------- progress bar ---------- */
+
+/* Global rather than scoped to the update tab: the setup portal shows one too,
+   while it is waiting for a network to come up. */
+
+.progress {
+  height: 10px;
+  margin: 0.75rem 0 0.25rem;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.progress > .bar {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.15s linear;
+}
+
+/* An attempt with no measurable progress: the same bar, sliding. */
+.progress.indeterminate > .bar {
+  width: 35%;
+  animation: slide 1.4s ease-in-out infinite;
+}
+
+@keyframes slide {
+  0%   { margin-left: -35%; }
+  100% { margin-left: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress.indeterminate > .bar {
+    animation: none;
+    width: 100%;
+    opacity: 0.4;
+  }
+}
+
+/* ---------- file picker ---------- */
+
+/* The native file input is replaced by a square icon button, so it matches the
+   other controls instead of rendering as whatever the browser fancies. The
+   input stays in the page - hidden but focusable - so it is still reachable
+   with the keyboard. */
+.filepick {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.filename {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.filename.empty {
+  color: var(--muted);
+}
+
+.filepick input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  border: 0;
+}
+
+/* Same padding and line height as the buttons above, so both come out the same
+   height; aspect-ratio then squares it off at whatever that height becomes. */
+.iconbutton {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  line-height: 1.5;
+  aspect-ratio: 1;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.iconbutton svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.iconbutton:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.filepick input[type="file"]:focus-visible + .iconbutton {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.filepick input[type="file"]:disabled + .iconbutton {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* ---------- messages ---------- */
+
+.banner {
+  background: var(--danger-bg);
+  color: var(--danger);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.85rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.centered {
+  text-align: center;
+  color: var(--muted);
+  padding: 3rem 1rem;
+}
+
+.centered button {
+  font: inherit;
+  margin-top: 0.75rem;
+  padding: 0.45rem 1.1rem;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--accent);
+  color: var(--accent-text);
+  cursor: pointer;
+}
+
+.success {
+  color: var(--accent);
+}

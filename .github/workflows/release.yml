@@ -1,0 +1,262 @@
+# Builds both images and publishes them where the devices can fetch them.
+#
+# Two channels, and the trigger decides which:
+#   push to main     -> "edge",   a rolling pre-release under the fixed tag `edge`
+#   push of a tag v* -> "stable", a normal release under that tag
+#
+# The devices never talk to the GitHub API. They poll one of two fixed URLs,
+# which is why the edge release keeps a fixed tag and the stable one is reached
+# through /releases/latest/download/:
+#
+#   stable  .../releases/latest/download/manifest.json
+#   edge    .../releases/download/edge/manifest.json
+#
+# Both are spelled out in src/OtaUpdate.cpp; change OTA_REPO there when forking.
+#
+# The edge release must stay marked as a pre-release, or it would take over
+# /releases/latest and stable devices would start following it.
+#
+# A stable release additionally publishes docs/ as a GitHub Pages site - the
+# browser-based flashing page for a blank chip (see docs/index.html). That
+# needs three parts a running device never touches (the bootloader, the
+# partition table itself, the boot_app0 stub) alongside the two OTA already
+# builds, and it needs them on the *same origin* as the page: a browser
+# fetch() of a GitHub release asset has no CORS header and is silently
+# blocked, so the page cannot point at /releases/ the way a device's manifest
+# does - see scripts/web_tools_manifest.py. Not built for the edge channel:
+# first-time flashing a blank board is exactly the case that wants the
+# reviewed release, not the rolling one.
+
+name: Release
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write # creating releases and uploading the images
+
+# Two pushes in quick succession would otherwise race over deleting and
+# recreating the edge release.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      channel: ${{ steps.meta.outputs.channel }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # scripts/version.py needs the tags; a shallow clone has none, and
+          # every build would silently fall back to the version in Version.h.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.platformio
+            ~/.cache/pip
+          key: pio-${{ hashFiles('platformio.ini') }}
+          restore-keys: pio-
+
+      - name: Install PlatformIO
+        run: pip install --upgrade platformio
+
+      # src/Secrets.h is not in the repository. The build copes with that (see
+      # Secrets.example.h) and the resulting image simply has no espota
+      # password - which is right for a public image anyway.
+      - name: Build the firmware
+        run: pio run
+
+      - name: Work out version and channel
+        id: meta
+        run: |
+          version="$(cat .pio/version.txt)"
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "channel=stable" >> "$GITHUB_OUTPUT"
+            echo "tag=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "channel=edge" >> "$GITHUB_OUTPUT"
+            echo "tag=edge" >> "$GITHUB_OUTPUT"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Version $version"
+
+      # After the firmware, so WEB_UI_VERSION can carry the version the
+      # firmware was stamped with into version.json - otherwise the web UI
+      # would report whatever happens to be in package.json.
+      - name: Build the web interface
+        env:
+          WEB_UI_VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build the filesystem image
+        run: pio run -t buildfs
+
+      - name: Write the manifest
+        env:
+          BUILD: .pio/build/seeed_xiao_esp32s3
+        run: |
+          notes="$(git log -1 --pretty=%s)"
+          python scripts/manifest.py \
+            --channel "${{ steps.meta.outputs.channel }}" \
+            --version "${{ steps.meta.outputs.version }}" \
+            --notes "$notes" \
+            --base-url "https://github.com/${{ github.repository }}/releases/download/${{ steps.meta.outputs.tag }}" \
+            --out manifest.json \
+            "$BUILD/firmware.bin" "$BUILD/littlefs.bin"
+
+      # Recreated from scratch every time, so the fixed tag follows the commit
+      # it was built from and stale assets cannot linger.
+      - name: Publish the edge release
+        if: steps.meta.outputs.channel == 'edge'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD: .pio/build/seeed_xiao_esp32s3
+        run: |
+          cat > notes.md <<'NOTES'
+          Rolling build of the latest commit on `main`, replaced on every push.
+          Not tested - for that, take the latest stable release.
+
+          | | |
+          |---|---|
+          | Version | `${{ steps.meta.outputs.version }}` |
+          | Commit | ${{ github.sha }} |
+
+          `firmware.bin` is the program, `littlefs.bin` the web interface; both
+          go in through the Update tab, which works out which is which.
+          NOTES
+          gh release delete edge --yes --cleanup-tag || true
+          gh release create edge \
+            --prerelease \
+            --title "Edge build ${{ steps.meta.outputs.version }}" \
+            --notes-file notes.md \
+            "$BUILD/firmware.bin" "$BUILD/littlefs.bin" manifest.json
+
+      # boot_app0.bin and the offsets for it and for bootloader.bin /
+      # partitions.bin never come from this project's own partitions.csv - see
+      # the module docstring in web_tools_manifest.py for where they do come
+      # from, and why they cannot drift out of step with the actual build.
+      - name: Locate boot_app0.bin
+        if: steps.meta.outputs.channel == 'stable'
+        id: boot_app0
+        run: |
+          path="$(find ~/.platformio/packages/framework-arduinoespressif32/tools/partitions -name boot_app0.bin | head -1)"
+          if [ -z "$path" ]; then
+            echo "boot_app0.bin not found under the framework package" >&2
+            exit 1
+          fi
+          echo "path=$path" >> "$GITHUB_OUTPUT"
+
+      # Only for stable: first-time flashing a blank board wants the reviewed
+      # release, and the flashing page always points at whichever stable
+      # release last deployed it - see the workflow's own header comment.
+      - name: Write the ESP Web Tools manifest
+        if: steps.meta.outputs.channel == 'stable'
+        env:
+          BUILD: .pio/build/seeed_xiao_esp32s3
+        run: |
+          cp "${{ steps.boot_app0.outputs.path }}" "$BUILD/boot_app0.bin"
+          python scripts/web_tools_manifest.py \
+            --version "${{ steps.meta.outputs.version }}" \
+            --base-url "." \
+            --out esp-web-tools-manifest.json \
+            --boot-app0 "$BUILD/boot_app0.bin" \
+            "$BUILD"
+
+      # Idempotent on purpose: unlike edge, a stable release is never deleted
+      # and recreated, since it is meant to stay put once tagged - but a
+      # workflow_dispatch re-run against a tag that already published (say, to
+      # pick up a fix here, or to redo a Pages deploy that failed after the
+      # release itself succeeded) must not die on "release already exists".
+      # `gh release upload --clobber` replaces the assets in place without
+      # touching the title or the generated notes a first run wrote.
+      - name: Publish the stable release
+        if: steps.meta.outputs.channel == 'stable'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD: .pio/build/seeed_xiao_esp32s3
+        run: |
+          assets=(
+            "$BUILD/firmware.bin" "$BUILD/littlefs.bin" manifest.json
+            "$BUILD/bootloader.bin" "$BUILD/partitions.bin" "$BUILD/boot_app0.bin"
+            esp-web-tools-manifest.json
+          )
+          if gh release view "${{ steps.meta.outputs.tag }}" >/dev/null 2>&1; then
+            gh release upload "${{ steps.meta.outputs.tag }}" "${assets[@]}" --clobber
+          else
+            gh release create "${{ steps.meta.outputs.tag }}" \
+              --title "${{ steps.meta.outputs.tag }}" \
+              --generate-notes \
+              "${assets[@]}"
+          fi
+
+      - name: Stage the flashing page
+        if: steps.meta.outputs.channel == 'stable'
+        env:
+          BUILD: .pio/build/seeed_xiao_esp32s3
+        run: |
+          mkdir -p pages/firmware
+          cp -r docs/. pages/
+          cp "$BUILD/bootloader.bin" "$BUILD/partitions.bin" "$BUILD/boot_app0.bin" \
+             "$BUILD/firmware.bin" "$BUILD/littlefs.bin" \
+             esp-web-tools-manifest.json \
+             pages/firmware/
+
+      - name: Configure Pages
+        if: steps.meta.outputs.channel == 'stable'
+        uses: actions/configure-pages@v5
+
+      - name: Upload the flashing page
+        if: steps.meta.outputs.channel == 'stable'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: pages
+
+      - name: Summary
+        run: |
+          {
+            echo "### ${{ steps.meta.outputs.channel }} ${{ steps.meta.outputs.version }}"
+            echo
+            echo '```json'
+            cat manifest.json
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # Separate job so it gets its own `github-pages` deployment environment and
+  # its own, narrower token - the build job needs `contents: write` for the
+  # releases, this one only ever needs to publish the artifact the build job
+  # staged. actions/deploy-pages picks that artifact up from this workflow run
+  # without being told its name.
+  deploy-pages:
+    needs: build
+    if: needs.build.outputs.channel == 'stable'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
