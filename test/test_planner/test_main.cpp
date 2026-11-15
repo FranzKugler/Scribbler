@@ -90,8 +90,9 @@ static Planner::Queue queue()
  *          blame the planner for a geometric effect.
  *
  * And the two are tied together: the chord speed may not exceed the larger of
- * the reported speeds at its ends, so the reported numbers cannot quietly
- * understate how fast the pen went.
+ * the reported speeds at its ends by more than a*dt/2 - what a peak inside the
+ * slice can add (a triangle profile's top) - so the reported numbers cannot
+ * quietly understate how fast the pen went.
  */
 static void checkLimits(const std::vector<Sample> &samples, double x0, double y0, double vMax)
 {
@@ -102,7 +103,8 @@ static void checkLimits(const std::vector<Sample> &samples, double x0, double y0
         TEST_ASSERT_TRUE(s.dt > 0.0);
         const double chord = std::hypot(s.x - px, s.y - py) / s.dt;
         TEST_ASSERT_TRUE_MESSAGE(chord <= vMax * 1.001, "speed limit");
-        TEST_ASSERT_TRUE_MESSAGE(chord <= std::fmax(pv, s.speed) * 1.001 + 1e-9, "reported speed too low");
+        TEST_ASSERT_TRUE_MESSAGE(chord <= std::fmax(pv, s.speed) * 1.001 + 0.5 * ACCEL * s.dt + 1e-9,
+                                 "reported speed too low");
         TEST_ASSERT_TRUE_MESSAGE(std::fabs(s.speed - pv) <= ACCEL * s.dt * 1.001 + 1e-9, "accel limit");
         px = s.x;
         py = s.y;
@@ -183,7 +185,10 @@ static void test_corner_slows_reversal_stops()
     TEST_ASSERT_TRUE(slowest >= vCorner - 1e-6);
     TEST_ASSERT_TRUE(slowest <= vCorner + ACCEL * DT + 1e-6);
 
-    // Straight back: the pen must stand at the turning point.
+    // Straight back: the pen must stand at the turning point. A slice runs on
+    // into the next block within its dt, so none ends exactly at the turn;
+    // but one ends within half a slice of acceleration of it, at a speed no
+    // higher than one slice of acceleration - possible only if it stopped.
     Planner::Queue r = queue();
     r.push(50.0, 0.0, 50.0);
     r.push(0.0, 0.0, 50.0);
@@ -192,7 +197,8 @@ static void test_corner_slows_reversal_stops()
     r.finish();
     while (r.slice(DT, s))
     {
-        if (std::fabs(s.x - 50.0) < 1e-9 && s.speed == 0.0) stoppedAtTurn = true;
+        if (std::fabs(s.x - 50.0) <= 0.5 * ACCEL * DT * DT + 1e-9 && s.speed <= ACCEL * DT + 1e-9)
+            stoppedAtTurn = true;
     }
     TEST_ASSERT_TRUE(stoppedAtTurn);
     TEST_ASSERT_DOUBLE_WITHIN(1e-9, 0.0, s.x);
