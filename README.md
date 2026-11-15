@@ -63,4 +63,4 @@ is English; the web interface speaks German and English, following the browser.
 The mechanics, the kinematic model and the job format follow
 [nikivanov/mural](https://github.com/nikivanov/mural) by Nik Ivanov, licensed under
 [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/). Scribbler re-implements them;
-it does not vendor Mural's code. Non-commercial use only, as for Mural.
+it does not vendor Mural's code. Scribbler itself is under the same licence — see [LICENSE](LICENSE).
