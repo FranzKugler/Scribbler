@@ -304,6 +304,19 @@ Each phase ends with something checkable on the device, not with a green build.
 2. **Kinematics on the host** — `Kinematics` + native tests against a reference table generated
    from Mural's algorithm. A small page in the mock (or a script) that draws the belt lengths and
    the tilt γ over the drawing area.
+   *Done 2026-11-15 (Mural-faithful port, 359-point reference, CI runs it).* Two findings in
+   Mural's solver that matter for our time-sliced planner, both visible in the reference table:
+   - **No convergence after a jump.** The torque search moves at most 2° per iteration and gives
+     up after 20, so a pose > ~40° of tilt away from the warm start comes out wrong (a jump across
+     the area lands at −3.8° instead of +22.4°). Mural hides this by chopping every move into 1 mm
+     pieces. Handled by `Model::settle()` for the first pose after homing, resume or a jog.
+   - **Limit cycle at standstill.** The 0.2° search grid is anchored at the warm start, so solving
+     the same point repeatedly alternates between two grid values (22.4° ↔ 22.6° at a top corner)
+     — ~0.07 mm of belt, i.e. several microsteps of chatter when the planner's 5–10 ms slices
+     barely move. **Next step:** a continuous solver (bisection or Brent on the torque residual,
+     bracketed by the same window), tested against the reference within one grid step (≤ 0.2°,
+     ≤ 0.15 mm) and for smoothness along a path. A deliberate departure from Mural, to be
+     recorded in `Kinematics.cpp`.
 3. **Motors** — TMC2209 over UART (`test_connection`, current, microsteps, StealthChop), FastAccelStepper,
    jog endpoints, the Jog tab. Debug tab shows driver status (`DRV_STATUS`, temperature flags).
 4. **Calibration flow** — state machine, Setup wizard, settings persisted. Draw a 100 mm square
