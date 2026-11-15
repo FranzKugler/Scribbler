@@ -353,8 +353,9 @@ Each phase ends with something checkable on the device, not with a green build.
 7. **Own SVG pipeline** in the Jobs tab, with preview and time estimate.
    *Built 2026-11-15:* `web/src/worker/` (CLAUDE.md, "SVG -> job"), 14 node tests, the converter
    card in the Jobs tab. Mural's worker turned out to be GPL (and its one-line engine AGPL),
-   so it was only the map, not a source. Open: hidden-line removal for overlapping filled shapes,
-   raster images (§5), and a check against the same SVG through Mural's UI on the wall.
+   so it was only the map, not a source. *2026-11-16:* hidden-line removal
+   (`occlude.js`) and photos as squiggle rows (`raster.js`), 18 node tests in all. Open: a check
+   against the same SVG through Mural's UI on the wall; a TSP one-line mode for photos (§5).
 8. **Polish** — checkpoint/resume after power loss, first-flash page, README, release.
    *2026-11-16:* checkpoint and continue built (`Checkpoint`, `/plot/continue`, the card in the
    Jobs tab, the mock). Taken at pen lifts, where the path has run dry - the only moments the
@@ -402,8 +403,9 @@ the README and in the header of `Kinematics.*`. (Not legal advice.)
   StallGuard's SG_RESULT: detects a belt that slipped off the pulley before the plot starts.
 - **Live preview from the device.** The Plot tab draws the actual position stream (`/currentState`
   polled at ~4 Hz) over the job preview — makes a lost step visible while it happens.
-- **Raster images.** Mural's worker has a vectoriser and a hatch filler; for photos a TSP-art or
-  "squiggle" mode is the classic polargraph look and cheap to implement in the worker.
+- **Raster images.** ~~Squiggle~~ built 2026-11-16 (phase 7). Still open: a TSP-art one-line mode
+  and a vectoriser for line art - Mural's use potrace and an AGPL engine, so own code or another
+  licence-compatible library.
 - ~~**Speed vs. γ.**~~ Measured 2026-11-16: belts run at most 10 % faster than the pen (phase 6
   note); no Jacobian limit needed.
 - **Mock that moves.** `server.js` simulates a running job (progress, position along the path), so

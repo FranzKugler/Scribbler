@@ -240,18 +240,22 @@ p1 / p0        pen down / up
 Keep it compatible: a file made by Mural's web UI must plot unchanged. Extensions go in new line
 types that older parsers skip, not in changed semantics.
 
-## SVG -> job (web/src/worker/)
+## SVG or photo -> job (web/src/worker/)
 
 The Jobs tab's converter (`lib/JobMaker.svelte`) writes the format above. The main thread
 parses the SVG with `DOMParser` into a plain tree (`lib/svgtree.js`) - a worker has none -
 and `convert.worker.js` runs `pipeline.js`: `svg.js` (elements, styles, `<use>`, simple
 `<style>` rules) -> placed on the area (fit to a width %, or the file's own mm) ->
 `geometry.js` (path data, transforms, curves flattened to 0.1 mm) -> outlines and
-`hatch.js` fills -> clipped to the area -> `order.js` (greedy nearest neighbour from home,
-grid-indexed) -> commands, stats and a time estimate from the firmware's speeds. Text and
-images are skipped and reported. Written fresh: Mural's worker is GPL with an AGPL engine, so
+`hatch.js` fills -> `occlude.js` cuts away what later fills cover (SVG paint order; on by
+default) -> clipped to the area -> straight runs thinned -> `order.js` (greedy nearest
+neighbour from home, grid-indexed) -> commands, stats and a time estimate from the firmware's
+speeds. Text and embedded images are skipped and reported. A photo (PNG/JPEG/WebP) is scaled to
+at most 400 px and turned grey on the main thread (`imageToGray`); `raster.js` draws it as
+squiggle rows - amplitude by darkness, optionally one continuous line - and shares the tail of
+the pipeline (`finish()`). Written fresh: Mural's worker is GPL with an AGPL engine, so
 nothing of it is taken over. Pure modules, tested with `npm test` (`node --test`); keep them
-free of DOM and Svelte. No hidden-line removal yet (Mural's "flatten").
+free of DOM and Svelte. Hidden-line removal is O(strokes x later fills' edges), pruned by bounding boxes.
 
 ## Conventions (house standard)
 

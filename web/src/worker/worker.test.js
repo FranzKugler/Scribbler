@@ -16,7 +16,9 @@ import { flatten, parsePath, parseTransform, apply, shapePath } from './geometry
 import { collect, page, lengthMm } from './svg.js';
 import { hatch } from './hatch.js';
 import { clip, order } from './order.js';
-import { convert } from './pipeline.js';
+import { convert, convertImage } from './pipeline.js';
+import { occluder, cutAway } from './occlude.js';
+import { squiggle } from './raster.js';
 
 const el = (tag, attrs = {}, ...children) => ({ tag, attrs, children, text: '' });
 const near = (a, b, eps = 1e-6) => assert.ok(Math.abs(a - b) <= eps, `${a} != ${b} (±${eps})`);
@@ -185,4 +187,64 @@ test('convert: actual size, clipping warned, empty drawing refused', () => {
   const empty = convert(el('svg', { viewBox: '0 0 10 10' }, el('text')), { width: 600, maxY: 1000 }, { x: 300, y: 350 });
   assert.equal(empty.error, 'svgEmpty');
   assert.deepEqual(empty.warnings, [{ code: 'skipped', tag: 'text', count: 1 }]);
+});
+
+test('cutAway: the part under a later fill goes, the rest stays', () => {
+  const square = occluder([[[4, -1], [6, -1], [6, 1], [4, 1]]], 'nonzero');
+  const parts = cutAway([[0, 0], [10, 0]], [square]);
+  assert.equal(parts.length, 2);
+  assert.deepEqual(parts[0], [[0, 0], [4, 0]]);
+  assert.deepEqual(parts[1], [[6, 0], [10, 0]]);
+  // Far away: the very same array back, untouched.
+  const line = [[0, 50], [10, 50]];
+  assert.equal(cutAway(line, [square])[0], line);
+});
+
+test('convert: a later filled shape hides what it covers, a stroke-only one does not', () => {
+  const area = { width: 100, maxY: 100 }, home = { x: 50, y: 50 };
+  const lineAt = (y) => el('line', { x1: 0, y1: y, x2: 100, y2: y, stroke: 'black' });
+  const tree = el('svg', { viewBox: '0 0 100 100' },
+    lineAt(20), lineAt(60),
+    el('rect', { x: 40, y: 10, width: 20, height: 20, fill: 'white' }),
+    el('rect', { x: 40, y: 50, width: 20, height: 20, fill: 'none', stroke: 'black' }));
+  const r = convert(tree, area, home);
+  assert.ok(r.warnings.some((w) => w.code === 'hidden'));
+  // Line at 20 loses 20 mm under the white square; the one at 60 keeps all.
+  // Plus both squares' outlines: 80 + 100 + 80 + 80.
+  near(r.stats.drawMm, 80 + 100 + 80 + 80, 1e-6);
+  const off = convert(tree, area, home, { hideOccluded: false });
+  near(off.stats.drawMm, 100 + 100 + 80 + 80, 1e-6);
+});
+
+test('squiggle: white is straight, black waves half a row high, continuous is one line', () => {
+  const flat = (v) => ({ gray: new Float32Array(16).fill(v), width: 4, height: 4 });
+  const o = { lineSpacing: 2, wavelength: 3, gamma: 1, continuous: false };
+  const white = squiggle(flat(1), 0, 0, 30, 10, o);
+  assert.equal(white.length, 5);
+  for (const row of white) for (const [, y] of row) near(y, row[0][1], 1e-12);
+  const black = squiggle(flat(0), 0, 0, 30, 10, o);
+  for (const row of black) {
+    const ys = row.map((p) => p[1]);
+    const swing = Math.max(...ys) - Math.min(...ys);
+    // Six points per wave: the samples miss the crest by up to 30°, so cos 30° of it.
+    assert.ok(swing > 2 * 0.96 * 0.86 && swing <= 2 * 0.96 + 1e-9, `swing ${swing}`);
+  }
+  assert.equal(squiggle(flat(0.5), 0, 0, 30, 10, { ...o, continuous: true }).length, 1);
+});
+
+test('convertImage: a photo becomes rows across the area, thinned where light', () => {
+  const gray = new Float32Array(100).fill(1);
+  for (let i = 0; i < 10; i++) gray[i * 10 + 5] = 0;   // one dark column
+  const r = convertImage({ gray, width: 10, height: 10 }, { width: 600, maxY: 1000 }, { x: 300, y: 350 },
+    { widthPercent: 50, lineSpacing: 10 });
+  assert.equal(r.error, undefined);
+  near(r.stats.widthMm, 300);
+  near(r.stats.heightMm, 300);
+  assert.equal(r.stats.penLifts, 1);   // continuous by default
+  // Mostly white: far fewer points than the same image all dark.
+  const dark = convertImage({ gray: new Float32Array(100), width: 10, height: 10 }, { width: 600, maxY: 1000 },
+    { x: 300, y: 350 }, { widthPercent: 50, lineSpacing: 10 });
+  assert.ok(r.stats.lines < dark.stats.lines * 0.3, `${r.stats.lines} vs ${dark.stats.lines} lines`);
+  assert.equal(convertImage({ gray: new Float32Array(3), width: 2, height: 2 }, { width: 600, maxY: 1000 },
+    { x: 300, y: 350 }).error, 'imageUnreadable');
 });

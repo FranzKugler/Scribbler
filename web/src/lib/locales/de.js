@@ -173,10 +173,10 @@ export default {
     'laufen schneller.',
 
   // --- jobs tab: converter ---
-  makeTitle: 'Neuer Auftrag aus einem SVG',
+  makeTitle: 'Neuer Auftrag aus SVG oder Foto',
   makeNeedsAnchor: 'Erst im Setup den Ankerabstand eintragen - er bestimmt die Größe der Zeichenfläche.',
-  makeHint: 'Linien, Formen und Flächen einer SVG-Datei. Text vorher in Pfade umwandeln.',
-  makePick: 'SVG wählen',
+  makeHint: 'Ein SVG (Linien, Formen, Flächen - Text in Pfade umgewandelt) oder ein Foto (PNG, JPEG, WebP).',
+  makePick: 'Datei wählen',
   makeSize: 'Größe',
   makeSizeFit: 'An die Zeichenfläche anpassen',
   makeSizeActual: 'Wie in der Datei',
@@ -185,12 +185,18 @@ export default {
   makeInfill: 'Flächen schraffieren',
   makeSpacing: 'Schraffurabstand (mm)',
   makeAngle: 'Schraffurwinkel (°)',
+  makeHideOccluded: 'Verdecktes weglassen',
+  makeRowSpacing: 'Zeilenabstand (mm)',
+  makeWavelength: 'Wellenlänge (mm)',
+  makeGamma: 'Dunkelheit (Gamma, 1 = unverändert)',
+  makeContinuous: 'Eine durchgehende Linie',
   makeWorking: 'Wird umgewandelt …',
   makeStats: (w, h, draw, travel, lifts, time) =>
     `${w} × ${h} mm · gezeichnet ${draw}, Leerfahrt ${travel} · ${lifts}× Stift heben · etwa ${time}`,
   makeWarnings: {
     skipped: (w) => `${w.count} × <${w.tag}> übersprungen - das kann ein Stift nicht zeichnen (Text: in Pfade umwandeln).`,
     clipped: () => 'Was außerhalb der Zeichenfläche lag, wurde abgeschnitten.',
+    hidden: () => 'Linien unter darüberliegenden gefüllten Formen wurden weggelassen.',
     noSize: () => 'Die Datei nennt keine Größe - stattdessen an die Fläche angepasst.'
   },
   makeName: 'Name auf der Karte',
@@ -465,7 +471,8 @@ export default {
   err_jobOpen: 'Die Datei lässt sich nicht öffnen.',
   err_jobEmpty: 'Die Datei enthält keine Bewegung.',
   err_svgUnreadable: 'Keine lesbare SVG-Datei.',
-  err_svgEmpty: 'Im SVG ist nichts zu zeichnen.',
+  err_svgEmpty: 'Es gibt nichts zu zeichnen.',
+  err_imageUnreadable: 'Kein lesbares Bild.',
   err_jobRead: 'Die Datei ließ sich nicht lesen.',
   err_jobWrite: 'Schreiben auf die Karte fehlgeschlagen – vermutlich voll.',
   err_jobAborted: 'Die Übertragung wurde abgebrochen.',

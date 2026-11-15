@@ -1,9 +1,11 @@
 <script>
   /**
    * JobMaker
-   * The Jobs tab's converter: an SVG file in, a job in Mural's format out -
-   * previewed on the drawing area with its travel moves, measured, timed,
-   * then saved to the card through the usual upload (or downloaded).
+   * The Jobs tab's converter: an SVG or a photo in, a job in Mural's format
+   * out - previewed on the drawing area with its travel moves, measured,
+   * timed, then saved to the card through the usual upload (or downloaded).
+   * SVGs keep their lines (outlines, hatching, hidden parts cut away); photos
+   * become squiggle rows.
    *
    * The work is the worker's (src/worker/pipeline.js); this is the form and
    * the picture. Every option change converts again, the newest answer wins.
@@ -11,11 +13,11 @@
    * @author   Franz Kugler / franz _AT_ franz _MINUS_ kugler _DOT_ de
    * @version  1.0
    * @created  15.11.2026
-   * @updated  15.11.2026
+   * @updated  16.11.2026
    */
   import * as api from './api.js';
   import { dict } from './i18n.svelte.js';
-  import { parseSvg, convertInWorker } from './svgtree.js';
+  import { parseSvg, imageToGray, convertInWorker } from './svgtree.js';
 
   /** plotter: /currentState's plotter; cardPresent; onSaved: reload the card list. */
   let { plotter, cardPresent, onSaved } = $props();
@@ -25,7 +27,7 @@
   let picker = $state(null);
   let canvas = $state(null);
   let fileName = $state('');
-  let tree = $state.raw(null);
+  let input = $state.raw(null);   // {tree} or {image}
   let name = $state('');
   let result = $state.raw(null);
   let error = $state(null);
@@ -39,6 +41,13 @@
   let infill = $state(false);
   let hatchSpacing = $state(2);
   let hatchAngle = $state(45);
+  let hideOccluded = $state(true);
+  let lineSpacing = $state(3);
+  let wavelength = $state(3);
+  let gamma = $state(1);
+  let continuous = $state(true);
+
+  const isImage = $derived(!!input?.image);
 
   // Numbers, not objects: /currentState is polled, and every poll brings a
   // new object - deriving those would reconvert the drawing on every poll.
@@ -59,21 +68,22 @@
     error = null;
     result = null;
     saved = false;
+    const svg = /\.svg$/i.test(file.name) || file.type === 'image/svg+xml';
     try {
-      tree = parseSvg(await file.text());
+      input = svg ? { tree: parseSvg(await file.text()) } : { image: await imageToGray(file) };
     } catch (err) {
-      tree = null;
+      input = null;
       error = t[`err_${err.message}`] ?? err.message;
       return;
     }
     fileName = file.name;
-    const base = file.name.replace(/\.svg$/i, '').replace(/[^A-Za-z0-9._-]/g, '_').replace(/^\.+/, '');
+    const base = file.name.replace(/\.[A-Za-z0-9]+$/, '').replace(/[^A-Za-z0-9._-]/g, '_').replace(/^\.+/, '');
     name = `${(base || 'drawing').slice(0, 60)}.txt`;
   }
 
   // Convert whenever the file or an option changes.
   $effect(() => {
-    if (!tree || !configured) return;
+    if (!input || !configured) return;
     const area = { width: areaWidth, maxY: areaDepth };
     const home = { x: homeX, y: homeY };
     const options = {
@@ -83,12 +93,17 @@
       infill,
       hatchSpacing: Math.max(0.3, Number(hatchSpacing) || 2),
       hatchAngle: Number(hatchAngle) || 0,
+      hideOccluded,
+      lineSpacing: Math.max(0.5, Number(lineSpacing) || 3),
+      wavelength: Math.max(0.5, Number(wavelength) || 3),
+      gamma: Math.min(5, Math.max(0.2, Number(gamma) || 1)),
+      continuous,
       drawSpeed
     };
     const id = ++latest;
     working = true;
     saved = false;
-    convertInWorker(tree, area, home, options).then(
+    convertInWorker(input, area, home, options).then(
       (r) => {
         if (id !== latest) return;
         working = false;
@@ -191,42 +206,68 @@
   {#if !configured}
     <p class="hint">{t.makeNeedsAnchor}</p>
   {:else}
-    <input type="file" accept=".svg,image/svg+xml" bind:this={picker} onchange={pick} hidden />
+    <input type="file" accept=".svg,image/svg+xml,image/png,image/jpeg,image/webp" bind:this={picker}
+      onchange={pick} hidden />
     <div class="field">
       <span class={fileName ? 'key' : 'hint'}>{fileName || t.makeHint}</span>
       <button type="button" class="secondary" onclick={() => picker.click()}>{t.makePick}</button>
     </div>
 
-    {#if tree}
-      <div class="field">
-        <label for="mk-size">{t.makeSize}</label>
-        <select id="mk-size" bind:value={sizeMode}>
-          <option value="fit">{t.makeSizeFit}</option>
-          <option value="actual">{t.makeSizeActual}</option>
-        </select>
-      </div>
-      {#if sizeMode === 'fit'}
+    {#if input}
+      {#if !isImage}
+        <div class="field">
+          <label for="mk-size">{t.makeSize}</label>
+          <select id="mk-size" bind:value={sizeMode}>
+            <option value="fit">{t.makeSizeFit}</option>
+            <option value="actual">{t.makeSizeActual}</option>
+          </select>
+        </div>
+      {/if}
+      {#if isImage || sizeMode === 'fit'}
         <div class="field">
           <label for="mk-width">{t.makeWidth}</label>
           <input id="mk-width" type="number" min="1" max="100" step="1" bind:value={widthPercent} />
         </div>
       {/if}
-      <div class="field">
-        <label for="mk-outlines">{t.makeOutlines}</label>
-        <input id="mk-outlines" type="checkbox" bind:checked={outlines} />
-      </div>
-      <div class="field">
-        <label for="mk-infill">{t.makeInfill}</label>
-        <input id="mk-infill" type="checkbox" bind:checked={infill} />
-      </div>
-      {#if infill}
+      {#if isImage}
         <div class="field">
-          <label for="mk-spacing">{t.makeSpacing}</label>
-          <input id="mk-spacing" type="number" min="0.3" max="20" step="0.1" bind:value={hatchSpacing} />
+          <label for="mk-rows">{t.makeRowSpacing}</label>
+          <input id="mk-rows" type="number" min="0.5" max="20" step="0.5" bind:value={lineSpacing} />
         </div>
         <div class="field">
-          <label for="mk-angle">{t.makeAngle}</label>
-          <input id="mk-angle" type="number" min="-90" max="90" step="5" bind:value={hatchAngle} />
+          <label for="mk-wave">{t.makeWavelength}</label>
+          <input id="mk-wave" type="number" min="0.5" max="20" step="0.5" bind:value={wavelength} />
+        </div>
+        <div class="field">
+          <label for="mk-gamma">{t.makeGamma}</label>
+          <input id="mk-gamma" type="number" min="0.2" max="5" step="0.1" bind:value={gamma} />
+        </div>
+        <div class="field">
+          <label for="mk-cont">{t.makeContinuous}</label>
+          <input id="mk-cont" type="checkbox" bind:checked={continuous} />
+        </div>
+      {:else}
+        <div class="field">
+          <label for="mk-outlines">{t.makeOutlines}</label>
+          <input id="mk-outlines" type="checkbox" bind:checked={outlines} />
+        </div>
+        <div class="field">
+          <label for="mk-infill">{t.makeInfill}</label>
+          <input id="mk-infill" type="checkbox" bind:checked={infill} />
+        </div>
+        {#if infill}
+          <div class="field">
+            <label for="mk-spacing">{t.makeSpacing}</label>
+            <input id="mk-spacing" type="number" min="0.3" max="20" step="0.1" bind:value={hatchSpacing} />
+          </div>
+          <div class="field">
+            <label for="mk-angle">{t.makeAngle}</label>
+            <input id="mk-angle" type="number" min="-90" max="90" step="5" bind:value={hatchAngle} />
+          </div>
+        {/if}
+        <div class="field">
+          <label for="mk-hide">{t.makeHideOccluded}</label>
+          <input id="mk-hide" type="checkbox" bind:checked={hideOccluded} />
         </div>
       {/if}
 
