@@ -346,9 +346,10 @@ Each phase ends with something checkable on the device, not with a green build.
    over 64 blocks, trapezoids, time slices; 9 host tests that measure speed and acceleration
    from the slices themselves) and `Path` (a task on core 1 feeding both belts with 5 ms
    `moveTimed()` slices in lockstep). Mural's 1 mm stop-and-go is gone from jobs. Open: the
-   comparison on a wall; pause/cancel stopping sooner than the end of the planned buffer
-   (needs the planner to cut a block short); a belt-speed limit from the kinematics' Jacobian
-   near the edges (§5).
+   comparison on a wall.
+   *2026-11-16:* pause/cancel brake at once (`stopSoon()`, 3 more host tests; resume replays
+   what was cut off). The Jacobian belt-speed limit was measured instead of built: a belt runs
+   at most 1.10x the pen's speed (d = 1 m, at the edge), 1.05x at 2-3 m - not worth a limiter.
 7. **Own SVG pipeline** in the Jobs tab, with preview and time estimate.
    *Built 2026-11-15:* `web/src/worker/` (CLAUDE.md, "SVG -> job"), 14 node tests, the converter
    card in the Jobs tab. Mural's worker turned out to be GPL (and its one-line engine AGPL),
@@ -399,8 +400,8 @@ the README and in the header of `Kinematics.*`. (Not legal advice.)
   polled at ~4 Hz) over the job preview — makes a lost step visible while it happens.
 - **Raster images.** Mural's worker has a vectoriser and a hatch filler; for photos a TSP-art or
   "squiggle" mode is the classic polargraph look and cheap to implement in the worker.
-- **Speed vs. γ.** The tilt changes with position; at the edges the pen moves slower than the bot.
-  The planner can limit speed by the Jacobian of the kinematics, not just by a constant.
+- ~~**Speed vs. γ.**~~ Measured 2026-11-16: belts run at most 10 % faster than the pen (phase 6
+  note); no Jacobian limit needed.
 - **Mock that moves.** `server.js` simulates a running job (progress, position along the path), so
   the Plot tab can be built without a wall.
 

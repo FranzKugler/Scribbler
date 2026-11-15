@@ -101,6 +101,84 @@ namespace Planner
         replan();
     }
 
+    size_t Queue::stopSoon(Target *dropped, size_t max)
+    {
+        if (_count == 0) return 0;
+        const double a = _limits.accel;
+
+        // Where the pen is in the head block, and how fast.
+        Block &h = at(0);
+        double s = 0.0, v = _headEntry;
+        if (h.frozen) s = position(h, _time, v);
+
+        // Cut the head there: the rest of it is a fresh block, entered at the
+        // current speed, which replan() may give a new profile. Its junction
+        // limit no longer applies - the pen is past that corner.
+        h.x0 += h.ux * s;
+        h.y0 += h.uy * s;
+        h.length -= s;
+        h.frozen = false;
+        _time = 0.0;
+        _headEntry = v;
+        if (h.length < MIN_LENGTH)
+        {
+            // Exactly at the head's end: the next block is the head now, and
+            // the planned junction speed at its start is the current one.
+            _head = (_head + 1) % CAPACITY;
+            _count--;
+            if (_count == 0)
+            {
+                _headEntry = 0.0;
+                return 0;
+            }
+        }
+
+        // How far a stop from v takes. A hair more, so rounding never asks
+        // the head to start slower than the pen already moves.
+        const double need = sq(v) / (2.0 * a) * (1.0 + 1e-9) + 1e-9;
+
+        size_t n = 0;
+        auto drop = [&](const Block &b) {
+            if (n < max) dropped[n++] = {b.x0 + b.ux * b.length, b.y0 + b.uy * b.length, b.vMax};
+        };
+
+        double covered = 0.0;
+        for (size_t i = 0; i < _count; i++)
+        {
+            Block &b = at(i);
+            if (covered + b.length < need)
+            {
+                covered += b.length;
+                continue;
+            }
+            // The stop lands in block i: shorten it, drop what follows.
+            const double keep = need - covered;
+            size_t kept = i + 1;
+            if (keep < b.length - MIN_LENGTH)
+            {
+                drop(b);
+                if (keep < MIN_LENGTH && i > 0)
+                {
+                    kept = i;   // the stop is at the block's start: drop it whole
+                }
+                else
+                {
+                    b.length = keep > MIN_LENGTH ? keep : MIN_LENGTH;
+                }
+            }
+            for (size_t j = i + 1; j < _count; j++) drop(at(j));
+            _count = kept;
+            break;
+        }
+
+        const Block &last = at(_count - 1);
+        _endX = last.x0 + last.ux * last.length;
+        _endY = last.y0 + last.uy * last.length;
+        _finishing = true;
+        replan();
+        return n;
+    }
+
     void Queue::clear()
     {
         _head = 0;

@@ -132,11 +132,11 @@ the servo pulse range.
 `atHome` (hang the loops on the pins) → `ready` (Cartesian moves) ⇄ `plotting` ⇄ `paused`.
 Changing the anchor distance, jogging a belt, a raw jog or motors-off from the Hardware tab, an
 emergency `/stop` during a move, and a restart all go back to `needsRetract`; the position is
-not persisted yet. Pausing or cancelling a job waits for the current millimetre and keeps the
-position. Moves outside a job (homing, jogs) are point-to-point in belt space
+not persisted yet. Pausing or cancelling a job brakes at once and keeps the position. Moves outside a job (homing, jogs) are point-to-point in belt space
 (`Motion::moveBelts`: both belts on scaled copies of one ramp). A job goes through `Path`:
-pen-down moves at `drawSpeed`, pen-up at travel speed, both straight; a pen change, pause or
-cancel first lets the path run dry (so pause/cancel finish up to 64 planned moves). A finished
+pen-down moves at `drawSpeed`, pen-up at travel speed, both straight; a pen change first lets
+the path run dry; pause and cancel brake on the path within v²/2a (`Planner::Queue::stopSoon`),
+and a resume pushes what the stop cut off before reading on. A finished
 job returns home. `plotter.underruns` counts slices that found a step queue empty — should be 0.
 
 ### REST: plotter (open; firmware, `server.js` and `api.js` share it)
@@ -215,7 +215,9 @@ right driver is absent on purpose, to show that card.
   both belts, with the rounding drift carried per belt. Outside a job, `loop()` calls it
   (`Motion::jog`, `moveBelts`). Never both: `Path::start()` refuses while a belt moves.
 - Pen limits are the planner's (300 mm/s², junction deviation 0.05 mm); belt speeds follow from
-  where the bot hangs - near the edges a belt can be faster than the pen.
+  where the bot hangs - near the edges a belt can be faster than the pen, by 10 % at most (at
+  d = 1 m; 5 % at 2-3 m - Mural's model, measured by finite differences over the area,
+  2026-11-16). Too little for a belt-speed limit of its own; the pen limits cover it.
 - Pen moves are segments in the same queue, so ordering between pen and motion is never a race.
 - The device states and the actions each state allows are in one table (`PlotterState`); every
   refusal is a code (`notHomed`, `busy`, `noCard`, …), never a sentence.

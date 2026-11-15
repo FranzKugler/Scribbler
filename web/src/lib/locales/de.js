@@ -144,8 +144,8 @@ export default {
   jobResume: 'Weiter',
   jobStop: 'Abbrechen',
   jobStopHint:
-    'Pause und Abbrechen fahren das schon Geplante zu Ende (höchstens 64 Strecken) und heben den Stift – ' +
-    'die Position bleibt bekannt. Stopp hält sofort an; danach müssen die Riemen neu eingezogen werden.',
+    'Pause und Abbrechen bremsen sofort auf der Linie und heben den Stift – die Position bleibt ' +
+    'bekannt, Fortsetzen macht genau dort weiter. Stopp hält sofort an; danach müssen die Riemen neu eingezogen werden.',
   jobsCard: 'SD-Karte',
   jobsNoCard: 'Keine SD-Karte – Karte einlegen und das Gerät neu starten.',
   jobsCardUsage: (used, total) => `${used} von ${total} belegt.`,

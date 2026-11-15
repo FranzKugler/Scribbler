@@ -244,6 +244,14 @@ namespace Path
         xSemaphoreGive(lock);
     }
 
+    size_t stopSoon(Planner::Target *dropped, size_t max)
+    {
+        xSemaphoreTake(lock, portMAX_DELAY);
+        const size_t n = planner.stopSoon(dropped, max);
+        xSemaphoreGive(lock);
+        return n;
+    }
+
     bool idle()
     {
         xSemaphoreTake(lock, portMAX_DELAY);

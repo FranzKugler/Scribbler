@@ -20,8 +20,8 @@
  * one belt is mirrored on the other.
  *
  * What it is not: aware of jobs, files or the pen. Plotter pushes segments,
- * calls finish() before anything that needs standstill (a pen change, a
- * pause), and waits for idle().
+ * calls finish() before anything that needs standstill (a pen change),
+ * stopSoon() for a pause or cancel, and waits for idle().
  *
  * @mc       ESP32S3
  * @author   Franz Kugler / franz _AT_ franz _MINUS_ kugler _DOT_ de
@@ -34,6 +34,7 @@
 
 #include <Arduino.h>
 #include "Kinematics.h"
+#include "Planner.h"
 
 namespace Path
 {
@@ -57,6 +58,13 @@ namespace Path
 
     /** Plan to a stop at the end of what is buffered. */
     void finish();
+
+    /**
+     * Brake now, on the path, as fast as the acceleration allows; what the
+     * stop cut off goes to `dropped` (Planner::Queue::stopSoon). Then wait
+     * for idle() as after finish().
+     */
+    size_t stopSoon(Planner::Target *dropped, size_t max);
 
     /** Nothing buffered and both belts standing. */
     bool idle();

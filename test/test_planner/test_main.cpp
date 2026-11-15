@@ -290,9 +290,108 @@ static void test_degenerate_input()
     TEST_ASSERT_FALSE(q.push(1000.0, 0.0, 30.0));
 }
 
+/** Slices for `seconds` (while there is anything) into `out`. */
+static void sliceFor(Planner::Queue &q, double seconds, std::vector<Sample> &out)
+{
+    Planner::Slice s;
+    for (double t = 0.0; t < seconds && q.slice(DT, s); t += DT) out.push_back({s.x, s.y, s.dt, s.speed});
+}
+
+/**
+ * stopSoon() at cruising speed on one long line: the pen stops v²/2a past
+ * where it was, inside the limits, and the dropped target is the line's end.
+ */
+static void test_stop_soon_on_a_line()
+{
+    Planner::Queue q = queue();
+    q.push(1000.0, 0.0, 50.0);
+    q.finish();
+    std::vector<Sample> samples;
+    sliceFor(q, 1.0, samples);
+    const double x0 = samples.back().x, v = samples.back().speed;
+    TEST_ASSERT_DOUBLE_WITHIN(1e-9, 50.0, v);
+
+    Planner::Target dropped[Planner::Queue::CAPACITY];
+    const size_t n = q.stopSoon(dropped, Planner::Queue::CAPACITY);
+    TEST_ASSERT_EQUAL(1, n);
+    TEST_ASSERT_EQUAL_DOUBLE(1000.0, dropped[0].x);
+    TEST_ASSERT_EQUAL_DOUBLE(50.0, dropped[0].speed);
+
+    drainInto(q, samples);
+    checkLimits(samples, 0.0, 0.0, 50.0);
+    TEST_ASSERT_DOUBLE_WITHIN(1e-6, x0 + v * v / (2.0 * ACCEL), samples.back().x);
+    TEST_ASSERT_EQUAL_DOUBLE(0.0, samples.back().speed);
+    TEST_ASSERT_TRUE(q.idle());
+}
+
+/**
+ * The same through 1 mm pieces, where the stop spans several blocks - then
+ * carry on from the dropped targets, as a resumed job does: the pen ends
+ * where the uninterrupted path would, never goes backwards, stays in limits.
+ */
+static void test_stop_soon_through_pieces_then_resume()
+{
+    Planner::Queue q = queue();
+    std::vector<Sample> samples;
+    int next = 1;
+    // Stream until well into the line and up to speed.
+    for (; next <= 120; next++) pushInto(q, next * 1.0, 0.0, 100.0, samples);
+    sliceFor(q, 0.3, samples);
+    const double x0 = samples.back().x, v = samples.back().speed;
+    TEST_ASSERT_TRUE(v > 90.0);
+
+    Planner::Target dropped[Planner::Queue::CAPACITY];
+    const size_t n = q.stopSoon(dropped, Planner::Queue::CAPACITY);
+    const double stopAt = x0 + v * v / (2.0 * ACCEL);
+    TEST_ASSERT_TRUE(n > 1);
+    // The first dropped target ends the block the stop cut short.
+    TEST_ASSERT_DOUBLE_WITHIN(1e-9, std::ceil(stopAt), dropped[0].x);
+    for (size_t i = 1; i < n; i++) TEST_ASSERT_DOUBLE_WITHIN(1e-9, dropped[i - 1].x + 1.0, dropped[i].x);
+    TEST_ASSERT_DOUBLE_WITHIN(1e-9, next - 1.0, dropped[n - 1].x);
+
+    drainInto(q, samples);
+    TEST_ASSERT_DOUBLE_WITHIN(1e-6, stopAt, samples.back().x);
+    TEST_ASSERT_TRUE(q.idle());
+
+    // Resume: the dropped targets first, then the rest of the line.
+    for (size_t i = 0; i < n; i++) pushInto(q, dropped[i].x, dropped[i].y, dropped[i].speed, samples);
+    for (; next <= 200; next++) pushInto(q, next * 1.0, 0.0, 100.0, samples);
+    drainInto(q, samples);
+    TEST_ASSERT_DOUBLE_WITHIN(1e-9, 200.0, samples.back().x);
+
+    checkLimits(samples, 0.0, 0.0, 100.0);
+    double px = 0.0;
+    for (const Sample &s : samples)
+    {
+        TEST_ASSERT_TRUE_MESSAGE(s.x >= px - 1e-9, "went backwards");
+        TEST_ASSERT_DOUBLE_WITHIN(1e-12, 0.0, s.y);
+        px = s.x;
+    }
+}
+
+/** Nothing buffered: nothing to do. Buffered but not started: stop at once. */
+static void test_stop_soon_idle_and_unstarted()
+{
+    Planner::Queue q = queue();
+    Planner::Target dropped[Planner::Queue::CAPACITY];
+    TEST_ASSERT_EQUAL(0, q.stopSoon(dropped, Planner::Queue::CAPACITY));
+
+    q.push(10.0, 0.0, 30.0);
+    q.push(10.0, 10.0, 30.0);
+    TEST_ASSERT_EQUAL(2, q.stopSoon(dropped, Planner::Queue::CAPACITY));
+    TEST_ASSERT_EQUAL_DOUBLE(10.0, dropped[0].x);
+    TEST_ASSERT_EQUAL_DOUBLE(10.0, dropped[1].y);
+    auto rest = drain(q);
+    TEST_ASSERT_TRUE(q.idle());
+    TEST_ASSERT_DOUBLE_WITHIN(1e-5, 0.0, rest.empty() ? 0.0 : rest.back().x);
+}
+
 int main(int, char **)
 {
     UNITY_BEGIN();
+    RUN_TEST(test_stop_soon_on_a_line);
+    RUN_TEST(test_stop_soon_through_pieces_then_resume);
+    RUN_TEST(test_stop_soon_idle_and_unstarted);
     RUN_TEST(test_single_segment);
     RUN_TEST(test_short_segment_is_a_triangle);
     RUN_TEST(test_straight_pieces_run_through);

@@ -137,8 +137,8 @@ export default {
   jobResume: 'Resume',
   jobStop: 'Cancel',
   jobStopHint:
-    'Pause and cancel finish what is already planned (64 moves at most) and lift the pen - the ' +
-    'position stays known. Stop halts at once; the belts then have to be wound in again.',
+    'Pause and cancel brake at once on the line and lift the pen - the position stays known, and ' +
+    'resume carries on right there. Stop halts at once; the belts then have to be wound in again.',
   jobsCard: 'SD card',
   jobsNoCard: 'No SD card - insert one and restart the device.',
   jobsCardUsage: (used, total) => `${used} of ${total} used.`,

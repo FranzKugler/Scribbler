@@ -29,6 +29,7 @@
 #include "Kinematics.h"
 #include "JobRunner.h"
 #include "Path.h"
+#include "Planner.h"
 
 extern Settings settings;
 void scheduleSettingsSave();
@@ -74,8 +75,9 @@ namespace
     Kinematics::Model model;
 
     // The job's drawing state. Moves go to Path; anything that needs
-    // standstill - a pen change, a pause, the end - first lets Path run dry
-    // ("draining") and then does `after`.
+    // standstill - a pen change, the end - first lets Path run dry
+    // ("draining") and then does `after`. A pause or cancel brakes at once
+    // instead (stopSoonThen) and then waits for standstill the same way.
     enum class After : uint8_t { Nothing, PenDown, PenUp, Pause, Stop, Finish };
     After after = After::Nothing;
     bool draining = false;
@@ -87,6 +89,11 @@ namespace
     double pendX = 0.0, pendY = 0.0, pendSpeed = 0.0;
     // Where the last pushed move ends - for the progress count.
     double pushX = 0.0, pushY = 0.0;
+    // What a pause cut off the plan (Path::stopSoon): pushed again first on
+    // resume, so the job goes on from where the pen stopped. Counted in the
+    // progress already when it was first pushed.
+    Planner::Target replay[Planner::Queue::CAPACITY];
+    size_t replayCount = 0, replayNext = 0;
 
     // The pen's image coordinates once Ready; where a move is going while
     // one runs (the position is the target's once it has stopped).
@@ -120,6 +127,7 @@ namespace
         pauseRequested = stopRequested = false;
         draining = waitingPen = havePending = false;
         after = After::Nothing;
+        replayCount = replayNext = 0;
     }
 
     Kinematics::Geometry geometry()
@@ -142,6 +150,19 @@ namespace
     void drainThen(After next)
     {
         Path::finish();
+        draining = true;
+        after = next;
+    }
+
+    /**
+     * Pause and cancel: brake now, on the path, instead of running out what
+     * is planned (up to 64 moves). A pause keeps what was cut off for resume.
+     */
+    void stopSoonThen(After next)
+    {
+        replayCount = Path::stopSoon(replay, Planner::Queue::CAPACITY);
+        replayNext = 0;
+        if (next != After::Pause) replayCount = 0;
         draining = true;
         after = next;
     }
@@ -264,14 +285,28 @@ namespace
         if (stopRequested)
         {
             stopRequested = false;
-            drainThen(After::Stop);
+            stopSoonThen(After::Stop);
             return;
         }
         if (pauseRequested)
         {
             pauseRequested = false;
-            drainThen(After::Pause);
+            stopSoonThen(After::Pause);
             return;
+        }
+
+        // After a resume: what the pause cut off, before anything new.
+        while (replayNext < replayCount)
+        {
+            const Planner::Target &t = replay[replayNext];
+            if (!Path::push(t.x, t.y, t.speed)) return;   // full: next pass
+            replayNext++;
+            if (replayNext == replayCount)
+            {
+                pushX = t.x;
+                pushY = t.y;
+                replayCount = replayNext = 0;
+            }
         }
 
         for (int n = 0; n < LINES_PER_POLL; n++)

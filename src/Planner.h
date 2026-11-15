@@ -62,6 +62,14 @@ namespace Planner
         double speed = 0.0;  // pen speed at the end of the slice [mm/s]
     };
 
+    /** A move's target, as pushed: what stopSoon() hands back for later. */
+    struct Target
+    {
+        double x = 0.0;
+        double y = 0.0;
+        double speed = 0.0;
+    };
+
     class Queue
     {
     public:
@@ -102,6 +110,18 @@ namespace Planner
 
         /** No more segments are coming for now: plan the buffer to a stop. */
         void finish();
+
+        /**
+         * Stop as soon as the acceleration allows, on the path: the running
+         * block is cut where the pen is, the plan ends v²/2a further along
+         * (through corners if need be), everything beyond is dropped. The
+         * dropped targets go to `dropped` (at most `max`, in order) so that
+         * the caller can push them again to carry on where the pen stopped -
+         * first the end of the block that was cut short, then the rest.
+         * Returns how many. For pause and cancel: finish() would run the
+         * whole buffer out first, up to CAPACITY moves.
+         */
+        size_t stopSoon(Target *dropped, size_t max);
 
         /**
          * Forgets everything buffered, at once - for an emergency stop, after
