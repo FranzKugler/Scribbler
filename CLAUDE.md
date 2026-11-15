@@ -4,11 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Status
 
-**Phases 1–3 begun (PLAN.md section 3).** What exists: the house scaffolding copied from
+**Phases 1–4 built (PLAN.md section 3).** What exists: the house scaffolding copied from
 DoorOpener and renamed (portal, SPA, OTA, expert lock, log ring, storage explorer, mock server,
 release workflow, first-flash page), `src/Board.h` from the schematic's netlist,
-`src/Kinematics.*` with host tests, and the hardware modules with a bring-up tab (below) that
-can jog each belt. No homing, no Cartesian moves, no planner yet. None of it has run on hardware. [PLAN.md](PLAN.md) is the source of truth for everything not
+`src/Kinematics.*` with host tests, the hardware modules with a bring-up tab, and the
+calibration flow (state machine, Setup tab) up to a bot hanging at a known position. No jobs, no
+planner, no straight lines yet. None of it has run on hardware. [PLAN.md](PLAN.md) is the source of truth for everything not
 built; this file describes what is, plus the rules. Do not describe here what has not been built.
 
 ## Project overview
@@ -102,7 +103,9 @@ The house modules (`Portal`, `WebRoutes`, `OtaUpdate`, `Expert`, `LogBuffer`, `F
 | [src/Pen.cpp](src/Pen.cpp) | `Pen::` — servo on LEDC, ramped in `poll()`, `settled()` | blocking (Mural's is) |
 | [src/Display.cpp](src/Display.cpp) | `Display::` — SSD1306, four lines, redrawn on change | required: absent = no-op |
 | [src/Imu.cpp](src/Imu.cpp) | `Imu::` — BMI270, tilt by complementary filter | an input to the motion |
-| [src/HardwareRoutes.cpp](src/HardwareRoutes.cpp) | `Hw::` — `/hardware*`, all behind the lock | state-aware (that is PlotRoutes, planned) |
+| [src/HardwareRoutes.cpp](src/HardwareRoutes.cpp) | `Hw::` — `/hardware*`, all behind the lock | state-aware; a raw jog or motors-off makes Plotter forget its position |
+| [src/Plotter.cpp](src/Plotter.cpp) | `Plotter::` — the state machine, what each state allows, the calibration flow, the Kinematics model | the job runner or the planner |
+| [src/PlotRoutes.cpp](src/PlotRoutes.cpp) | `Plot::` — `/calib/*`, `/jog`, `/home`, `/stop`, `/pen`; open | a second state table — every handler asks Plotter |
 
 `main.cpp` starts the drivers right after the settings (motors off), then one `Wire` bus for
 display and IMU. The display names the access point in portal mode and the address otherwise.
@@ -114,6 +117,29 @@ Things marked in the code as **unverified until a board exists**: the TMC2240 re
 (check `IOIN.VERSION` = 0x40 first), the IMU's axis mapping and signs (constants at the top of
 `Imu.cpp`), which DIR level lengthens which belt (top of `Motion.cpp`; jog +10 mm and watch),
 the servo pulse range.
+
+### The plotter's states (Plotter.h)
+
+`unconfigured` (no anchor distance) → `needsRetract` (wind both belts to the stop by jogging) →
+`retracted` (lengths known: 40 mm each; pulley calibration happens here) → `extendingHome` →
+`atHome` (hang the loops on the pins) → `ready` (Cartesian moves). Changing the anchor
+distance, jogging a belt, a raw jog or motors-off from the Hardware tab, and a restart all go
+back to `needsRetract`; the position is not persisted yet. Moves before the planner are
+point-to-point in belt space (`Motion::moveBelts`: both belts on scaled copies of one ramp).
+
+### REST: plotter (open; firmware, `server.js` and `api.js` share it)
+
+- `GET /currentState` carries `plotter`: `state`, `moving`, `anchorDistance`, `pulleyDiameter`,
+  `pulleyRun`, `microsteps`, `penDown`; once configured `width`, `maxY`, `home{x,y}`; from
+  `retracted` on `belts{left,right}` in mm; when `ready` `position{x,y,target}` and `tiltModel`;
+  `tiltImu` whenever the IMU reads (degrees).
+- `POST /calib/anchor {mm}` (300–5000), `/calib/retracted`, `/calib/home`, `/calib/hung`,
+  `/calib/pulley/extend {mm}` (100–2000, left belt), `/calib/pulley {measured}` (within ±20 %),
+  `/calib/pen {up, down}`.
+- `POST /jog` — `{side, mm}` before homing, `{dx, dy}` when ready. `POST /home`, `POST /stop`
+  (never refused), `POST /pen {state|angle}`.
+- Refusals: `notConfigured`, `wrongState`, `busy`, `outsideArea`, `unreachable`, `noPulleyRun`,
+  `motion` (409); `badValue` with `errorDetail` (400).
 
 ### REST: hardware (firmware, `server.js` and `api.js` share it)
 

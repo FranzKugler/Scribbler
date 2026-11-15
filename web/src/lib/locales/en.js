@@ -11,7 +11,7 @@
  */
 export default {
   // --- shell ---
-  tabs: ['Status', 'WiFi', 'Hardware', 'Update', 'Debug', 'Storage'],
+  tabs: ['Status', 'Setup', 'WiFi', 'Hardware', 'Update', 'Debug', 'Storage'],
   loading: 'Loading the settings …',
   loadingShort: 'loading …',
   deviceUnreachable: 'Device unreachable',
@@ -117,6 +117,70 @@ export default {
     'works out which one it was handed from the first byte.',
   connectionLost: 'Connection lost',
   uploadAborted: 'Upload aborted',
+
+  // --- setup tab ---
+  setupUnavailable: 'Plotter status unavailable',
+  setupState: 'Plotter',
+  setupStateLabel: 'State',
+  plotterStates: {
+    unconfigured: 'not set up',
+    needsRetract: 'wind in the belts',
+    retracted: 'belts at the stop',
+    extendingHome: 'paying out to home length',
+    atHome: 'ready to hang up',
+    ready: 'ready'
+  },
+  setupStateHint: {
+    unconfigured: 'Enter the distance between the two wall pins first.',
+    needsRetract: 'Wind both belts in to the stop, then confirm.',
+    retracted: 'The belt lengths are known. Calibrate the pulley if you like, then pay out to home.',
+    extendingHome: 'Paying out the belts …',
+    atHome: 'Hang the belt loops over the wall pins and confirm.',
+    ready: 'The bot hangs at a known position.'
+  },
+  setupBelts: 'Belts left / right',
+  setupPosition: 'Pen',
+  setupTilt: 'Tilt',
+  setupTiltValues: (model, imu) => `model ${model}° · IMU ${imu}°`,
+  setupStop: 'Stop',
+  setupAnchorTitle: 'Wall',
+  setupAnchor: 'Pin distance (mm)',
+  setupSave: 'Save',
+  setupAnchorHint:
+    'Measured centre to centre of the two pins. Changing it discards the known position.',
+  setupArea: (w, h) => `Drawing area ${w} mm wide, down to ${h} mm below its top edge.`,
+  setupRetractTitle: 'Wind in the belts',
+  setupRetractHint:
+    'Hold the bot and wind each belt in until its end sits at the stop. Small steps towards the end.',
+  setupStep: 'Step',
+  setupWindIn: 'Wind in',
+  setupPayOut: 'Pay out',
+  setupAtStop: 'Both at the stop',
+  setupPulleyTitle: 'Calibrate the pulley (optional)',
+  setupPulleyHint: (d) =>
+    `Currently ${d} mm. Let the left belt pay out, measure how much actually came out and enter it - ` +
+    'the diameter is corrected and the belt wound back in.',
+  setupPulleyRun: 'Pay out (mm)',
+  setupPulleyStart: 'Pay out',
+  setupMeasured: (run) => `Measured for ${run} mm`,
+  setupApply: 'Apply',
+  setupHomeTitle: 'Pay out to home length',
+  setupHomeHint:
+    'Pays both belts out to the length of the home position. The bot is not on the wall yet.',
+  setupExtend: 'Pay out',
+  setupHangTitle: 'Hang up',
+  setupHangHint: 'Put both loops over the wall pins, let go of the bot gently, then confirm.',
+  setupHung: 'Hanging',
+  setupMoveTitle: 'Move',
+  setupUp: 'up',
+  setupDown: 'down',
+  setupLeft: 'left',
+  setupRight: 'right',
+  setupHome: 'Home',
+  setupMoveHint:
+    'Moves the pen within the drawing area. No straight lines yet - those come with the planner.',
+  setupPenTitle: 'Pen',
+  setupPenHint: 'Find the angle at which the pen just touches the wall firmly, and save it as down.',
 
   // --- hardware tab ---
   hwUnavailable: 'Hardware status unavailable',
@@ -306,6 +370,12 @@ export default {
     'open the address above.',
 
   // --- what the device can refuse with ---
+  err_notConfigured: 'Enter the wall pin distance first.',
+  err_wrongState: 'Not possible in the current state.',
+  err_outsideArea: 'The target lies outside the drawing area.',
+  err_unreachable: 'The model finds no pose for the bot there.',
+  err_noPulleyRun: 'Pay the belt out for measuring first.',
+  err_motion: 'The step generator refused the move.',
   err_busy: 'A belt is still moving - stop it first.',
   err_motorsOff: 'The motors are switched off.',
   err_badValue: (field) => `Not a valid value: ${field}.`,

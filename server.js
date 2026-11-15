@@ -103,7 +103,8 @@ app.get('/currentState', (req, res) =>
     firmwareVersion: '0.1.0-mock',
     webUiVersion: '0.1.0',
     uptime: Date.now() - BOOTED,
-    ip: '192.168.178.42'
+    ip: '192.168.178.42',
+    plotter: plotterState()
   })
 );
 
@@ -608,6 +609,7 @@ app.post('/hardware/motors', (req, res) => {
   if (!guard(res)) return;
   if (typeof req.body?.enabled !== 'boolean') return refuse(res, 'enabled');
   if (!req.body.enabled && anyMoving()) return res.status(409).json({ error: 'busy' });
+  if (!req.body.enabled) forgetPosition();
   hw.motorsEnabled = req.body.enabled;
   say(3, `Motors ${hw.motorsEnabled ? 'on' : 'off'}`);
   res.json({ ok: true });
@@ -623,6 +625,7 @@ app.post('/hardware/jog', (req, res) => {
   const now = beltNow(belt);
   if (now.moving) return res.status(409).json({ error: 'busy' });
   Object.assign(belt, { from: now.mm, to: now.mm + mm, at: Date.now() });
+  forgetPosition();
   res.json({ ok: true });
 });
 
@@ -670,6 +673,212 @@ app.post('/hardware/config', (req, res) => {
   if (b.penUp !== undefined) hw.pen.upAngle = b.penUp;
   if (b.penDown !== undefined) hw.pen.downAngle = b.penDown;
   res.json({ ok: true });
+});
+
+/* ------ plotter ------ */
+
+// Same states, same refusals as src/Plotter.cpp. The kinematics are plain
+// hypotenuses with the wall offset - no tilt: the mock is about the shape of
+// the answers and the flow of the setup tab, not about where the pen lands.
+
+const RETRACTED_MM = 40;
+const HOME_Y_MM = 350;
+const plotter = { state: 'unconfigured', anchor: 0, pulleyRun: 0, x: 0, y: 0 };
+
+const width = () => plotter.anchor * 0.6;
+const homeX = () => width() / 2;
+
+function lengths(x, y) {
+  const fx = x + 0.2 * plotter.anchor;
+  const fy = y + 0.25 * plotter.anchor;
+  const leg = (dx) => Math.sqrt(dx * dx + fy * fy + 41 * 41);
+  return { left: leg(fx - 41), right: leg(plotter.anchor - fx - 41) };
+}
+
+function moveBelts(left, right) {
+  for (const [side, to] of [['left', left], ['right', right]]) {
+    const now = beltNow(hw.belts[side]);
+    Object.assign(hw.belts[side], { from: now.mm, to, at: Date.now() });
+  }
+  hw.motorsEnabled = true;
+}
+
+function plotterState() {
+  // The transition the firmware makes in Plotter::poll().
+  if (plotter.state === 'extendingHome' && !anyMoving()) plotter.state = 'atHome';
+  const out = {
+    state: plotter.state,
+    moving: anyMoving(),
+    anchorDistance: plotter.anchor,
+    pulleyDiameter: hw.pulleyDiameter,
+    pulleyRun: plotter.pulleyRun,
+    microsteps: hw.microsteps,
+    penDown: penNow().down
+  };
+  if (plotter.state === 'unconfigured') return out;
+  out.width = width();
+  out.maxY = plotter.anchor;
+  out.home = { x: homeX(), y: HOME_Y_MM };
+  if (plotter.state !== 'needsRetract') {
+    out.belts = { left: beltNow(hw.belts.left).mm, right: beltNow(hw.belts.right).mm };
+  }
+  if (plotter.state === 'ready') {
+    out.position = { x: plotter.x, y: plotter.y, target: anyMoving() };
+    out.tiltModel = 0;
+  }
+  out.tiltImu = Math.sin(Date.now() / 1000 * 1.3) * 1.2;
+  return out;
+}
+
+/** The plotter forgets where it is - the mock's Plotter::forgetPosition(). */
+function forgetPosition() {
+  if (plotter.state !== 'unconfigured' && plotter.state !== 'needsRetract') {
+    plotter.state = 'needsRetract';
+    plotter.pulleyRun = 0;
+  }
+}
+
+function answer(res, code, field) {
+  if (!code) return res.json({ ok: true });
+  const body = { error: code };
+  if (code === 'badValue' && field) body.errorDetail = field;
+  res.status(code === 'badValue' ? 400 : 409).json(body);
+}
+
+const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
+
+app.post('/calib/anchor', (req, res) => {
+  const mm = req.body?.mm;
+  if (!isNum(mm)) return answer(res, 'badValue', 'mm');
+  if (anyMoving()) return answer(res, 'busy');
+  if (!(mm >= 300 && mm <= 5000)) return answer(res, 'badValue', 'mm');
+  plotter.anchor = mm;
+  plotter.pulleyRun = 0;
+  plotter.state = 'needsRetract';
+  answer(res);
+});
+
+app.post('/calib/retracted', (req, res) => {
+  if (plotter.state === 'unconfigured') return answer(res, 'notConfigured');
+  if (!['needsRetract', 'retracted'].includes(plotter.state)) return answer(res, 'wrongState');
+  if (anyMoving()) return answer(res, 'busy');
+  for (const b of Object.values(hw.belts)) Object.assign(b, { from: RETRACTED_MM, to: RETRACTED_MM, at: 0 });
+  plotter.pulleyRun = 0;
+  plotter.state = 'retracted';
+  answer(res);
+});
+
+app.post('/calib/home', (req, res) => {
+  if (plotter.state !== 'retracted') return answer(res, 'wrongState');
+  if (anyMoving()) return answer(res, 'busy');
+  const l = lengths(homeX(), HOME_Y_MM);
+  moveBelts(l.left, l.right);
+  plotter.x = homeX();
+  plotter.y = HOME_Y_MM;
+  plotter.state = 'extendingHome';
+  answer(res);
+});
+
+app.post('/calib/hung', (req, res) => {
+  if (plotter.state !== 'atHome') return answer(res, 'wrongState');
+  if (anyMoving()) return answer(res, 'busy');
+  plotter.state = 'ready';
+  answer(res);
+});
+
+app.post('/calib/pulley/extend', (req, res) => {
+  const mm = req.body?.mm;
+  if (!isNum(mm)) return answer(res, 'badValue', 'mm');
+  if (plotter.state !== 'retracted') return answer(res, 'wrongState');
+  if (anyMoving()) return answer(res, 'busy');
+  if (!(mm >= 100 && mm <= 2000)) return answer(res, 'badValue', 'mm');
+  moveBelts(RETRACTED_MM + mm, RETRACTED_MM);
+  plotter.pulleyRun = mm;
+  answer(res);
+});
+
+app.post('/calib/pulley', (req, res) => {
+  const measured = req.body?.measured;
+  if (!isNum(measured)) return answer(res, 'badValue', 'measured');
+  if (plotter.state !== 'retracted') return answer(res, 'wrongState');
+  if (plotter.pulleyRun <= 0) return answer(res, 'noPulleyRun');
+  if (anyMoving()) return answer(res, 'busy');
+  if (!(measured >= plotter.pulleyRun * 0.8 && measured <= plotter.pulleyRun * 1.2))
+    return answer(res, 'badValue', 'measured');
+  hw.pulleyDiameter = hw.pulleyDiameter * measured / plotter.pulleyRun;
+  moveBelts(RETRACTED_MM, RETRACTED_MM);
+  say(3, `Plotter: pulley -> ${hw.pulleyDiameter.toFixed(4)} mm`);
+  plotter.pulleyRun = 0;
+  answer(res);
+});
+
+app.post('/calib/pen', (req, res) => {
+  const { up, down } = req.body ?? {};
+  for (const [key, v] of [['up', up], ['down', down]]) {
+    if (v !== undefined && !(Number.isInteger(v) && v >= 0 && v <= 180)) return answer(res, 'badValue', key);
+  }
+  if (up !== undefined) hw.pen.upAngle = up;
+  if (down !== undefined) hw.pen.downAngle = down;
+  answer(res);
+});
+
+app.post('/jog', (req, res) => {
+  const b = req.body ?? {};
+  if (typeof b.side === 'string') {
+    if (b.side !== 'left' && b.side !== 'right') return answer(res, 'badValue', 'side');
+    if (!isNum(b.mm)) return answer(res, 'badValue', 'mm');
+    if (plotter.state === 'unconfigured') return answer(res, 'notConfigured');
+    if (!['needsRetract', 'retracted'].includes(plotter.state)) return answer(res, 'wrongState');
+    if (anyMoving()) return answer(res, 'busy');
+    if (!(b.mm >= -1000 && b.mm <= 1000)) return answer(res, 'badValue', 'mm');
+    const belt = hw.belts[b.side];
+    const now = beltNow(belt);
+    Object.assign(belt, { from: now.mm, to: now.mm + b.mm, at: Date.now() });
+    hw.motorsEnabled = true;
+    plotter.state = 'needsRetract';
+    return answer(res);
+  }
+  const dx = isNum(b.dx) ? b.dx : 0;
+  const dy = isNum(b.dy) ? b.dy : 0;
+  if (plotter.state !== 'ready') return answer(res, 'wrongState');
+  if (anyMoving()) return answer(res, 'busy');
+  const x = plotter.x + dx;
+  const y = plotter.y + dy;
+  if (x < 0 || x > width() || y < 0 || y > plotter.anchor) return answer(res, 'outsideArea');
+  const l = lengths(x, y);
+  moveBelts(l.left, l.right);
+  plotter.x = x;
+  plotter.y = y;
+  answer(res);
+});
+
+app.post('/home', (req, res) => {
+  if (plotter.state !== 'ready') return answer(res, 'wrongState');
+  if (anyMoving()) return answer(res, 'busy');
+  const l = lengths(homeX(), HOME_Y_MM);
+  moveBelts(l.left, l.right);
+  plotter.x = homeX();
+  plotter.y = HOME_Y_MM;
+  answer(res);
+});
+
+app.post('/stop', (req, res) => {
+  for (const belt of Object.values(hw.belts)) {
+    const now = beltNow(belt);
+    Object.assign(belt, { from: now.mm, to: now.mm, at: Date.now() });
+  }
+  answer(res);
+});
+
+app.post('/pen', (req, res) => {
+  const { angle, state } = req.body ?? {};
+  if (Number.isInteger(angle)) {
+    if (angle < 0 || angle > 180) return answer(res, 'badValue', 'angle');
+    movePen(angle);
+  } else if (state === 'up') movePen(hw.pen.upAngle);
+  else if (state === 'down') movePen(hw.pen.downAngle);
+  else return answer(res, 'badValue', 'state');
+  answer(res);
 });
 
 /* ------ the manifest the device builds itself ------ */

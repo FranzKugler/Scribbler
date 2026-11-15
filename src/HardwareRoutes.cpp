@@ -23,6 +23,7 @@
 #include "LogBuffer.h"
 #include "Driver.h"
 #include "Motion.h"
+#include "Plotter.h"
 #include "Pen.h"
 #include "Imu.h"
 #include "Display.h"
@@ -159,6 +160,8 @@ namespace
         // Cutting the outputs under a moving belt: the step generator would
         // go on counting steps the motor no longer makes.
         if (!on && Motion::moving()) return refuseCode(409, "busy");
+        // Without holding torque a hanging bot sags on its belts.
+        if (!on) Plotter::forgetPosition();
         Driver::enable(on);
         sendOk();
     }
@@ -182,6 +185,9 @@ namespace
 
         if (!Driver::enabled()) return refuseCode(409, "motorsOff");
         if (!Motion::jog(which, mm)) return refuseCode(409, "busy");
+        // The plotter did not ask for this move, so it no longer knows where
+        // the belts are.
+        Plotter::forgetPosition();
         sendOk();
     }
 
@@ -273,7 +279,11 @@ namespace
         scheduleSettingsSave();
 
         if (driverChanged) Driver::configure(current, microsteps);
-        if (scaleChanged) Motion::setScale(microsteps, pulley);
+        if (scaleChanged)
+        {
+            Motion::setScale(microsteps, pulley);
+            Plotter::settingsChanged();
+        }
         Pen::setAngles(up, down);
         sendOk();
     }

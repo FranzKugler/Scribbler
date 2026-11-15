@@ -207,6 +207,23 @@ export async function fetchLog(since = 0) {
   return res.json();
 }
 
+/* ------ plotter ------ */
+
+// The calibration flow and the plotter's own controls. Each is checked by the
+// device against its state; a refusal comes back as a code and lands in the
+// banner through post(). The state itself arrives with /currentState.
+export const setAnchor = (mm) => post('/calib/anchor', { mm });
+export const confirmRetracted = () => post('/calib/retracted', {});
+export const extendHome = () => post('/calib/home', {});
+export const confirmHung = () => post('/calib/hung', {});
+export const pulleyExtend = (mm) => post('/calib/pulley/extend', { mm });
+export const pulleyMeasured = (measured) => post('/calib/pulley', { measured });
+export const savePenAngles = (angles) => post('/calib/pen', angles);
+export const jog = (body) => post('/jog', body);
+export const goHome = () => post('/home', {});
+export const stopAll = () => post('/stop', {});
+export const movePen = (body) => post('/pen', body);
+
 /* ------ hardware ------ */
 
 /**

@@ -87,6 +87,12 @@ public:
     void setPenDown(byte angle) { this->PenDown = angle; }
     byte getPenDown() { return this->PenDown; }
 
+    // Anchor distance d: centre of the left pin to centre of the right pin
+    // [mm], measured on the wall. 0 means not set yet - the plotter cannot
+    // home without it (Plotter's Unconfigured state).
+    void   setAnchorDistance(double mm) { this->AnchorDistance = mm; }
+    double getAnchorDistance() { return this->AnchorDistance; }
+
     // Effective pulley diameter, belt included [mm]. Mural's default for a
     // GT2 16T pulley; the e-steps calibration (phase 4) refines it, and every
     // belt length in millimetres depends on it.
@@ -114,6 +120,7 @@ private:
     uint16_t Microsteps;      // per full step
     byte     PenUp;           // degrees
     byte     PenDown;         // degrees
+    double   AnchorDistance;  // mm, 0 = not set
     double   PulleyDiameter;  // mm
     float    ImuOffset;       // rad
 };

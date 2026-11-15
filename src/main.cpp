@@ -51,6 +51,8 @@
 #include "Display.h"
 #include "Imu.h"
 #include "HardwareRoutes.h"
+#include "Plotter.h"
+#include "PlotRoutes.h"
 
 #include <Wire.h>
 
@@ -397,6 +399,7 @@ void setup()
     // about if something moves during a boot.
     Driver::begin(settings.getMotorCurrent(), settings.getMicrosteps());
     Motion::begin(settings.getMicrosteps(), settings.getPulleyDiameter());
+    Plotter::begin();
     Pen::begin(settings.getPenUp(), settings.getPenDown());
 
     // One bus for the display and the IMU, started here once rather than by
@@ -447,6 +450,7 @@ void setup()
     Files::begin();
     Nvs::begin();
     Hw::begin();
+    Plot::begin();
     server.begin();
 
     startArduinoOta();
@@ -488,6 +492,7 @@ void loop()
 
     Pen::poll();
     Imu::poll();
+    Plotter::poll();
 
     // The network switch requested by the WLAN tab, step by step.
     Web::poll();

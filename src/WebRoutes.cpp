@@ -16,6 +16,7 @@
 #include <esp_system.h>   // esp_reset_reason(), for the debug tab
 
 #include "WebRoutes.h"
+#include "Plotter.h"      // /currentState carries the plotter's state
 #include "OtaUpdate.h"    // a rename asks for a restart; /currentState names the images
 #include "Version.h"
 #include "Settings.h"
@@ -102,6 +103,10 @@ static void sendCurrentState()
     doc["webUiVersion"]    = Ota::webUiVersion();
     doc["uptime"]          = millis();
     doc["ip"]              = WiFi.localIP().toString();
+
+    // What the landing tab shows and the setup tab steers by - open, like
+    // the rest of this answer, because the plotter's controls are.
+    Plotter::publish(doc["plotter"].to<JsonObject>());
 
     String out;
     serializeJson(doc, out);

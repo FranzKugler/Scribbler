@@ -16,7 +16,7 @@
  */
 export default {
   // --- shell ---
-  tabs: ['Status', 'WLAN', 'Hardware', 'Update', 'Debug', 'Speicher'],
+  tabs: ['Status', 'Einrichten', 'WLAN', 'Hardware', 'Update', 'Debug', 'Speicher'],
   loading: 'Einstellungen werden geladen …',
   loadingShort: 'wird geladen …',
   deviceUnreachable: 'Gerät nicht erreichbar',
@@ -124,6 +124,72 @@ export default {
     'von beiden hochgeladen wurde, erkennt das Gerät am ersten Byte.',
   connectionLost: 'Verbindung abgebrochen',
   uploadAborted: 'Upload abgebrochen',
+
+  // --- setup tab ---
+  setupUnavailable: 'Plotter-Status nicht verfügbar',
+  setupState: 'Plotter',
+  setupStateLabel: 'Zustand',
+  plotterStates: {
+    unconfigured: 'nicht eingerichtet',
+    needsRetract: 'Riemen einziehen',
+    retracted: 'Riemen am Anschlag',
+    extendingHome: 'fährt auf Startlänge',
+    atHome: 'bereit zum Aufhängen',
+    ready: 'bereit'
+  },
+  setupStateHint: {
+    unconfigured: 'Zuerst den Abstand der beiden Wandstifte eintragen.',
+    needsRetract: 'Beide Riemen bis zum Anschlag einziehen und dann bestätigen.',
+    retracted: 'Die Riemenlängen sind bekannt. Optional den Pulley kalibrieren, dann auf Startlänge fahren.',
+    extendingHome: 'Die Riemen werden ausgegeben …',
+    atHome: 'Die Riemenschlaufen über die Wandstifte hängen und bestätigen.',
+    ready: 'Der Bot hängt an bekannter Position.'
+  },
+  setupBelts: 'Riemen links / rechts',
+  setupPosition: 'Stift',
+  setupTilt: 'Neigung',
+  setupTiltValues: (model, imu) => `Modell ${model}° · IMU ${imu}°`,
+  setupStop: 'Stopp',
+  setupAnchorTitle: 'Wand',
+  setupAnchor: 'Abstand der Stifte (mm)',
+  setupSave: 'Speichern',
+  setupAnchorHint:
+    'Von Mitte zu Mitte der beiden Stifte gemessen. Eine Änderung verwirft die bekannte Position.',
+  setupArea: (w, h) => `Zeichenfläche ${w} mm breit, bis ${h} mm unter ihrer Oberkante.`,
+  setupRetractTitle: 'Riemen einziehen',
+  setupRetractHint:
+    'Den Bot halten und jeden Riemen einziehen, bis sein Ende am Anschlag sitzt. Lieber in kleinen ' +
+    'Schritten zum Schluss.',
+  setupStep: 'Schrittweite',
+  setupWindIn: 'Einziehen',
+  setupPayOut: 'Ausgeben',
+  setupAtStop: 'Beide am Anschlag',
+  setupPulleyTitle: 'Pulley kalibrieren (optional)',
+  setupPulleyHint: (d) =>
+    `Aktuell ${d} mm. Den linken Riemen ausgeben lassen, die tatsächlich ausgegebene Länge messen und ` +
+    'eintragen – der Durchmesser wird korrigiert und der Riemen wieder eingezogen.',
+  setupPulleyRun: 'Ausgeben (mm)',
+  setupPulleyStart: 'Ausgeben',
+  setupMeasured: (run) => `Gemessen für ${run} mm`,
+  setupApply: 'Übernehmen',
+  setupHomeTitle: 'Auf Startlänge fahren',
+  setupHomeHint:
+    'Gibt beide Riemen auf die Länge der Startposition aus. Der Bot hängt dabei noch nicht an der Wand.',
+  setupExtend: 'Ausgeben',
+  setupHangTitle: 'Aufhängen',
+  setupHangHint: 'Die beiden Schlaufen über die Wandstifte legen, den Bot sanft loslassen, dann bestätigen.',
+  setupHung: 'Hängt',
+  setupMoveTitle: 'Bewegen',
+  setupUp: 'hoch',
+  setupDown: 'runter',
+  setupLeft: 'links',
+  setupRight: 'rechts',
+  setupHome: 'Start',
+  setupMoveHint:
+    'Fährt den Stift innerhalb der Zeichenfläche. Noch keine geraden Linien – die kommen mit dem Planer.',
+  setupPenTitle: 'Stift',
+  setupPenHint:
+    'Den Winkel suchen, bei dem der Stift die Wand gerade sicher berührt, und als „runter“ speichern.',
 
   // --- hardware tab ---
   hwUnavailable: 'Hardware-Status nicht verfügbar',
@@ -313,6 +379,12 @@ export default {
     'wählen und die genannte Adresse aufrufen.',
 
   // --- what the device can refuse with ---
+  err_notConfigured: 'Zuerst den Abstand der Wandstifte eintragen.',
+  err_wrongState: 'Das geht im aktuellen Zustand nicht.',
+  err_outsideArea: 'Das Ziel liegt außerhalb der Zeichenfläche.',
+  err_unreachable: 'An dieser Stelle findet das Modell keine Lage für den Bot.',
+  err_noPulleyRun: 'Zuerst den Riemen zum Messen ausgeben.',
+  err_motion: 'Der Schrittgenerator hat die Bewegung abgelehnt.',
   err_busy: 'Ein Riemen fährt noch – erst anhalten.',
   err_motorsOff: 'Die Motoren sind ausgeschaltet.',
   err_badValue: (field) => `Kein gültiger Wert: ${field}.`,

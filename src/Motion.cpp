@@ -10,6 +10,7 @@
  */
 #include "Motion.h"
 
+#include <algorithm>
 #include <FastAccelStepper.h>
 
 #include "Board.h"
@@ -46,15 +47,18 @@ namespace
         return FULL_STEPS_PER_TURN * ms / (PI * diameter);
     }
 
-    /** Speed and ramp follow the scale, so a jog is the same in mm/s at any microstep setting. */
-    void applyMotionProfile()
+    /**
+     * Speed and ramp in belt millimetres, converted at the current scale, so a
+     * move is the same in mm/s at any microstep setting. Set before every move:
+     * a later move may have left the other belt's profile scaled down.
+     */
+    void setProfile(FastAccelStepper *s, double speedMmS, double accelMmS2)
     {
-        for (FastAccelStepper *s : stepper)
-        {
-            if (!s) continue;
-            s->setSpeedInHz((uint32_t)lround(JOG_SPEED_MM_S * perMm));
-            s->setAcceleration((int32_t)lround(JOG_ACCEL_MM_S2 * perMm));
-        }
+        // At least one step per second and per second squared: zero is
+        // refused by the library, and a belt with almost no way to go still
+        // has to get there.
+        s->setSpeedInHz((uint32_t)std::max(1L, lround(speedMmS * perMm)));
+        s->setAcceleration((int32_t)std::max(1L, lround(accelMmS2 * perMm)));
     }
 }
 
@@ -86,7 +90,6 @@ namespace Motion
             // switches both drivers at once.
             stepper[i]->setCurrentPosition(0);
         }
-        applyMotionProfile();
 
         debugI("Motion: %.3f steps/mm (1/%u, pulley %.4f mm)", perMm, microsteps, pulleyDiameter);
     }
@@ -110,7 +113,6 @@ namespace Motion
         microsteps = ms;
         pulleyDiameter = diameter;
         perMm = next;
-        applyMotionProfile();
         debugI("Motion: %.3f steps/mm (1/%u, pulley %.4f mm)", perMm, microsteps, pulleyDiameter);
         return true;
     }
@@ -126,9 +128,50 @@ namespace Motion
         if (!s || s->isRunning()) return false;
         const int32_t delta = (int32_t)lround(mm * perMm);
         if (delta == 0) return true;
+        setProfile(s, JOG_SPEED_MM_S, JOG_ACCEL_MM_S2);
         // 0 is success in every version of the result code - a plain int in
         // the 0.x series, MoveResultCode since; the cast covers both spellings.
         return static_cast<int>(s->move(delta)) == 0;
+    }
+
+    bool moveBelts(double leftMm, double rightMm, double speedMmS, double accelMmS2)
+    {
+        if (!ready() || moving()) return false;
+
+        const int32_t target[Driver::COUNT] = {(int32_t)lround(leftMm * perMm),
+                                               (int32_t)lround(rightMm * perMm)};
+        int32_t way[Driver::COUNT];
+        int32_t longest = 0;
+        for (uint8_t i = 0; i < Driver::COUNT; i++)
+        {
+            way[i] = abs(target[i] - stepper[i]->getCurrentPosition());
+            longest = std::max(longest, way[i]);
+        }
+        if (longest == 0) return true;
+
+        // Scaled copies of one trapezoid take the same time for their ways:
+        // both phases - ramp and cruise - shrink by the same factor.
+        for (uint8_t i = 0; i < Driver::COUNT; i++)
+        {
+            if (way[i] == 0) continue;
+            const double share = (double)way[i] / longest;
+            setProfile(stepper[i], speedMmS * share, accelMmS2 * share);
+        }
+        bool ok = true;
+        for (uint8_t i = 0; i < Driver::COUNT; i++)
+        {
+            if (way[i] == 0) continue;
+            ok = static_cast<int>(stepper[i]->moveTo(target[i])) == 0 && ok;
+        }
+        return ok;
+    }
+
+    bool setLengths(double leftMm, double rightMm)
+    {
+        if (!ready() || moving()) return false;
+        stepper[Driver::LEFT]->setCurrentPosition((int32_t)lround(leftMm * perMm));
+        stepper[Driver::RIGHT]->setCurrentPosition((int32_t)lround(rightMm * perMm));
+        return true;
     }
 
     void stop()

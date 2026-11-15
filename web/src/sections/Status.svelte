@@ -77,6 +77,12 @@
     <div class="field">
       <span class="key">{t.uptime}</span><span>{duration(info.uptime)}</span>
     </div>
+    {#if info.plotter}
+      <div class="field">
+        <span class="key">{t.setupState}</span>
+        <span>{t.plotterStates[info.plotter.state] ?? info.plotter.state}</span>
+      </div>
+    {/if}
 
     <p class="hint">{t.statusHint}</p>
   {:else}

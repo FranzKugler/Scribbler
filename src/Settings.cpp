@@ -48,6 +48,7 @@ Settings::Settings()
     Microsteps   = DEFAULT_MICROSTEPS;
     PenUp        = DEFAULT_PEN_UP;
     PenDown      = DEFAULT_PEN_DOWN;
+    AnchorDistance = 0.0;
     PulleyDiameter = DEFAULT_PULLEY;
     ImuOffset    = 0.0f;
 }
@@ -90,8 +91,12 @@ void Settings::loadSettings()
     Microsteps   = doc["Microsteps"] | DEFAULT_MICROSTEPS;
     PenUp        = doc["PenUp"] | DEFAULT_PEN_UP;
     PenDown      = doc["PenDown"] | DEFAULT_PEN_DOWN;
+    AnchorDistance = doc["AnchorDistance"] | 0.0;
     PulleyDiameter = doc["PulleyDiameter"] | DEFAULT_PULLEY;
     ImuOffset    = doc["ImuOffset"] | 0.0f;
+
+    // Outside what Plotter accepts, the record is not something to plot by.
+    if (!(AnchorDistance >= 300.0 && AnchorDistance <= 5000.0)) AnchorDistance = 0.0;
 
     // A pulley of 0 would divide every belt length by zero.
     if (!(PulleyDiameter >= 5.0 && PulleyDiameter <= 40.0)) PulleyDiameter = DEFAULT_PULLEY;
@@ -118,6 +123,7 @@ void Settings::fillDocument(JsonDocument &doc)
     doc["Microsteps"]       = Microsteps;
     doc["PenUp"]            = PenUp;
     doc["PenDown"]          = PenDown;
+    doc["AnchorDistance"]   = AnchorDistance;
     doc["PulleyDiameter"]   = PulleyDiameter;
     doc["ImuOffset"]        = ImuOffset;
 }

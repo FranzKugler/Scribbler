@@ -3,13 +3,17 @@
  * The two belts as motors: FastAccelStepper on STEP/DIR, positions in steps
  * and in millimetres of belt, and moves with a ramp.
  *
- * This is phase 3 of PLAN.md: each belt on its own (jog), and stop. What it
- * deliberately does not do yet:
+ * Belt space only: each belt on its own (jog), both belts to target lengths
+ * together (moveBelts), and stop. Cartesian is Plotter's business - it asks
+ * Kinematics for the lengths and hands them here. What this deliberately does
+ * not do yet:
  *
- *   - Cartesian moves. Those need the anchor distance and a homed position
- *     (phase 4), and straight lines need the planner, which slices time and
- *     feeds both steppers' queues in lockstep (phase 6, FastAccelStepper's
- *     moveTimed()).
+ *   - Straight lines. moveBelts() runs both belts on scaled copies of one
+ *     ramp, so they start and stop together - a straight line in belt space,
+ *     which on the wall is a gentle curve. Fine for travelling home and for
+ *     jogging a few millimetres; a drawn line needs the planner, which slices
+ *     time and feeds both steppers' queues in lockstep (phase 6,
+ *     FastAccelStepper's moveTimed()).
  *   - Run in a task of its own. Every call into FastAccelStepper comes from
  *     loop() - one caller, which is the case the library is built for (it
  *     documents no locking for move()/moveTo() from a second task). The motion
@@ -24,6 +28,10 @@
  * Millimetres to steps: 200 full steps x microsteps per pulley turn, and a
  * turn is pi x the effective pulley diameter. Rounded, not truncated as in
  * Mural - truncation biases every belt short by half a step on average.
+ *
+ * Positions: step 0 is a belt of length 0, so once Plotter has set the belt
+ * lengths (at the retract stop) a position *is* a length. Before that it is
+ * whatever the belt has travelled since boot.
  *
  * @mc       ESP32S3
  * @author   Franz Kugler / franz _AT_ franz _MINUS_ kugler _DOT_ de
@@ -60,6 +68,16 @@ namespace Motion
      * not quietly turn into a different move than the one asked for.
      */
     bool jog(Driver::Side side, double mm);
+
+    /**
+     * Both belts to the given lengths [mm], starting and arriving together:
+     * the belt with the longer way runs at `speed`/`accel`, the other on the
+     * same profile scaled down. Refused while either belt moves.
+     */
+    bool moveBelts(double leftMm, double rightMm, double speedMmS, double accelMmS2);
+
+    /** Declares where the belts are - at a known stop. Only at standstill. */
+    bool setLengths(double leftMm, double rightMm);
 
     /** Ramps both belts down to a stop. */
     void stop();

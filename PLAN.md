@@ -328,6 +328,11 @@ Each phase ends with something checkable on the device, not with a green build.
    complementary filter).
 4. **Calibration flow** — state machine, Setup wizard, settings persisted. Draw a 100 mm square
    in four positions of the wall; pulley-diameter calibration from the measured result.
+   *Built 2026-11-15, not yet on hardware:* `Plotter` (states, refusal codes, retract → home →
+   hang, XY jog and go-home in belt space), `PlotRoutes` (open), the Setup tab, anchor distance
+   and pulley as settings. The pulley is calibrated by paying out a measured length rather
+   than from a drawn square - Mural's way, and possible before the bot is on the wall. The
+   square test needs straight lines, so it waits for the planner.
 5. **Jobs** — SD, chunked upload, `JobRunner` with Mural-compatible format, progress, pause/stop.
    First plot from a file produced by Mural's own web UI.
 6. **Planner** — trapezoid + lookahead; compare plot time and quality against phase 5 on the same file.
