@@ -55,6 +55,7 @@
 #include "Plotter.h"
 #include "PlotRoutes.h"
 #include "SdStore.h"
+#include "Checkpoint.h"
 #include "JobRoutes.h"
 
 #include <Wire.h>
@@ -452,6 +453,8 @@ void setup()
 
     // The card holds the jobs; not needed in portal mode, so mounted here.
     SdStore::begin();
+    // A job interrupted last time, to be offered once the bot is homed.
+    Checkpoint::begin();
 
     Web::begin();
     Files::begin();

@@ -30,6 +30,7 @@
 #include "JobRunner.h"
 #include "Path.h"
 #include "Planner.h"
+#include "Checkpoint.h"
 
 extern Settings settings;
 void scheduleSettingsSave();
@@ -94,6 +95,26 @@ namespace
     // progress already when it was first pushed.
     Planner::Target replay[Planner::Queue::CAPACITY];
     size_t replayCount = 0, replayNext = 0;
+
+    // Checkpoints are taken at pen lifts (see Checkpoint.h), but not more
+    // often than this: a hatched area lifts the pen every second, and each
+    // record is an NVS write. Resuming redraws at most this much.
+    constexpr uint32_t CHECKPOINT_MS = 10000;
+    uint32_t lastCheckpoint = 0;
+
+    /** Where the job stands now - valid only with the path run dry, pen lifting. */
+    void saveCheckpoint()
+    {
+        Checkpoint::Record r;
+        strlcpy(r.name, JobRunner::name(), sizeof r.name);
+        r.size = JobRunner::size();
+        r.offset = JobRunner::offset();
+        r.line = JobRunner::line();
+        r.done = JobRunner::done();
+        r.total = JobRunner::total();
+        Checkpoint::save(r);
+        lastCheckpoint = millis();
+    }
 
     // The pen's image coordinates once Ready; where a move is going while
     // one runs (the position is the target's once it has stopped).
@@ -218,6 +239,12 @@ namespace
                 endJob();
                 enter(State::Ready);
             }
+            else if (JobRunner::phase() == Phase::Running)
+            {
+                // The first checkpoint: the top of the file, or where a
+                // resumed job starts - pen up, standing, so it is exact.
+                saveCheckpoint();
+            }
             return;
         }
 
@@ -256,6 +283,7 @@ namespace
                     Pen::up();
                     jobPenDown = false;
                     waitingPen = true;
+                    if (millis() - lastCheckpoint >= CHECKPOINT_MS) saveCheckpoint();
                     break;
                 case After::Pause:
                     Path::end();
@@ -263,6 +291,8 @@ namespace
                     enter(State::Paused);
                     break;
                 case After::Stop:
+                    // Cancelled on purpose: nothing to come back to.
+                    Checkpoint::clear();
                     endJob();
                     enter(State::Ready);
                     break;
@@ -271,6 +301,7 @@ namespace
                     // The end - or a read error JobRunner has recorded. Back
                     // home as Mural does, unless something failed.
                     const bool finished = JobRunner::phase() == Phase::Finished;
+                    if (finished) Checkpoint::clear();
                     endJob();
                     enter(State::Ready);
                     if (finished) travelTo(model.width() / 2.0, HOME_Y_MM);
@@ -457,6 +488,16 @@ namespace Plotter
         // look at if a plot judders.
         out["underruns"] = Path::underruns();
 
+        // A job that was interrupted - power, crash, emergency stop - and can
+        // be continued from its last checkpoint once homed.
+        if (Checkpoint::present())
+        {
+            JsonObject cp = out["checkpoint"].to<JsonObject>();
+            cp["name"] = Checkpoint::get().name;
+            cp["done"] = Checkpoint::get().done;
+            cp["total"] = Checkpoint::get().total;
+        }
+
         // The job: the running one, or the record of the last one (finished,
         // failed or stopped), so the UI can say how it ended.
         if (JobRunner::name()[0])
@@ -594,13 +635,14 @@ namespace Plotter
         return nullptr;
     }
 
-    const char *startJob(const char *name)
+    /** startJob() and continueJob(): from the top, or from a checkpoint. */
+    const char *openJob(const char *name, const JobRunner::Resume *resume)
     {
         if (current != State::Ready) return "wrongState";
         if (Motion::moving() || Path::active()) return "busy";
 
         const char *refused = JobRunner::open(name, posX, posY, model.width(),
-                                              MAX_Y_FRACTION * settings.getAnchorDistance());
+                                              MAX_Y_FRACTION * settings.getAnchorDistance(), resume);
         if (refused) return refused;
 
         Driver::enable(true);
@@ -611,6 +653,26 @@ namespace Plotter
         after = After::Nothing;
         // The path is taken over once the check has passed - see runJob().
         enter(State::Plotting);
+        return nullptr;
+    }
+
+    const char *startJob(const char *name)
+    {
+        return openJob(name, nullptr);
+    }
+
+    const char *continueJob()
+    {
+        if (!Checkpoint::present()) return "noCheckpoint";
+        const Checkpoint::Record &r = Checkpoint::get();
+        const JobRunner::Resume resume{r.size, r.offset, r.line, r.done};
+        return openJob(r.name, &resume);
+    }
+
+    const char *forgetCheckpoint()
+    {
+        if (current == State::Plotting || current == State::Paused) return "wrongState";
+        Checkpoint::clear();
         return nullptr;
     }
 
@@ -639,6 +701,7 @@ namespace Plotter
     {
         if (current == State::Paused)
         {
+            Checkpoint::clear();
             endJob();
             enter(State::Ready);
             return nullptr;

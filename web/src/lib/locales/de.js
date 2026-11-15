@@ -128,6 +128,14 @@ export default {
   // --- jobs tab ---
   jobsUnavailable: 'Plotter-Status nicht verfügbar',
   jobsNow: 'Aktueller Auftrag',
+  jobsCheckpoint: 'Unterbrochener Auftrag',
+  jobsCheckpointHint:
+    'Abgebrochen durch Stromausfall, Neustart oder Not-Stopp. Fortsetzen macht beim letzten Stiftheben ' +
+    'weiter (bis zu 10 s zurück) - nur sinnvoll, wenn Papier und Anker seitdem nicht bewegt wurden.',
+  jobsCheckpointNotReady: 'Erst im Setup neu einrichten (einziehen, Home, einhängen), dann fortsetzen.',
+  jobContinue: 'Fortsetzen',
+  jobForget: 'Verwerfen',
+  jobForgetConfirm: (name) => `Den unterbrochenen Auftrag ${name} verwerfen? Die Datei bleibt auf der Karte.`,
   jobPhases: {
     idle: 'beendet',
     checking: 'wird geprüft …',
@@ -452,6 +460,8 @@ export default {
   err_jobName: 'Kein gültiger Auftragsname.',
   err_noCard: 'Keine SD-Karte.',
   err_jobNotFound: 'Den Auftrag gibt es nicht.',
+  err_noCheckpoint: 'Es gibt keinen unterbrochenen Auftrag.',
+  err_jobChanged: 'Die Auftragsdatei wurde seitdem geändert - bitte von vorn starten.',
   err_jobOpen: 'Die Datei lässt sich nicht öffnen.',
   err_jobEmpty: 'Die Datei enthält keine Bewegung.',
   err_svgUnreadable: 'Keine lesbare SVG-Datei.',

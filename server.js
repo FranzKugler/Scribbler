@@ -720,6 +720,7 @@ function plotterState() {
   };
   const job = jobNow();
   if (job) out.job = job;
+  if (checkpoint) out.checkpoint = { ...checkpoint };
   if (plotter.state === 'unconfigured') return out;
   out.width = width();
   out.maxY = plotter.anchor;
@@ -737,6 +738,12 @@ function plotterState() {
 
 /** The plotter forgets where it is - the mock's Plotter::forgetPosition(). */
 function forgetPosition() {
+  if (job.phase === 'running' && ['plotting', 'paused'].includes(plotter.state)) {
+    // Interrupted, not cancelled: the firmware keeps its last checkpoint,
+    // taken at a pen lift up to 10 s back.
+    const done = jobNow()?.done ?? job.done;
+    checkpoint = { name: job.name, done: Math.max(0, done - 10 * plotter.drawSpeed), total: job.total };
+  }
   if (job.phase === 'checking' || job.phase === 'running') endJob('idle');
   if (plotter.state !== 'unconfigured' && plotter.state !== 'needsRetract') {
     plotter.state = 'needsRetract';
@@ -910,6 +917,8 @@ const validJobName = (n) => typeof n === 'string' && /^[A-Za-z0-9_-][A-Za-z0-9._
 // The running job: name, phase, total, done so far (frozen while paused),
 // and when the running stretch began.
 const job = { name: '', phase: 'idle', total: 0, done: 0, since: 0, error: null, line: 0 };
+// The firmware's Checkpoint: {name, done, total} of a job that was cut off.
+let checkpoint = null;
 
 function checkJob(text) {
   let x = plotter.x, y = plotter.y, total = 0, moves = 0;
@@ -940,6 +949,7 @@ function jobNow() {
     done = Math.min(job.total, job.done + ((Date.now() - job.since) / 1000) * plotter.drawSpeed);
     if (done >= job.total) {
       endJob('finished');
+      checkpoint = null;
       done = job.total;
     }
   }
@@ -1004,14 +1014,13 @@ app.post('/jobs/upload', (req, res) => {
   });
 });
 
-app.post('/plot/start', (req, res) => {
-  const name = req.body?.name;
+function startJob(res, name, from) {
   if (plotter.state !== 'ready') return answer(res, 'wrongState');
   if (anyMoving()) return answer(res, 'busy');
   if (!validJobName(name)) return answer(res, 'jobName');
   if (!(name in jobFiles)) return answer(res, 'jobNotFound');
   const check = checkJob(jobFiles[name]);
-  Object.assign(job, { name, phase: 'checking', total: check.total ?? 0, done: 0, since: Date.now(),
+  Object.assign(job, { name, phase: 'checking', total: check.total ?? 0, done: from, since: Date.now(),
                        error: null, line: 0 });
   if (check.error) {
     // The firmware finds this during the check and lands in Ready; the
@@ -1019,7 +1028,22 @@ app.post('/plot/start', (req, res) => {
     Object.assign(job, { phase: 'failed', error: check.error, line: check.line ?? 0 });
     return answer(res);
   }
+  // Like the firmware's first checkpoint, at the start of the run.
+  checkpoint = { name, done: from, total: job.total };
   plotter.state = 'plotting';
+  answer(res);
+}
+
+app.post('/plot/start', (req, res) => startJob(res, req.body?.name, 0));
+
+app.post('/plot/continue', (req, res) => {
+  if (!checkpoint) return answer(res, 'noCheckpoint');
+  startJob(res, checkpoint.name, checkpoint.done);
+});
+
+app.post('/plot/forget', (req, res) => {
+  if (['plotting', 'paused'].includes(plotter.state)) return answer(res, 'wrongState');
+  checkpoint = null;
   answer(res);
 });
 
@@ -1045,6 +1069,7 @@ app.post('/plot/stop', (req, res) => {
   if (plotter.state !== 'plotting' && plotter.state !== 'paused') return answer(res, 'wrongState');
   jobNow();
   endJob('idle');
+  checkpoint = null;   // cancelled on purpose
   answer(res);
 });
 

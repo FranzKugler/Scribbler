@@ -227,6 +227,9 @@ export const startJob = (name) => post('/plot/start', { name });
 export const pauseJob = () => post('/plot/pause', {});
 export const resumeJob = () => post('/plot/resume', {});
 export const stopJob = () => post('/plot/stop', {});
+/** The job a power cut or an emergency stop interrupted, from its last checkpoint. */
+export const continueJob = () => post('/plot/continue', {});
+export const forgetCheckpoint = () => post('/plot/forget', {});
 export const setDrawSpeed = (drawSpeed) => post('/plot/config', { drawSpeed });
 
 /** The card and the jobs on it. Throws, like the other polled reads. */

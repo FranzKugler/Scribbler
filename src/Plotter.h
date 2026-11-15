@@ -114,11 +114,22 @@ namespace Plotter
     /** Ready only: checks /jobs/<name> and draws it. */
     const char *startJob(const char *name);
 
-    /** Once the planned moves have run out, pen up, wait. */
+    /**
+     * Ready only: the checkpointed job (Checkpoint.h), from its last
+     * checkpoint - after a power cut, a crash or an emergency stop, once the
+     * bot is homed again. noCheckpoint, jobChanged (the file is not the one
+     * it was), or startJob()'s refusals.
+     */
+    const char *continueJob();
+
+    /** Drops the checkpoint. Not while a job runs or is paused. */
+    const char *forgetCheckpoint();
+
+    /** Brake on the path, pen up, wait; resume carries on from there. */
     const char *pauseJob();
     const char *resumeJob();
 
-    /** Once the planned moves have run out, pen up, give the job up - position kept. */
+    /** Brake on the path, pen up, give the job up - position kept, checkpoint dropped. */
     const char *stopJob();
 
     /** Drawing speed of the pen [mm/s]. */

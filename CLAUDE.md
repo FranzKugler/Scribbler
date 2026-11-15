@@ -111,6 +111,7 @@ The house modules (`Portal`, `WebRoutes`, `OtaUpdate`, `Expert`, `LogBuffer`, `F
 | [src/Path.cpp](src/Path.cpp) | `Path::` — the planner plus a task on core 1 (prio 5) that slices it every 2 ms, solves each slice and feeds both belts with `moveTimed()` in lockstep; only FastAccelStepper caller while active | aware of jobs or the pen |
 | [src/JobFormat.cpp](src/JobFormat.cpp) | one job line, parsed; pure C++ with host tests | aware of files |
 | [src/JobRunner.cpp](src/JobRunner.cpp) | `JobRunner::` — a job on the card: the sliced dry-run check, commands one by one, progress by distance | the executor (that is Plotter, and later the planner) |
+| [src/Checkpoint.cpp](src/Checkpoint.cpp) | `Checkpoint::` — one NVS record (namespace `checkpoint`): job name and size, file offset and line, mm done; taken by Plotter at pen lifts (path dry), at most every 10 s, and when a run starts | the position — after a restart the bot is homed again |
 | [src/SdStore.cpp](src/SdStore.cpp) | `SdStore::` — the card, SD_MMC 1-bit, mounted at boot in app mode | required: no card = no plotting, not no boot |
 | [src/JobRoutes.cpp](src/JobRoutes.cpp) | `Jobs::` — `/jobs*`: list, streamed upload (.part + rename), download, delete; open | a file manager outside `/jobs` |
 
@@ -132,7 +133,8 @@ the servo pulse range.
 `atHome` (hang the loops on the pins) → `ready` (Cartesian moves) ⇄ `plotting` ⇄ `paused`.
 Changing the anchor distance, jogging a belt, a raw jog or motors-off from the Hardware tab, an
 emergency `/stop` during a move, and a restart all go back to `needsRetract`; the position is
-not persisted yet. Pausing or cancelling a job brakes at once and keeps the position. Moves outside a job (homing, jogs) are point-to-point in belt space
+not persisted - the job is: a checkpoint survives all of these, and once homed again
+`/plot/continue` goes on from the last pen lift. Finishing or cancelling a job drops it. Pausing or cancelling a job brakes at once and keeps the position. Moves outside a job (homing, jogs) are point-to-point in belt space
 (`Motion::moveBelts`: both belts on scaled copies of one ramp). A job goes through `Path`:
 pen-down moves at `drawSpeed`, pen-up at travel speed, both straight; a pen change first lets
 the path run dry; pause and cancel brake on the path within v²/2a (`Planner::Queue::stopSoon`),
@@ -151,14 +153,16 @@ job returns home. `plotter.underruns` counts slices that found a step queue empt
 - `POST /jog` — `{side, mm}` before homing, `{dx, dy}` when ready. `POST /home`, `POST /stop`
   (never refused), `POST /pen {state|angle}`.
 - `POST /plot/start {name}`, `/plot/pause`, `/plot/resume`, `/plot/stop`,
-  `/plot/config {drawSpeed}` (1–100 mm/s). `/currentState` then carries `plotter.job`
+  `/plot/config {drawSpeed}` (1–100 mm/s), `/plot/continue` (the checkpointed job, when ready),
+  `/plot/forget` (drop the checkpoint). `/currentState` then carries `plotter.job`
   (`name`, `phase` idle|checking|running|finished|failed, `total`, `done` in mm, and `error`
-  plus `line` when it failed) and `drawSpeed`; `position` also while plotting or paused.
+  plus `line` when it failed) and `drawSpeed`; `plotter.checkpoint` (`name`, `done`, `total`)
+  while one is stored; `position` also while plotting or paused.
 - `GET /jobs` → `{card: {present, total, used}, jobs: [{name, size}], truncated?}`;
   `POST /jobs/upload?name=` (multipart, streamed); `GET /jobs/read?name=[&download=1]`;
   `POST /jobs/delete {name}`. Names: `[A-Za-z0-9._-]{1,64}`, no leading dot.
 - Refusals: `notConfigured`, `wrongState`, `busy`, `outsideArea`, `unreachable`, `noPulleyRun`,
-  `motion`, `noCard` (409); `badValue` with `errorDetail`, `jobName` (400); `jobNotFound` (404);
+  `motion`, `noCard`, `noCheckpoint`, `jobChanged` (409); `badValue` with `errorDetail`, `jobName` (400); `jobNotFound` (404);
   a job's own failures (`jobEmpty`, `outsideArea` with `line`, `jobRead`) land in `plotter.job`.
 
 ### REST: hardware (firmware, `server.js` and `api.js` share it)

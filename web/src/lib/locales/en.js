@@ -121,6 +121,14 @@ export default {
   // --- jobs tab ---
   jobsUnavailable: 'Plotter status unavailable',
   jobsNow: 'Current job',
+  jobsCheckpoint: 'Interrupted job',
+  jobsCheckpointHint:
+    'Cut off by a power cut, a restart or an emergency stop. Continue picks it up at the last pen lift ' +
+    '(up to 10 s back) - only if the paper and the anchors have not moved since.',
+  jobsCheckpointNotReady: 'Set the plotter up again in Setup first (wind in, home, hang), then continue.',
+  jobContinue: 'Continue',
+  jobForget: 'Discard',
+  jobForgetConfirm: (name) => `Discard the interrupted job ${name}? The file stays on the card.`,
   jobPhases: {
     idle: 'ended',
     checking: 'being checked …',
@@ -442,6 +450,8 @@ export default {
   err_jobName: 'Not a valid job name.',
   err_noCard: 'No SD card.',
   err_jobNotFound: 'No such job.',
+  err_noCheckpoint: 'There is no interrupted job.',
+  err_jobChanged: 'The job file has changed since - start it again from the top.',
   err_jobOpen: 'The file cannot be opened.',
   err_jobEmpty: 'The file contains no move.',
   err_svgUnreadable: 'Not a readable SVG file.',

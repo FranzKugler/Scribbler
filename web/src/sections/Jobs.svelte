@@ -109,6 +109,33 @@
 {:else if !p}
   <section class="card"><p class="hint">{t.loadingShort}</p></section>
 {:else}
+  {#if p.checkpoint && !running}
+    <section class="card">
+      <h2>{t.jobsCheckpoint}</h2>
+      <div class="field">
+        <span class="key">{p.checkpoint.name}</span>
+        <span>{t.jobProgress(
+          Math.round(p.checkpoint.done),
+          Math.round(p.checkpoint.total),
+          p.checkpoint.total > 0 ? Math.round((p.checkpoint.done / p.checkpoint.total) * 100) : 0
+        )}</span>
+      </div>
+      <p class="hint">{p.state === 'ready' ? t.jobsCheckpointHint : t.jobsCheckpointNotReady}</p>
+      <div class="field">
+        <span></span>
+        <span>
+          <button type="button" class="secondary" disabled={busy}
+            onclick={() => confirm(t.jobForgetConfirm(p.checkpoint.name)) && act(api.forgetCheckpoint)}
+            >{t.jobForget}</button
+          >
+          <button type="button" class="primary" disabled={busy || p.state !== 'ready' || p.moving}
+            onclick={() => act(api.continueJob)}>{t.jobContinue}</button
+          >
+        </span>
+      </div>
+    </section>
+  {/if}
+
   <section class="card">
     <h2>{t.jobsNow}</h2>
     {#if p.job}

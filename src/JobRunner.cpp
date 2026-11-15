@@ -37,6 +37,12 @@ namespace
     // The check's own walk along the path.
     double walkX = 0.0, walkY = 0.0, startX = 0.0, startY = 0.0;
     uint32_t lineNo = 0, moves = 0;
+    uint32_t fileSize = 0;
+
+    // Where running starts once the check has passed: the top, or a
+    // checkpoint's offset.
+    uint32_t resumeOffset = 0, resumeLine = 0;
+    double resumeDone = 0.0;
 
     void fail(const char *code, uint32_t line = 0)
     {
@@ -94,7 +100,7 @@ namespace JobRunner
         return true;
     }
 
-    const char *open(const char *name, double sx, double sy, double w, double my)
+    const char *open(const char *name, double sx, double sy, double w, double my, const Resume *resume)
     {
         if (!validName(name)) return "jobName";
         if (!SdStore::present()) return "noCard";
@@ -107,6 +113,15 @@ namespace JobRunner
         if (!SdStore::fs().exists(path)) return "jobNotFound";
         file = SdStore::fs().open(path, "r");
         if (!file) return "jobOpen";
+        fileSize = file.size();
+        if (resume && (resume->size != fileSize || resume->offset > fileSize))
+        {
+            file.close();
+            return "jobChanged";
+        }
+        resumeOffset = resume ? resume->offset : 0;
+        resumeLine = resume ? resume->line : 0;
+        resumeDone = resume ? resume->done : 0.0;
 
         width = w;
         maxY = my;
@@ -134,14 +149,19 @@ namespace JobRunner
                     fail("jobEmpty");
                     return;
                 }
-                if (!file.seek(0))
+                if (!file.seek(resumeOffset))
                 {
                     fail("jobRead");
                     return;
                 }
-                lineNo = 0;
+                lineNo = resumeLine;
+                doneMm = resumeDone;
                 current = Phase::Running;
-                debugI("Job %s: %u moves, %.0f mm - running", jobName, (unsigned)moves, totalMm);
+                if (resumeOffset)
+                    debugI("Job %s: %u moves, %.0f mm - resuming at line %u, %.0f mm",
+                           jobName, (unsigned)moves, totalMm, (unsigned)lineNo, doneMm);
+                else
+                    debugI("Job %s: %u moves, %.0f mm - running", jobName, (unsigned)moves, totalMm);
                 return;
             }
             const JobFormat::Line l = JobFormat::parse(buf);
@@ -221,6 +241,9 @@ namespace JobRunner
     uint32_t errorLine() { return failureLine; }
     double total()       { return totalMm; }
     double done()        { return doneMm; }
+    uint32_t size()      { return fileSize; }
+    uint32_t offset()    { return file ? (uint32_t)file.position() : 0; }
+    uint32_t line()      { return lineNo; }
 
     const char *phaseName()
     {

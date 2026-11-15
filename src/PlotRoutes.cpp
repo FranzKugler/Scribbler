@@ -134,6 +134,8 @@ namespace
     void pauseJob()  { answer(Plotter::pauseJob()); }
     void resumeJob() { answer(Plotter::resumeJob()); }
     void stopJob()   { answer(Plotter::stopJob()); }
+    void continueJob()      { answer(Plotter::continueJob()); }
+    void forgetCheckpoint() { answer(Plotter::forgetCheckpoint()); }
 
     void plotConfig()
     {
@@ -188,6 +190,8 @@ namespace Plot
         server.on("/plot/pause", HTTP_POST, pauseJob);
         server.on("/plot/resume", HTTP_POST, resumeJob);
         server.on("/plot/stop", HTTP_POST, stopJob);
+        server.on("/plot/continue", HTTP_POST, continueJob);
+        server.on("/plot/forget", HTTP_POST, forgetCheckpoint);
         server.on("/plot/config", HTTP_POST, plotConfig);
     }
 }

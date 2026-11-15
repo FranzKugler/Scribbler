@@ -16,7 +16,7 @@
  * executor without touching this.
  *
  * Refusal and failure codes: jobName, noCard, jobNotFound, jobOpen,
- * jobEmpty, outsideArea (with the line number), jobRead.
+ * jobEmpty, outsideArea (with the line number), jobRead, jobChanged.
  *
  * @mc       ESP32S3
  * @author   Franz Kugler / franz _AT_ franz _MINUS_ kugler _DOT_ de
@@ -44,12 +44,23 @@ namespace JobRunner
     /** A job name: 1-64 of [A-Za-z0-9._-], not starting with a dot. */
     bool validName(const char *name);
 
+    /** Where to pick a job up again (Checkpoint): the file is still checked whole. */
+    struct Resume
+    {
+        uint32_t size;     // must match the file's, or the job is refused (jobChanged)
+        uint32_t offset;   // the byte to read on from
+        uint32_t line;
+        double done;       // mm already behind
+    };
+
     /**
      * Opens /jobs/<name> and starts the check. The pen starts at (startX,
-     * startY), which the first move's distance is counted from. nullptr or a
-     * refusal code.
+     * startY), which the first move's distance is counted from. With
+     * `resume`, running starts at its offset instead of the top. nullptr or
+     * a refusal code.
      */
-    const char *open(const char *name, double startX, double startY, double width, double maxY);
+    const char *open(const char *name, double startX, double startY, double width, double maxY,
+                     const Resume *resume = nullptr);
 
     /** Advances the check by up to `lines` lines. Call while Checking. */
     void check(uint32_t lines);
@@ -73,6 +84,11 @@ namespace JobRunner
     uint32_t errorLine();
     double total();
     double done();
+
+    /** The file's size, and the byte and line the next read starts at - for a checkpoint. */
+    uint32_t size();
+    uint32_t offset();
+    uint32_t line();
 }
 
 #endif

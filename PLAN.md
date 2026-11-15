@@ -356,6 +356,10 @@ Each phase ends with something checkable on the device, not with a green build.
    so it was only the map, not a source. Open: hidden-line removal for overlapping filled shapes,
    raster images (§5), and a check against the same SVG through Mural's UI on the wall.
 8. **Polish** — checkpoint/resume after power loss, first-flash page, README, release.
+   *2026-11-16:* checkpoint and continue built (`Checkpoint`, `/plot/continue`, the card in the
+   Jobs tab, the mock). Taken at pen lifts, where the path has run dry - the only moments the
+   file offset, the distance and the position agree; at most every 10 s, so resuming redraws at
+   most that much. Release v0.1.0 out, flashing page live.
 
 **Release and first flash — requested 2026-11-15, not urgent, not to be forgotten.** The house
 pipeline is already in the repository (from DoorOpener): `release.yml` builds both images on
