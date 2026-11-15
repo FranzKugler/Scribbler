@@ -335,6 +335,12 @@ Each phase ends with something checkable on the device, not with a green build.
    square test needs straight lines, so it waits for the planner.
 5. **Jobs** — SD, chunked upload, `JobRunner` with Mural-compatible format, progress, pause/stop.
    First plot from a file produced by Mural's own web UI.
+   *Built 2026-11-15, not yet on hardware:* `SdStore`, `JobFormat` (host-tested; reads Mural
+   files without Mural's d-line digit loss and refuses garbage instead of moving to 0,0),
+   `JobRunner` (dry-run check in slices, progress by distance), `JobRoutes` (streamed multipart
+   upload rather than Mural's chunked protocol - the file format is what stays compatible),
+   pause/cancel at the end of a millimetre, the Plot tab. The first plot of a Mural file
+   waits for hardware.
 6. **Planner** — trapezoid + lookahead; compare plot time and quality against phase 5 on the same file.
 7. **Own SVG pipeline** in the Jobs tab, with preview and time estimate.
 8. **Polish** — checkpoint/resume after power loss, first-flash page, README, release.

@@ -13,7 +13,12 @@
  *   POST /jog                   {side, mm} before homing, {dx, dy} when ready
  *   POST /home                  ready: travel back home
  *   POST /stop                  any motion, never refused
- *   POST /pen                   {state: "up"|"down"} or {angle}
+ *   POST /pen                   {state: "up"|"down"} or {angle}; not while plotting
+ *   POST /plot/start            {name}: check /jobs/<name>, then draw it
+ *   POST /plot/pause            pen up after the current millimetre
+ *   POST /plot/resume
+ *   POST /plot/stop             give the job up after the current millimetre
+ *   POST /plot/config           {drawSpeed} [mm/s]
  *
  * The state, position and belts go out with /currentState (Plotter::publish).
  *

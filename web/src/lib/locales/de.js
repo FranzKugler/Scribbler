@@ -16,7 +16,7 @@
  */
 export default {
   // --- shell ---
-  tabs: ['Status', 'Einrichten', 'WLAN', 'Hardware', 'Update', 'Debug', 'Speicher'],
+  tabs: ['Status', 'Plotten', 'Einrichten', 'WLAN', 'Hardware', 'Update', 'Debug', 'Speicher'],
   loading: 'Einstellungen werden geladen …',
   loadingShort: 'wird geladen …',
   deviceUnreachable: 'Gerät nicht erreichbar',
@@ -124,6 +124,45 @@ export default {
     'von beiden hochgeladen wurde, erkennt das Gerät am ersten Byte.',
   connectionLost: 'Verbindung abgebrochen',
   uploadAborted: 'Upload abgebrochen',
+
+  // --- jobs tab ---
+  jobsUnavailable: 'Plotter-Status nicht verfügbar',
+  jobsNow: 'Aktueller Auftrag',
+  jobPhases: {
+    idle: 'beendet',
+    checking: 'wird geprüft …',
+    running: 'zeichnet',
+    finished: 'fertig',
+    failed: 'fehlgeschlagen'
+  },
+  jobPaused: 'pausiert',
+  jobFailed: (reason, line) => (line ? `${reason} (Zeile ${line})` : reason),
+  jobProgress: (done, total, pct) => `${done} von ${total} mm · ${pct} %`,
+  jobsIdle: 'Kein Auftrag. Einen von der Karte starten.',
+  jobsNotReady: 'Der Plotter ist noch nicht eingerichtet – siehe „Einrichten“.',
+  jobPause: 'Pause',
+  jobResume: 'Weiter',
+  jobStop: 'Abbrechen',
+  jobStopHint:
+    'Pause und Abbrechen warten den laufenden Millimeter ab und heben den Stift – die Position bleibt ' +
+    'bekannt. Stopp hält sofort an; danach müssen die Riemen neu eingezogen werden.',
+  jobsCard: 'SD-Karte',
+  jobsNoCard: 'Keine SD-Karte – Karte einlegen und das Gerät neu starten.',
+  jobsCardUsage: (used, total) => `${used} von ${total} belegt.`,
+  jobsEmpty: 'Noch keine Aufträge auf der Karte.',
+  jobStart: 'Zeichnen',
+  jobDownload: 'Laden',
+  jobDelete: 'Löschen',
+  jobDeleteConfirm: (name) => `${name} löschen?`,
+  jobsTruncated: 'Nicht alle Aufträge angezeigt.',
+  jobUploading: (name) => `${name} wird übertragen …`,
+  jobsUploadHint: 'Eine Auftragsdatei im Mural-Format (.txt).',
+  jobUpload: 'Hochladen',
+  jobsSpeedTitle: 'Geschwindigkeit',
+  jobsSpeed: 'Zeichnen (mm/s)',
+  jobsSpeedHint:
+    'Bis der Planer da ist, hält der Bot nach jedem Millimeter kurz an – schneller als ~20 mm/s bringt ' +
+    'eher Zittern als Zeit.',
 
   // --- setup tab ---
   setupUnavailable: 'Plotter-Status nicht verfügbar',
@@ -385,6 +424,16 @@ export default {
   err_unreachable: 'An dieser Stelle findet das Modell keine Lage für den Bot.',
   err_noPulleyRun: 'Zuerst den Riemen zum Messen ausgeben.',
   err_motion: 'Der Schrittgenerator hat die Bewegung abgelehnt.',
+  err_jobName: 'Kein gültiger Auftragsname.',
+  err_noCard: 'Keine SD-Karte.',
+  err_jobNotFound: 'Den Auftrag gibt es nicht.',
+  err_jobOpen: 'Die Datei lässt sich nicht öffnen.',
+  err_jobEmpty: 'Die Datei enthält keine Bewegung.',
+  err_jobRead: 'Die Datei ließ sich nicht lesen.',
+  err_jobWrite: 'Schreiben auf die Karte fehlgeschlagen – vermutlich voll.',
+  err_jobAborted: 'Die Übertragung wurde abgebrochen.',
+  err_jobRename: 'Die fertige Datei ließ sich nicht an ihren Platz bringen.',
+  err_jobDelete: 'Löschen fehlgeschlagen.',
   err_busy: 'Ein Riemen fährt noch – erst anhalten.',
   err_motorsOff: 'Die Motoren sind ausgeschaltet.',
   err_badValue: (field) => `Kein gültiger Wert: ${field}.`,

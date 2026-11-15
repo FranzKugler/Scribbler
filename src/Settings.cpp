@@ -36,6 +36,7 @@
 #define DEFAULT_PEN_UP        90
 #define DEFAULT_PEN_DOWN      70
 #define DEFAULT_PULLEY        10.14926
+#define DEFAULT_DRAW_SPEED    15.0
 
 Settings::Settings()
 {
@@ -50,6 +51,7 @@ Settings::Settings()
     PenDown      = DEFAULT_PEN_DOWN;
     AnchorDistance = 0.0;
     PulleyDiameter = DEFAULT_PULLEY;
+    DrawSpeed    = DEFAULT_DRAW_SPEED;
     ImuOffset    = 0.0f;
 }
 
@@ -93,6 +95,8 @@ void Settings::loadSettings()
     PenDown      = doc["PenDown"] | DEFAULT_PEN_DOWN;
     AnchorDistance = doc["AnchorDistance"] | 0.0;
     PulleyDiameter = doc["PulleyDiameter"] | DEFAULT_PULLEY;
+    DrawSpeed    = doc["DrawSpeed"] | DEFAULT_DRAW_SPEED;
+    if (!(DrawSpeed >= 1.0 && DrawSpeed <= 100.0)) DrawSpeed = DEFAULT_DRAW_SPEED;
     ImuOffset    = doc["ImuOffset"] | 0.0f;
 
     // Outside what Plotter accepts, the record is not something to plot by.
@@ -125,6 +129,7 @@ void Settings::fillDocument(JsonDocument &doc)
     doc["PenDown"]          = PenDown;
     doc["AnchorDistance"]   = AnchorDistance;
     doc["PulleyDiameter"]   = PulleyDiameter;
+    doc["DrawSpeed"]        = DrawSpeed;
     doc["ImuOffset"]        = ImuOffset;
 }
 

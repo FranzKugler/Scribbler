@@ -99,6 +99,11 @@ public:
     void   setPulleyDiameter(double mm) { this->PulleyDiameter = mm; }
     double getPulleyDiameter() { return this->PulleyDiameter; }
 
+    // Pen speed while drawing [mm/s]. Mural draws at 650 steps/s at 1/8,
+    // ~13 mm/s; the planner will make faster speeds worth trying.
+    void   setDrawSpeed(double mmPerS) { this->DrawSpeed = mmPerS; }
+    double getDrawSpeed() { return this->DrawSpeed; }
+
     // How far the IMU's zero is off the bot's level [rad]; see Imu::setOffset().
     void  setImuOffset(float radians) { this->ImuOffset = radians; }
     float getImuOffset() { return this->ImuOffset; }
@@ -122,6 +127,7 @@ private:
     byte     PenDown;         // degrees
     double   AnchorDistance;  // mm, 0 = not set
     double   PulleyDiameter;  // mm
+    double   DrawSpeed;       // mm/s
     float    ImuOffset;       // rad
 };
 

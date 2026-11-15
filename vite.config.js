@@ -38,6 +38,8 @@ const API_ROUTES = [
   '/portal',
   '/hardware',
   '/calib',
+  '/plot',
+  '/jobs',
   '/jog',
   '/home',
   '/stop',

@@ -4,12 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Status
 
-**Phases 1–4 built (PLAN.md section 3).** What exists: the house scaffolding copied from
+**Phases 1–5 built (PLAN.md section 3).** What exists: the house scaffolding copied from
 DoorOpener and renamed (portal, SPA, OTA, expert lock, log ring, storage explorer, mock server,
 release workflow, first-flash page), `src/Board.h` from the schematic's netlist,
 `src/Kinematics.*` with host tests, the hardware modules with a bring-up tab, and the
-calibration flow (state machine, Setup tab) up to a bot hanging at a known position. No jobs, no
-planner, no straight lines yet. None of it has run on hardware. [PLAN.md](PLAN.md) is the source of truth for everything not
+calibration flow (state machine, Setup tab), and jobs from the SD card in Mural's format (Plot
+tab). Drawing is still Mural's 1 mm stop-and-go - no planner yet. None of it has run on hardware. [PLAN.md](PLAN.md) is the source of truth for everything not
 built; this file describes what is, plus the rules. Do not describe here what has not been built.
 
 ## Project overview
@@ -105,7 +105,11 @@ The house modules (`Portal`, `WebRoutes`, `OtaUpdate`, `Expert`, `LogBuffer`, `F
 | [src/Imu.cpp](src/Imu.cpp) | `Imu::` — BMI270, tilt by complementary filter | an input to the motion |
 | [src/HardwareRoutes.cpp](src/HardwareRoutes.cpp) | `Hw::` — `/hardware*`, all behind the lock | state-aware; a raw jog or motors-off makes Plotter forget its position |
 | [src/Plotter.cpp](src/Plotter.cpp) | `Plotter::` — the state machine, what each state allows, the calibration flow, the Kinematics model | the job runner or the planner |
-| [src/PlotRoutes.cpp](src/PlotRoutes.cpp) | `Plot::` — `/calib/*`, `/jog`, `/home`, `/stop`, `/pen`; open | a second state table — every handler asks Plotter |
+| [src/PlotRoutes.cpp](src/PlotRoutes.cpp) | `Plot::` — `/calib/*`, `/jog`, `/home`, `/stop`, `/pen`, `/plot/*`; open | a second state table — every handler asks Plotter |
+| [src/JobFormat.cpp](src/JobFormat.cpp) | one job line, parsed; pure C++ with host tests | aware of files |
+| [src/JobRunner.cpp](src/JobRunner.cpp) | `JobRunner::` — a job on the card: the sliced dry-run check, commands one by one, progress by distance | the executor (that is Plotter, and later the planner) |
+| [src/SdStore.cpp](src/SdStore.cpp) | `SdStore::` — the card, SD_MMC 1-bit, mounted at boot in app mode | required: no card = no plotting, not no boot |
+| [src/JobRoutes.cpp](src/JobRoutes.cpp) | `Jobs::` — `/jobs*`: list, streamed upload (.part + rename), download, delete; open | a file manager outside `/jobs` |
 
 `main.cpp` starts the drivers right after the settings (motors off), then one `Wire` bus for
 display and IMU. The display names the access point in portal mode and the address otherwise.
@@ -122,10 +126,13 @@ the servo pulse range.
 
 `unconfigured` (no anchor distance) → `needsRetract` (wind both belts to the stop by jogging) →
 `retracted` (lengths known: 40 mm each; pulley calibration happens here) → `extendingHome` →
-`atHome` (hang the loops on the pins) → `ready` (Cartesian moves). Changing the anchor
-distance, jogging a belt, a raw jog or motors-off from the Hardware tab, and a restart all go
-back to `needsRetract`; the position is not persisted yet. Moves before the planner are
-point-to-point in belt space (`Motion::moveBelts`: both belts on scaled copies of one ramp).
+`atHome` (hang the loops on the pins) → `ready` (Cartesian moves) ⇄ `plotting` ⇄ `paused`.
+Changing the anchor distance, jogging a belt, a raw jog or motors-off from the Hardware tab, an
+emergency `/stop` during a move, and a restart all go back to `needsRetract`; the position is
+not persisted yet. Pausing or cancelling a job waits for the current millimetre and keeps the
+position. Moves before the planner are point-to-point in belt space (`Motion::moveBelts`: both
+belts on scaled copies of one ramp); a drawn segment is cut into 1 mm pieces at `drawSpeed`
+(Mural's way - straight, but stop-and-go). A finished job returns home.
 
 ### REST: plotter (open; firmware, `server.js` and `api.js` share it)
 
@@ -138,8 +145,16 @@ point-to-point in belt space (`Motion::moveBelts`: both belts on scaled copies o
   `/calib/pen {up, down}`.
 - `POST /jog` — `{side, mm}` before homing, `{dx, dy}` when ready. `POST /home`, `POST /stop`
   (never refused), `POST /pen {state|angle}`.
+- `POST /plot/start {name}`, `/plot/pause`, `/plot/resume`, `/plot/stop`,
+  `/plot/config {drawSpeed}` (1–100 mm/s). `/currentState` then carries `plotter.job`
+  (`name`, `phase` idle|checking|running|finished|failed, `total`, `done` in mm, and `error`
+  plus `line` when it failed) and `drawSpeed`; `position` also while plotting or paused.
+- `GET /jobs` → `{card: {present, total, used}, jobs: [{name, size}], truncated?}`;
+  `POST /jobs/upload?name=` (multipart, streamed); `GET /jobs/read?name=[&download=1]`;
+  `POST /jobs/delete {name}`. Names: `[A-Za-z0-9._-]{1,64}`, no leading dot.
 - Refusals: `notConfigured`, `wrongState`, `busy`, `outsideArea`, `unreachable`, `noPulleyRun`,
-  `motion` (409); `badValue` with `errorDetail` (400).
+  `motion`, `noCard` (409); `badValue` with `errorDetail`, `jobName` (400); `jobNotFound` (404);
+  a job's own failures (`jobEmpty`, `outsideArea` with `line`, `jobRead`) land in `plotter.job`.
 
 ### REST: hardware (firmware, `server.js` and `api.js` share it)
 
@@ -236,7 +251,7 @@ types that older parsers skip, not in changed semantics.
 npm install && npm run build      # web/ -> data/
 npm run dev / npm run mock        # UI against the mock, no hardware
 pio run / -t upload / -t uploadfs # the device (env seeed_xiao_esp32s3)
-pio test -e native                # host tests - needs gcc/clang on PATH
+pio test -e native                # host tests (Kinematics, JobFormat) - needs gcc/clang on PATH
 python scripts/kinematics_reference.py [--check]   # regenerate / verify the reference table
 python scripts/icon.py            # regenerate the icons (then copy three of them to docs/)
 ```

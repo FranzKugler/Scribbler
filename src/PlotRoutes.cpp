@@ -106,6 +106,8 @@ namespace
 
     void pen()
     {
+        // The job owns the pen while it draws.
+        if (Plotter::state() == Plotter::State::Plotting) return answer("wrongState");
         JsonDocument doc;
         body(doc);
         if (doc["angle"].is<int>())
@@ -120,6 +122,25 @@ namespace
         else if (strcmp(state, "down") == 0) Pen::down();
         else return answer("badValue", "state");
         answer(nullptr);
+    }
+
+    void startJob()
+    {
+        JsonDocument doc;
+        body(doc);
+        answer(Plotter::startJob(doc["name"] | ""));
+    }
+
+    void pauseJob()  { answer(Plotter::pauseJob()); }
+    void resumeJob() { answer(Plotter::resumeJob()); }
+    void stopJob()   { answer(Plotter::stopJob()); }
+
+    void plotConfig()
+    {
+        JsonDocument doc;
+        body(doc);
+        if (!doc["drawSpeed"].is<float>()) return answer("badValue", "drawSpeed");
+        answer(Plotter::setDrawSpeed(doc["drawSpeed"].as<double>()), "drawSpeed");
     }
 
     void penAngles()
@@ -163,5 +184,10 @@ namespace Plot
         server.on("/home", HTTP_POST, home);
         server.on("/stop", HTTP_POST, stop);
         server.on("/pen", HTTP_POST, pen);
+        server.on("/plot/start", HTTP_POST, startJob);
+        server.on("/plot/pause", HTTP_POST, pauseJob);
+        server.on("/plot/resume", HTTP_POST, resumeJob);
+        server.on("/plot/stop", HTTP_POST, stopJob);
+        server.on("/plot/config", HTTP_POST, plotConfig);
     }
 }

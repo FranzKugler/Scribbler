@@ -53,6 +53,8 @@
 #include "HardwareRoutes.h"
 #include "Plotter.h"
 #include "PlotRoutes.h"
+#include "SdStore.h"
+#include "JobRoutes.h"
 
 #include <Wire.h>
 
@@ -446,11 +448,15 @@ void setup()
     // yet started.
     Ota::begin();
 
+    // The card holds the jobs; not needed in portal mode, so mounted here.
+    SdStore::begin();
+
     Web::begin();
     Files::begin();
     Nvs::begin();
     Hw::begin();
     Plot::begin();
+    Jobs::begin();
     server.begin();
 
     startArduinoOta();

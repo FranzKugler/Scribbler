@@ -5,7 +5,7 @@
    * hands them to the section shown by the selected tab.
    *
    * Which tabs exist is the device's answer, not this component's: four of
-   * the seven sit behind expert mode, and until the device says otherwise it is
+   * the eight sit behind expert mode, and until the device says otherwise it is
    * treated as locked. That is the safe way round - a firmware without
    * `/expert` at all answers 404, and the tabs stay away rather than being
    * offered against endpoints that refuse them.
@@ -26,6 +26,7 @@
   import Debug from './sections/Debug.svelte';
   import Hardware from './sections/Hardware.svelte';
   import Setup from './sections/Setup.svelte';
+  import Jobs from './sections/Jobs.svelte';
   import Storage from './sections/Storage.svelte';
   import Expert from './sections/Expert.svelte';
 
@@ -33,8 +34,8 @@
   // offered once the device is unlocked; t.tabs keeps all of them either way, so
   // the label of a tab is found by its place in this list rather than in the
   // visible one.
-  const ALL_TABS = ['status', 'setup', 'wifi', 'hardware', 'ota', 'debug', 'storage'];
-  const OPEN_TABS = 3;
+  const ALL_TABS = ['status', 'jobs', 'setup', 'wifi', 'hardware', 'ota', 'debug', 'storage'];
+  const OPEN_TABS = 4;
 
   let active = $state('status');
   let device = $state(null);
@@ -177,6 +178,8 @@
 
     {#if active === 'status'}
       <Status />
+    {:else if active === 'jobs'}
+      <Jobs />
     {:else if active === 'setup'}
       <Setup />
     {:else if active === 'wifi'}

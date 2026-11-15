@@ -17,18 +17,26 @@
  *   AtHome          belts at home length, bot not yet on the wall: hang the
  *                   loops over the pins
  *   Ready           hanging at a known position; Cartesian moves allowed
+ *   Plotting        a job runs (JobRunner checks it first, then this draws it)
+ *   Paused          a job waits, pen up, at a known position
  *
  * Every action is checked against the state before anything moves, and a
  * refusal is a code (see the .cpp), so the UI can grey out what the device
  * would refuse anyway (PLAN.md section 2). "busy" is not a state: any motion
  * in progress refuses every action but stop.
  *
- * The position is not persisted. A restart, or a raw jog from the Hardware
- * tab, sends a homed bot back to NeedsRetract - the honest answer until
- * checkpoints exist (phase 8).
+ * The position is not persisted. A restart, a raw jog from the Hardware tab,
+ * or an emergency stop in the middle of a move sends a homed bot back to
+ * NeedsRetract - the honest answer until checkpoints exist (phase 8). Pausing
+ * or stopping a job does not: both wait for the current millimetre to end, so
+ * the position stays known.
  *
- * What it is not: the job runner (phase 5) or the planner (phase 6). Moves
- * here are point-to-point in belt space - see Motion.h.
+ * Drawing, until the planner (phase 6): Mural's way - each drawn segment cut
+ * into 1 mm pieces, each a point-to-point belt move at the drawing speed with
+ * no ramp to speak of; travel with the pen up is one ramped move. That makes
+ * lines straight to within the chord of a millimetre, and makes the bot stop
+ * and start every millimetre, which is the vibration the planner removes. The
+ * executor is the one part the planner replaces; JobRunner stays.
  *
  * @mc       ESP32S3
  * @author   Franz Kugler / franz _AT_ franz _MINUS_ kugler _DOT_ de
@@ -53,7 +61,9 @@ namespace Plotter
         Retracted,
         ExtendingHome,
         AtHome,
-        Ready
+        Ready,
+        Plotting,
+        Paused
     };
 
     /** Reads the anchor distance and pulley from the settings. After Motion::begin(). */
@@ -101,7 +111,24 @@ namespace Plotter
     const char *pulleyExtend(double mm);
     const char *pulleyMeasured(double mm);
 
-    /** Stops any motion. Never refused. */
+    /** Ready only: checks /jobs/<name> and draws it. */
+    const char *startJob(const char *name);
+
+    /** At the end of the current millimetre, pen up, wait. */
+    const char *pauseJob();
+    const char *resumeJob();
+
+    /** At the end of the current millimetre, pen up, give the job up - position kept. */
+    const char *stopJob();
+
+    /** Drawing speed of the pen [mm/s]. */
+    const char *setDrawSpeed(double mmPerS);
+
+    /**
+     * Emergency stop: ramps both belts down now. A move cut short leaves the
+     * bot somewhere along it, so the position is forgotten (NeedsRetract); a
+     * job is given up. Never refused.
+     */
     void stop();
 
     /**

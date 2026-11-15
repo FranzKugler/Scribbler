@@ -455,7 +455,8 @@ app.post('/fs/upload', (req, res) => {
 const nvs = [
   { ns: 'scribbler', key: 'conf', type: 'str',
     value: '{"Schema":1,"Hostname":"Scribbler","OtaChannel":0,"OtaAutoUpdate":false,"OtaCheckInterval":24,' +
-      '"MotorCurrent":700,"Microsteps":16,"PenUp":90,"PenDown":70,"ImuOffset":0}' },
+      '"MotorCurrent":700,"Microsteps":16,"PenUp":90,"PenDown":70,"AnchorDistance":0,' +
+      '"PulleyDiameter":10.14926,"DrawSpeed":15,"ImuOffset":0}' },
   { ns: 'scribexpert', key: 'on', type: 'u8', value: '1' },
   { ns: 'scribexpert', key: 'hash', type: 'blob', value: null, protected: true },
   { ns: 'scribexpert', key: 'salt', type: 'blob', value: null, protected: true },
@@ -683,7 +684,7 @@ app.post('/hardware/config', (req, res) => {
 
 const RETRACTED_MM = 40;
 const HOME_Y_MM = 350;
-const plotter = { state: 'unconfigured', anchor: 0, pulleyRun: 0, x: 0, y: 0 };
+const plotter = { state: 'unconfigured', anchor: 0, pulleyRun: 0, x: 0, y: 0, drawSpeed: 15 };
 
 const width = () => plotter.anchor * 0.6;
 const homeX = () => width() / 2;
@@ -713,8 +714,11 @@ function plotterState() {
     pulleyDiameter: hw.pulleyDiameter,
     pulleyRun: plotter.pulleyRun,
     microsteps: hw.microsteps,
-    penDown: penNow().down
+    penDown: penNow().down,
+    drawSpeed: plotter.drawSpeed
   };
+  const job = jobNow();
+  if (job) out.job = job;
   if (plotter.state === 'unconfigured') return out;
   out.width = width();
   out.maxY = plotter.anchor;
@@ -722,7 +726,7 @@ function plotterState() {
   if (plotter.state !== 'needsRetract') {
     out.belts = { left: beltNow(hw.belts.left).mm, right: beltNow(hw.belts.right).mm };
   }
-  if (plotter.state === 'ready') {
+  if (['ready', 'plotting', 'paused'].includes(plotter.state)) {
     out.position = { x: plotter.x, y: plotter.y, target: anyMoving() };
     out.tiltModel = 0;
   }
@@ -732,6 +736,7 @@ function plotterState() {
 
 /** The plotter forgets where it is - the mock's Plotter::forgetPosition(). */
 function forgetPosition() {
+  if (job.phase === 'checking' || job.phase === 'running') endJob('idle');
   if (plotter.state !== 'unconfigured' && plotter.state !== 'needsRetract') {
     plotter.state = 'needsRetract';
     plotter.pulleyRun = 0;
@@ -863,6 +868,10 @@ app.post('/home', (req, res) => {
 });
 
 app.post('/stop', (req, res) => {
+  const wasMoving = anyMoving() || plotter.state === 'plotting';
+  if (plotter.state === 'plotting' || plotter.state === 'paused') endJob('idle');
+  if (wasMoving) forgetPosition();
+  else if (plotter.state === 'paused') plotter.state = 'ready';
   for (const belt of Object.values(hw.belts)) {
     const now = beltNow(belt);
     Object.assign(belt, { from: now.mm, to: now.mm, at: Date.now() });
@@ -871,6 +880,7 @@ app.post('/stop', (req, res) => {
 });
 
 app.post('/pen', (req, res) => {
+  if (plotter.state === 'plotting') return answer(res, 'wrongState');
   const { angle, state } = req.body ?? {};
   if (Number.isInteger(angle)) {
     if (angle < 0 || angle > 180) return answer(res, 'badValue', 'angle');
@@ -878,6 +888,170 @@ app.post('/pen', (req, res) => {
   } else if (state === 'up') movePen(hw.pen.upAngle);
   else if (state === 'down') movePen(hw.pen.downAngle);
   else return answer(res, 'badValue', 'state');
+  answer(res);
+});
+
+/* ------ jobs ------ */
+
+// The card and the runner, after src/JobRoutes.cpp and src/JobRunner.cpp. A
+// job is checked the way the firmware checks it (bounds, at least one move,
+// total length), then "drawn" by the clock at the drawing speed - no belts
+// move in the mock while it runs.
+
+const CARD_TOTAL = 32 * 1024 ** 3;
+const jobFiles = {
+  'square-100.txt': [
+    'd400', 'h100', '250 300', 'p1', '350 300', '350 400', '250 400', '250 300', 'p0'
+  ].join('\n') + '\n'
+};
+const validJobName = (n) => typeof n === 'string' && /^[A-Za-z0-9_-][A-Za-z0-9._-]{0,63}$/.test(n);
+
+// The running job: name, phase, total, done so far (frozen while paused),
+// and when the running stretch began.
+const job = { name: '', phase: 'idle', total: 0, done: 0, since: 0, error: null, line: 0 };
+
+function checkJob(text) {
+  let x = plotter.x, y = plotter.y, total = 0, moves = 0;
+  const lines = text.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].trim().match(/^(-?[\d.eE+-]+)\s+(-?[\d.eE+-]+)$/);
+    if (!m) continue;
+    const nx = Number(m[1]), ny = Number(m[2]);
+    if (nx < -0.5 || nx > width() + 0.5 || ny < -0.5 || ny > plotter.anchor + 0.5)
+      return { error: 'outsideArea', line: i + 1 };
+    total += Math.hypot(nx - x, ny - y);
+    x = nx;
+    y = ny;
+    moves++;
+  }
+  return moves ? { total } : { error: 'jobEmpty' };
+}
+
+function jobNow() {
+  if (!job.name) return null;
+  if (job.phase === 'checking' && Date.now() - job.since > 800) {
+    // The firmware's check runs in slices; here it just takes a moment.
+    job.phase = 'running';
+    job.since += 800;   // the run began when the check ended, not when someone asked
+  }
+  let done = job.done;
+  if (job.phase === 'running' && plotter.state === 'plotting') {
+    done = Math.min(job.total, job.done + ((Date.now() - job.since) / 1000) * plotter.drawSpeed);
+    if (done >= job.total) {
+      endJob('finished');
+      done = job.total;
+    }
+  }
+  const out = { name: job.name, phase: job.phase, total: job.total, done };
+  if (job.error) {
+    out.error = job.error;
+    if (job.line) out.line = job.line;
+  }
+  return out;
+}
+
+function endJob(phase) {
+  if (job.phase === 'running' && plotter.state === 'plotting')
+    job.done = Math.min(job.total, job.done + ((Date.now() - job.since) / 1000) * plotter.drawSpeed);
+  job.phase = phase;
+  plotter.state = 'ready';
+  movePen(hw.pen.upAngle);
+}
+
+app.get('/jobs', (req, res) =>
+  res.json({
+    card: { present: true, total: CARD_TOTAL, used: 3.1 * 1024 ** 3 },
+    jobs: Object.entries(jobFiles).map(([name, text]) => ({ name, size: text.length }))
+  })
+);
+
+app.get('/jobs/read', (req, res) => {
+  const name = String(req.query.name ?? '');
+  if (!validJobName(name)) return res.status(400).json({ error: 'jobName' });
+  if (!(name in jobFiles)) return res.status(404).json({ error: 'jobNotFound' });
+  if (req.query.download) res.attachment(name);
+  res.type('text/plain').send(jobFiles[name]);
+});
+
+app.post('/jobs/delete', (req, res) => {
+  const name = req.body?.name;
+  if (!validJobName(name)) return res.status(400).json({ error: 'jobName' });
+  if (['plotting', 'paused'].includes(plotter.state) && job.name === name)
+    return res.status(409).json({ error: 'busy' });
+  if (!(name in jobFiles)) return res.status(404).json({ error: 'jobNotFound' });
+  delete jobFiles[name];
+  res.json({ ok: true });
+});
+
+app.post('/jobs/upload', (req, res) => {
+  const name = String(req.query.name ?? '');
+  if (!validJobName(name)) return res.status(400).json({ error: 'jobName' });
+  if (['plotting', 'paused'].includes(plotter.state) && job.name === name)
+    return res.status(409).json({ error: 'busy' });
+  const chunks = [];
+  req.on('data', (c) => chunks.push(c));
+  req.on('end', () => {
+    // Just enough multipart: the one part's body, between its header block
+    // and the closing boundary.
+    const raw = Buffer.concat(chunks).toString('latin1');
+    const boundary = /boundary=(.+)$/.exec(req.headers['content-type'] ?? '')?.[1];
+    const start = raw.indexOf('\r\n\r\n');
+    const end = boundary ? raw.lastIndexOf(`\r\n--${boundary}`) : -1;
+    const text = start >= 0 && end > start ? raw.slice(start + 4, end) : '';
+    jobFiles[name] = text;
+    res.json({ name, size: text.length });
+  });
+});
+
+app.post('/plot/start', (req, res) => {
+  const name = req.body?.name;
+  if (plotter.state !== 'ready') return answer(res, 'wrongState');
+  if (anyMoving()) return answer(res, 'busy');
+  if (!validJobName(name)) return answer(res, 'jobName');
+  if (!(name in jobFiles)) return answer(res, 'jobNotFound');
+  const check = checkJob(jobFiles[name]);
+  Object.assign(job, { name, phase: 'checking', total: check.total ?? 0, done: 0, since: Date.now(),
+                       error: null, line: 0 });
+  if (check.error) {
+    // The firmware finds this during the check and lands in Ready; the
+    // mock knows at once and says so the same way.
+    Object.assign(job, { phase: 'failed', error: check.error, line: check.line ?? 0 });
+    return answer(res);
+  }
+  plotter.state = 'plotting';
+  answer(res);
+});
+
+app.post('/plot/pause', (req, res) => {
+  if (plotter.state !== 'plotting') return answer(res, 'wrongState');
+  jobNow();
+  if (job.phase === 'running') {
+    job.done = Math.min(job.total, job.done + ((Date.now() - job.since) / 1000) * plotter.drawSpeed);
+  }
+  plotter.state = 'paused';
+  movePen(hw.pen.upAngle);
+  answer(res);
+});
+
+app.post('/plot/resume', (req, res) => {
+  if (plotter.state !== 'paused') return answer(res, 'wrongState');
+  job.since = Date.now();
+  plotter.state = 'plotting';
+  answer(res);
+});
+
+app.post('/plot/stop', (req, res) => {
+  if (plotter.state !== 'plotting' && plotter.state !== 'paused') return answer(res, 'wrongState');
+  jobNow();
+  endJob('idle');
+  answer(res);
+});
+
+app.post('/plot/config', (req, res) => {
+  const v = req.body?.drawSpeed;
+  if (!isNum(v)) return answer(res, 'badValue', 'drawSpeed');
+  if (!(v >= 1 && v <= 100)) return answer(res, 'badValue', 'drawSpeed');
+  plotter.drawSpeed = v;
   answer(res);
 });
 

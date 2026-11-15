@@ -223,6 +223,55 @@ export const jog = (body) => post('/jog', body);
 export const goHome = () => post('/home', {});
 export const stopAll = () => post('/stop', {});
 export const movePen = (body) => post('/pen', body);
+export const startJob = (name) => post('/plot/start', { name });
+export const pauseJob = () => post('/plot/pause', {});
+export const resumeJob = () => post('/plot/resume', {});
+export const stopJob = () => post('/plot/stop', {});
+export const setDrawSpeed = (drawSpeed) => post('/plot/config', { drawSpeed });
+
+/** The card and the jobs on it. Throws, like the other polled reads. */
+export async function fetchJobs() {
+  const res = await fetch('/jobs');
+  if (!res.ok) throw new Error(await failure(res, '/jobs'));
+  return res.json();
+}
+
+export const jobUrl = (name) => `/jobs/read?name=${encodeURIComponent(name)}&download=1`;
+export const deleteJob = (name) => post('/jobs/delete', { name });
+
+/**
+ * A job file to the card, streamed (multipart), with progress. The same
+ * shape as uploadFile(), to /jobs/upload.
+ */
+export function uploadJob(name, file, onProgress) {
+  return new Promise((resolve, reject) => {
+    const body = new FormData();
+    body.append('file', file, name);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `/jobs/upload?name=${encodeURIComponent(name)}`);
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) onProgress?.(event.loaded / event.total);
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(JSON.parse(xhr.responseText));
+        return;
+      }
+      let message = `HTTP ${xhr.status}`;
+      try {
+        const err = JSON.parse(xhr.responseText);
+        message = errorText(dict(), err.error, err.errorDetail) || message;
+      } catch {
+        /* not JSON */
+      }
+      reject(new Error(message));
+    };
+    xhr.onerror = () => reject(new Error(dict().connectionLost));
+    xhr.onabort = () => reject(new Error(dict().uploadAborted));
+    xhr.send(body);
+  });
+}
 
 /* ------ hardware ------ */
 

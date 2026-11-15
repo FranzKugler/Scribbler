@@ -11,7 +11,7 @@
  */
 export default {
   // --- shell ---
-  tabs: ['Status', 'Setup', 'WiFi', 'Hardware', 'Update', 'Debug', 'Storage'],
+  tabs: ['Status', 'Plot', 'Setup', 'WiFi', 'Hardware', 'Update', 'Debug', 'Storage'],
   loading: 'Loading the settings …',
   loadingShort: 'loading …',
   deviceUnreachable: 'Device unreachable',
@@ -117,6 +117,45 @@ export default {
     'works out which one it was handed from the first byte.',
   connectionLost: 'Connection lost',
   uploadAborted: 'Upload aborted',
+
+  // --- jobs tab ---
+  jobsUnavailable: 'Plotter status unavailable',
+  jobsNow: 'Current job',
+  jobPhases: {
+    idle: 'ended',
+    checking: 'being checked …',
+    running: 'drawing',
+    finished: 'finished',
+    failed: 'failed'
+  },
+  jobPaused: 'paused',
+  jobFailed: (reason, line) => (line ? `${reason} (line ${line})` : reason),
+  jobProgress: (done, total, pct) => `${done} of ${total} mm · ${pct} %`,
+  jobsIdle: 'No job. Start one from the card.',
+  jobsNotReady: 'The plotter is not set up yet - see Setup.',
+  jobPause: 'Pause',
+  jobResume: 'Resume',
+  jobStop: 'Cancel',
+  jobStopHint:
+    'Pause and cancel finish the current millimetre and lift the pen - the position stays known. ' +
+    'Stop halts at once; the belts then have to be wound in again.',
+  jobsCard: 'SD card',
+  jobsNoCard: 'No SD card - insert one and restart the device.',
+  jobsCardUsage: (used, total) => `${used} of ${total} used.`,
+  jobsEmpty: 'No jobs on the card yet.',
+  jobStart: 'Draw',
+  jobDownload: 'Download',
+  jobDelete: 'Delete',
+  jobDeleteConfirm: (name) => `Delete ${name}?`,
+  jobsTruncated: 'Not all jobs are shown.',
+  jobUploading: (name) => `Uploading ${name} …`,
+  jobsUploadHint: 'A job file in the Mural format (.txt).',
+  jobUpload: 'Upload',
+  jobsSpeedTitle: 'Speed',
+  jobsSpeed: 'Drawing (mm/s)',
+  jobsSpeedHint:
+    'Until the planner arrives the bot stops briefly after every millimetre - faster than ~20 mm/s ' +
+    'buys shaking rather than time.',
 
   // --- setup tab ---
   setupUnavailable: 'Plotter status unavailable',
@@ -376,6 +415,16 @@ export default {
   err_unreachable: 'The model finds no pose for the bot there.',
   err_noPulleyRun: 'Pay the belt out for measuring first.',
   err_motion: 'The step generator refused the move.',
+  err_jobName: 'Not a valid job name.',
+  err_noCard: 'No SD card.',
+  err_jobNotFound: 'No such job.',
+  err_jobOpen: 'The file cannot be opened.',
+  err_jobEmpty: 'The file contains no move.',
+  err_jobRead: 'The file could not be read.',
+  err_jobWrite: 'Writing to the card failed - probably full.',
+  err_jobAborted: 'The upload was aborted.',
+  err_jobRename: 'The finished file could not be moved into place.',
+  err_jobDelete: 'Deleting failed.',
   err_busy: 'A belt is still moving - stop it first.',
   err_motorsOff: 'The motors are switched off.',
   err_badValue: (field) => `Not a valid value: ${field}.`,
