@@ -131,7 +131,7 @@ Decisions:
     point where the model predicts γ ≈ 0 or from two positions 180° apart, and store it in NVS.
 - **No shaft encoders in the concept.** Footprints for two (MT6701 or AS5047P) under the motor
   shafts as an **unpopulated option**, so the experiment stays possible without the design depending
-  on it. *Superseded 2026-11-15:* the finished schematic (`Scribbler_pretty`) drops the option and
+  on it. *Superseded 2026-11-15:* the finished schematic drops the option and
   grounds the drivers' encoder inputs.
 - **Driver choice stays open** — see §0.4.
 

@@ -52,7 +52,7 @@ both together.
 
 ## Hardware target
 
-The own board in [hardware/pcb](hardware/pcb) — `Scribbler_pretty.kicad_sch` is the finished
+The own board in [hardware/pcb](hardware/pcb) — `Scribbler.kicad_sch` is the finished
 schematic: **XIAO ESP32-S3 Plus** (16 MB, house standard
 unchanged), **2 × TMC2240 in SPI mode** on a shared bus with one CS each, BMI270 IMU and SSD1306
 display on I2C, microSD in SD_MMC 1-bit mode, servo on 5 V, USB-C PD input (CH224A). The pin map
