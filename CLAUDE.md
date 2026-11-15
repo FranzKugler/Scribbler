@@ -214,13 +214,23 @@ python scripts/kinematics_reference.py [--check]   # regenerate / verify the ref
 python scripts/icon.py            # regenerate the icons (then copy three of them to docs/)
 ```
 
-The pioarduino platform pins **PlatformIO Core 6.1.19** (its fork) and reinstalls it into
-`~/.platformio/penv` on every build if the installed version differs. If the VS Code extension
-has upgraded the core, that reinstall fails on Windows while PIO Home runs from the same
-environment (locked files) and leaves packages half-removed — `pio` then dies with
-`ModuleNotFoundError`. Fix: close VS Code (or stop PIO Home), then install the platform's pinned
-list from `~/.platformio/platforms/espressif32/builder/penv_setup.py` (`python_deps`) with that
-environment's `uv pip install`.
+Three traps on this machine, all hit on 2026-11-15:
+
+- **Run `pio` from PowerShell or the VS Code terminal, not from Git Bash.** The platform's
+  ESP-IDF tools refuse an MSYS environment ("MSys/Mingw is not supported"), and esptool then
+  fails to install. Claude Code's Bash tool is Git Bash - use its PowerShell tool for `pio`.
+- **The pioarduino platform pins PlatformIO Core 6.1.19** (its fork, `pioarduino-core`) and
+  reinstalls it into `~/.platformio/penv` on a build if the installed version differs. If the
+  VS Code extension has upgraded the core, that reinstall fails on Windows while PIO Home runs
+  from the same environment (locked files) and leaves packages half-removed - `pio` then dies
+  with `ModuleNotFoundError`. Fix: stop PIO Home (its two `python.exe ... platformio ... home`
+  processes; closing VS Code would also end a Claude session running inside it), then install
+  the platform's pinned list from `~/.platformio/platforms/espressif32/builder/penv_setup.py`
+  (`python_deps`) with that environment's `uv pip install`. A half-installed
+  `packages/tool-esptoolpy` (only `package.json`/`tools.json`) and leftover
+  `.cache/tmp/pkg-installing-*` folders are safe to delete; the next build fetches them again.
+- **Git dependencies need full commit hashes** - see the comment at `lib_deps`. A short hash
+  only ever worked from the cache.
 
 CI: [test.yml](.github/workflows/test.yml) runs the host tests on every push;
 [release.yml](.github/workflows/release.yml) builds both images on `main` (edge pre-release)
