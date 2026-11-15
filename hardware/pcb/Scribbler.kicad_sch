@@ -5336,6 +5336,131 @@
 		          (font
 		            (size 1.27 1.27))))))
 		)
+	
+		(symbol
+		  "Device:D_Zener"
+		  (pin_numbers
+		    (hide yes))
+		  (pin_names
+		    (offset 1.016)
+		    (hide yes))
+		  (exclude_from_sim no)
+		  (in_bom yes)
+		  (on_board yes)
+		  (in_pos_files yes)
+		  (duplicate_pin_numbers_are_jumpers no)
+		  (property "Reference" "D"
+		    (at 0 2.54 0)
+		    (show_name no)
+		    (do_not_autoplace no)
+		    (effects
+		      (font
+		        (size 1.27 1.27))))
+		  (property "Value" "D_Zener"
+		    (at 0 -2.54 0)
+		    (show_name no)
+		    (do_not_autoplace no)
+		    (effects
+		      (font
+		        (size 1.27 1.27))))
+		  (property "Footprint" ""
+		    (at 0 0 0)
+		    (show_name no)
+		    (do_not_autoplace no)
+		    (hide yes)
+		    (effects
+		      (font
+		        (size 1.27 1.27))))
+		  (property "Datasheet" ""
+		    (at 0 0 0)
+		    (show_name no)
+		    (do_not_autoplace no)
+		    (hide yes)
+		    (effects
+		      (font
+		        (size 1.27 1.27))))
+		  (property "Description" "Zener diode"
+		    (at 0 0 0)
+		    (show_name no)
+		    (do_not_autoplace no)
+		    (hide yes)
+		    (effects
+		      (font
+		        (size 1.27 1.27))))
+		  (property "ki_keywords" "diode"
+		    (at 0 0 0)
+		    (show_name no)
+		    (do_not_autoplace no)
+		    (hide yes)
+		    (effects
+		      (font
+		        (size 1.27 1.27))))
+		  (property "ki_fp_filters" "TO-???* *_Diode_* *SingleDiode* D_*"
+		    (at 0 0 0)
+		    (show_name no)
+		    (do_not_autoplace no)
+		    (hide yes)
+		    (effects
+		      (font
+		        (size 1.27 1.27))))
+
+		  (symbol "D_Zener_0_1"
+		    (polyline
+		      (pts
+		        (xy -1.27 -1.27)
+		        (xy -1.27 1.27)
+		        (xy -0.762 1.27))
+		      (stroke
+		        (width 0.254)
+		        (type default))
+		      (fill
+		        (type none)))
+		    (polyline
+		      (pts
+		        (xy 1.27 0)
+		        (xy -1.27 0))
+		      (stroke
+		        (width 0)
+		        (type default))
+		      (fill
+		        (type none)))
+		    (polyline
+		      (pts
+		        (xy 1.27 -1.27)
+		        (xy 1.27 1.27)
+		        (xy -1.27 0)
+		        (xy 1.27 -1.27))
+		      (stroke
+		        (width 0.254)
+		        (type default))
+		      (fill
+		        (type none))))
+
+		  (symbol "D_Zener_1_1"
+		    (pin passive line
+		      (at -3.81 0 0)
+		      (length 2.54)
+		      (name "K"
+		        (effects
+		          (font
+		            (size 1.27 1.27))))
+		      (number "1"
+		        (effects
+		          (font
+		            (size 1.27 1.27)))))
+		    (pin passive line
+		      (at 3.81 0 180)
+		      (length 2.54)
+		      (name "A"
+		        (effects
+		          (font
+		            (size 1.27 1.27))))
+		      (number "2"
+		        (effects
+		          (font
+		            (size 1.27 1.27))))))
+		  (embedded_fonts no)
+		)
 	)
 	(text "Aux interface idle: ASDx/ASCx 10k pull-ups, OCSB high, OSDO NC."
 		(exclude_from_sim no)
@@ -9371,7 +9496,7 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:D_TVS")
+		(lib_id "Device:D_Zener")
 		(at 129.54 54.61 0)
 		(unit 1)
 		(body_style 1)
@@ -14996,4 +15121,9 @@
     (at 190 20 0)
     (effects (font (size 1.27 1.27)))
     (uuid "641b24ee-d0e8-43fd-acbb-add8ab3896a0")
+  )
+  (text "D2 is a UNIdirectional TVS (cathode to VS) - 22V standoff is correct for the 20V rail."
+    (at 112 64 0)
+    (effects (font (size 1.27 1.27)))
+    (uuid "7a0fefbe-f63c-4141-b765-c7500d90470d")
   ))
