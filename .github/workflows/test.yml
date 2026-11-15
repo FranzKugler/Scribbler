@@ -50,3 +50,12 @@ jobs:
 
       - name: Host tests
         run: pio test -e native
+
+      # The SVG -> job pipeline of the web UI (web/src/worker/): plain
+      # node --test, no dependencies to install.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Web worker tests
+        run: npm test

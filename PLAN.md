@@ -350,6 +350,10 @@ Each phase ends with something checkable on the device, not with a green build.
    (needs the planner to cut a block short); a belt-speed limit from the kinematics' Jacobian
    near the edges (§5).
 7. **Own SVG pipeline** in the Jobs tab, with preview and time estimate.
+   *Built 2026-11-15:* `web/src/worker/` (CLAUDE.md, "SVG -> job"), 14 node tests, the converter
+   card in the Jobs tab. Mural's worker turned out to be GPL (and its one-line engine AGPL),
+   so it was only the map, not a source. Open: hidden-line removal for overlapping filled shapes,
+   raster images (§5), and a check against the same SVG through Mural's UI on the wall.
 8. **Polish** — checkpoint/resume after power loss, first-flash page, README, release.
 
 **Release and first flash — requested 2026-11-15, not urgent, not to be forgotten.** The house

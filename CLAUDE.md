@@ -4,13 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Status
 
-**Phases 1–6 built (PLAN.md section 3).** What exists: the house scaffolding copied from
+**Phases 1–7 built (PLAN.md section 3), v0.1.0 released.** What exists: the house scaffolding copied from
 DoorOpener and renamed (portal, SPA, OTA, expert lock, log ring, storage explorer, mock server,
 release workflow, first-flash page), `src/Board.h` from the schematic's netlist,
 `src/Kinematics.*` with host tests, the hardware modules with a bring-up tab, and the
 calibration flow (state machine, Setup tab), and jobs from the SD card in Mural's format (Plot
-tab), drawn through a look-ahead planner sliced onto both belts by a task of its own. None of
-it has run on hardware. [PLAN.md](PLAN.md) is the source of truth for everything not
+tab), drawn through a look-ahead planner sliced onto both belts by a task of its own, and an SVG
+converter in the Jobs tab that writes those jobs. None of it has run on hardware. [PLAN.md](PLAN.md) is the source of truth for everything not
 built; this file describes what is, plus the rules. Do not describe here what has not been built.
 
 ## Project overview
@@ -234,6 +234,19 @@ p1 / p0        pen down / up
 Keep it compatible: a file made by Mural's web UI must plot unchanged. Extensions go in new line
 types that older parsers skip, not in changed semantics.
 
+## SVG -> job (web/src/worker/)
+
+The Jobs tab's converter (`lib/JobMaker.svelte`) writes the format above. The main thread
+parses the SVG with `DOMParser` into a plain tree (`lib/svgtree.js`) - a worker has none -
+and `convert.worker.js` runs `pipeline.js`: `svg.js` (elements, styles, `<use>`, simple
+`<style>` rules) -> placed on the area (fit to a width %, or the file's own mm) ->
+`geometry.js` (path data, transforms, curves flattened to 0.1 mm) -> outlines and
+`hatch.js` fills -> clipped to the area -> `order.js` (greedy nearest neighbour from home,
+grid-indexed) -> commands, stats and a time estimate from the firmware's speeds. Text and
+images are skipped and reported. Written fresh: Mural's worker is GPL with an AGPL engine, so
+nothing of it is taken over. Pure modules, tested with `npm test` (`node --test`); keep them
+free of DOM and Svelte. No hidden-line removal yet (Mural's "flatten").
+
 ## Conventions (house standard)
 
 - **Project language is English** — code, comments, README, this file, commit messages — even when
@@ -261,6 +274,7 @@ npm install && npm run build      # web/ -> data/
 npm run dev / npm run mock        # UI against the mock, no hardware
 pio run / -t upload / -t uploadfs # the device (env seeed_xiao_esp32s3)
 pio test -e native                # host tests (Kinematics, JobFormat, Planner) - needs gcc/clang on PATH
+npm test                          # host tests of the SVG -> job pipeline (node --test)
 python scripts/kinematics_reference.py [--check]   # regenerate / verify the reference table
 python scripts/icon.py            # regenerate the icons (then copy three of them to docs/)
 ```

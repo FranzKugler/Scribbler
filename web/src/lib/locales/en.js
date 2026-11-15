@@ -156,6 +156,31 @@ export default {
   jobsSpeedHint:
     'Straight lines run through without stopping, corners slow down. Moves with the pen up run faster.',
 
+  // --- jobs tab: converter ---
+  makeTitle: 'New job from an SVG',
+  makeNeedsAnchor: 'Set the anchor distance in Setup first - it decides the size of the drawing area.',
+  makeHint: 'Lines, shapes and fills of an SVG file. Convert text to paths first.',
+  makePick: 'Choose SVG',
+  makeSize: 'Size',
+  makeSizeFit: 'Fit to the drawing area',
+  makeSizeActual: 'As in the file',
+  makeWidth: 'Width (% of the area)',
+  makeOutlines: 'Draw outlines',
+  makeInfill: 'Fill areas with hatching',
+  makeSpacing: 'Hatch spacing (mm)',
+  makeAngle: 'Hatch angle (°)',
+  makeWorking: 'Converting …',
+  makeStats: (w, h, draw, travel, lifts, time) =>
+    `${w} × ${h} mm · drawn ${draw}, travel ${travel} · ${lifts} pen lifts · about ${time}`,
+  makeWarnings: {
+    skipped: (w) => `${w.count} × <${w.tag}> skipped - a pen cannot draw it (text: convert to paths).`,
+    clipped: () => 'Parts outside the drawing area were cut off.',
+    noSize: () => 'The file states no size - fitted to the area instead.'
+  },
+  makeName: 'Name on the card',
+  makeSave: 'Save to card',
+  makeSaved: (name) => `Saved as ${name}.`,
+
   // --- setup tab ---
   setupUnavailable: 'Plotter status unavailable',
   setupState: 'Plotter',
@@ -419,6 +444,8 @@ export default {
   err_jobNotFound: 'No such job.',
   err_jobOpen: 'The file cannot be opened.',
   err_jobEmpty: 'The file contains no move.',
+  err_svgUnreadable: 'Not a readable SVG file.',
+  err_svgEmpty: 'The SVG contains nothing to draw.',
   err_jobRead: 'The file could not be read.',
   err_jobWrite: 'Writing to the card failed - probably full.',
   err_jobAborted: 'The upload was aborted.',

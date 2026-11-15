@@ -164,6 +164,31 @@ export default {
     'Gerade Linien laufen ohne Halt durch, Ecken werden abgebremst. Leerfahrten mit gehobenem Stift ' +
     'laufen schneller.',
 
+  // --- jobs tab: converter ---
+  makeTitle: 'Neuer Auftrag aus einem SVG',
+  makeNeedsAnchor: 'Erst im Setup den Ankerabstand eintragen - er bestimmt die Größe der Zeichenfläche.',
+  makeHint: 'Linien, Formen und Flächen einer SVG-Datei. Text vorher in Pfade umwandeln.',
+  makePick: 'SVG wählen',
+  makeSize: 'Größe',
+  makeSizeFit: 'An die Zeichenfläche anpassen',
+  makeSizeActual: 'Wie in der Datei',
+  makeWidth: 'Breite (% der Fläche)',
+  makeOutlines: 'Umrisse zeichnen',
+  makeInfill: 'Flächen schraffieren',
+  makeSpacing: 'Schraffurabstand (mm)',
+  makeAngle: 'Schraffurwinkel (°)',
+  makeWorking: 'Wird umgewandelt …',
+  makeStats: (w, h, draw, travel, lifts, time) =>
+    `${w} × ${h} mm · gezeichnet ${draw}, Leerfahrt ${travel} · ${lifts}× Stift heben · etwa ${time}`,
+  makeWarnings: {
+    skipped: (w) => `${w.count} × <${w.tag}> übersprungen - das kann ein Stift nicht zeichnen (Text: in Pfade umwandeln).`,
+    clipped: () => 'Was außerhalb der Zeichenfläche lag, wurde abgeschnitten.',
+    noSize: () => 'Die Datei nennt keine Größe - stattdessen an die Fläche angepasst.'
+  },
+  makeName: 'Name auf der Karte',
+  makeSave: 'Auf die Karte',
+  makeSaved: (name) => `Gespeichert als ${name}.`,
+
   // --- setup tab ---
   setupUnavailable: 'Plotter-Status nicht verfügbar',
   setupState: 'Plotter',
@@ -429,6 +454,8 @@ export default {
   err_jobNotFound: 'Den Auftrag gibt es nicht.',
   err_jobOpen: 'Die Datei lässt sich nicht öffnen.',
   err_jobEmpty: 'Die Datei enthält keine Bewegung.',
+  err_svgUnreadable: 'Keine lesbare SVG-Datei.',
+  err_svgEmpty: 'Im SVG ist nichts zu zeichnen.',
   err_jobRead: 'Die Datei ließ sich nicht lesen.',
   err_jobWrite: 'Schreiben auf die Karte fehlgeschlagen – vermutlich voll.',
   err_jobAborted: 'Die Übertragung wurde abgebrochen.',

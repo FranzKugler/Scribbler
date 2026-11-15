@@ -4,8 +4,9 @@
    * What is on the card, and drawing it: upload a job file, start it, watch
    * it, pause or stop it.
    *
-   * Job files are Mural's format (src/JobFormat.h) - for now made elsewhere,
-   * e.g. by Mural's own web UI; turning an SVG into one here is phase 7.
+   * Job files are Mural's format (src/JobFormat.h): made from an SVG right
+   * here (lib/JobMaker.svelte), or elsewhere - Mural's own web UI - and
+   * uploaded as they are.
    *
    * Two things are polled: /currentState for the running job (fast, while one
    * runs) and /jobs for the card (only after something changed it - listing a
@@ -19,6 +20,7 @@
   import { onMount, onDestroy } from 'svelte';
   import * as api from '../lib/api.js';
   import { dict } from '../lib/i18n.svelte.js';
+  import JobMaker from '../lib/JobMaker.svelte';
 
   const t = $derived(dict());
 
@@ -188,6 +190,8 @@
       {#if uploadError}<p class="banner">{uploadError}</p>{/if}
     {/if}
   </section>
+
+  <JobMaker plotter={p} cardPresent={card?.card.present ?? false} onSaved={loadCard} />
 
   <section class="card">
     <h2>{t.jobsSpeedTitle}</h2>
