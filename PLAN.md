@@ -360,11 +360,12 @@ release + the GitHub Pages flashing page in `docs/`). What is still to do:
   `references/github-setup.md`): **Pages source = GitHub Actions**, and on the `github-pages`
   environment a **deployment rule for `v*` tags** — without it the first stable release
   publishes and then fails at deploy-pages.
-- `docs/index.html`: the lede and the steps still read as DoorOpener's text with the name
-  swapped; rewrite for the plotter (what the board is, what to do after flashing: the
-  `Scribbler` access point, then Setup).
-- Check `scripts/web_tools_manifest.py` against `partitions.csv` once more, then tag
-  **`v0.1.0`** and open the flashing page in a browser against a blank board.
+- ~~`docs/index.html` rewritten for the plotter~~, and the README with it (2026-11-15).
+- ~~`scripts/web_tools_manifest.py` against `partitions.csv`~~: it reads app0 (0x10000) and
+  spiffs (0x610000) from the table; bootloader 0x0, table 0x8000, boot_app0 0xe000 are the S3's.
+- Left: the two GitHub settings above (by hand), then tag **`v0.1.0`** and open the flashing
+  page in a browser against a blank board - the first own board, since there is no breadboard
+  phase.
 
 In parallel with phases 2–6, if board (B) is chosen: **KiCad board** per §0.2 — schematic,
 review, layout, JLCPCB order. It replaces the breadboard rig when it arrives; the only firmware
