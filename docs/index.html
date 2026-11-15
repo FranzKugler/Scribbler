@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Scribbler — Flash a board</title>
-<meta name="description" content="Flash a blank Seeed XIAO ESP32-S3 Plus with Scribbler firmware, straight from Chrome or Edge — no software to install.">
+<meta name="description" content="Flash the Scribbler wall plotter's controller - a Seeed XIAO ESP32-S3 Plus - straight from Chrome or Edge, with no software to install.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
@@ -201,10 +201,11 @@
     <p class="eyebrow">Scribbler</p>
     <h1>Flash a board, from the browser</h1>
     <p class="lede">
-      A blank <a href="https://github.com/FranzKugler/Scribbler">Seeed XIAO
-      ESP32-S3 Plus</a> is ready in about a minute — no PlatformIO, no Python,
-      nothing to install. This page writes the whole flash: bootloader,
-      firmware and the web interface, in one go.
+      <a href="https://github.com/FranzKugler/Scribbler">Scribbler</a> is a pen
+      plotter that hangs on a wall from two belts. Its brain is a Seeed XIAO
+      ESP32-S3 Plus; this page puts the firmware and the web interface on a
+      blank one in about a minute — no PlatformIO, no Python, nothing to
+      install.
     </p>
     <img class="mark" src="icon-512.png" width="512" height="512" alt="">
   </header>
@@ -214,9 +215,15 @@
     <ul class="requirements">
       <li>Chrome, Edge or Opera on a computer</li>
       <li>A USB-C cable that carries data</li>
-      <li>A Seeed XIAO ESP32-S3 (Plus, 16&nbsp;MB flash)</li>
+      <li>A Seeed XIAO ESP32-S3 Plus (16&nbsp;MB flash)</li>
     </ul>
     <p style="margin-top:0.9rem;">
+      Plug the cable into the <strong>XIAO's own USB-C port</strong>, not into
+      the plotter board's power input — that one only negotiates power. The
+      XIAO may sit on the board or be on its own; the motors need no power for
+      this.
+    </p>
+    <p>
       Safari and Firefox cannot do this — they have no Web Serial API. On a
       phone or tablet there is no port to connect to at all.
     </p>
@@ -256,17 +263,27 @@
     <h2>After it's flashed</h2>
     <p>
       The board reboots and, with no WiFi configured yet, opens an access point
-      of its own named <code>Scribbler</code>. Join it from a phone or laptop —
-      a setup page appears by itself and asks which network to use. From then
-      on it answers at <code>http://scribbler.local</code> or at its address
-      on the network.
+      of its own named <code>Scribbler</code> (the display, if one is fitted,
+      shows it). Join it from a phone or laptop — a setup page appears by
+      itself and asks which network to use. From then on it answers at
+      <code>http://scribbler.local</code> or at the address the display shows.
+    </p>
+    <p>
+      Then, on the wall, the <strong>Setup</strong> tab walks through the
+      calibration once: the distance between the two anchors, winding both
+      belts in to their stop, running out to the home position, hanging the
+      belt loops on the anchors, and the pen's up and down angles. Drawings
+      come from a microSD card in the board — uploaded through the
+      <strong>Jobs</strong> tab, in the same format Mural's web interface
+      writes.
     </p>
     <p>
       Updates after this one never need a cable again: they go through the
       <strong>Update</strong> tab, or happen by themselves from the release
-      channel the device is set to. That tab, along with the log and the
-      storage browser, sits behind a password you set once at
-      <code>http://scribbler.local/#expert</code>.
+      channel the device is set to. That tab, along with the hardware tests,
+      the log and the storage browser, sits behind a password you set once at
+      <code>http://scribbler.local/#expert</code>. Drawing and calibrating are
+      open to everyone on the network.
     </p>
   </section>
 
@@ -285,13 +302,16 @@
       straight from
       <a href="https://github.com/FranzKugler/Scribbler/releases/latest">the
       latest stable release</a>; see
-      <a href="https://github.com/FranzKugler/Scribbler/blob/main/CLAUDE.md">CLAUDE.md</a>
-      for how the firmware itself is put together.
+      <a href="https://github.com/FranzKugler/Scribbler#readme">the README</a>
+      for what the firmware does and how it is built.
     </p>
   </details>
 
   <footer>
     <a href="https://github.com/FranzKugler/Scribbler">FranzKugler/Scribbler</a>
+    · mechanics, kinematic model and job format after
+    <a href="https://github.com/nikivanov/mural">Mural</a> by Nik Ivanov
+    (<a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>)
   </footer>
 </main>
 <script type="module">
