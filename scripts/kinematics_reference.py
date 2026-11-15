@@ -136,12 +136,17 @@ class Movement:
         frameY = y + self.minSafeY
         gamma = self.gamma_last_position
         F_L = F_R = 0.0
+        # Not in Mural's code: whether the loop ended by its termination test
+        # rather than by running out of iterations. The table carries it so the
+        # test can tell Mural's right answers from its wrong ones (after a jump).
+        self.converged = False
         for _ in range(20):
             phi_L, phi_R = self.getBeltAngles(frameX, frameY, gamma)
             F_L, F_R = self.getBeltForces(phi_L, phi_R)
             gamma_last = gamma
             gamma = self.solveTorqueEquilibrium(phi_L, phi_R, F_L, F_R, gamma)
             if abs(gamma_last - gamma) < 0.25 / 180.0 * PI:
+                self.converged = True
                 break
         self.gamma_last_position = gamma
 
@@ -180,12 +185,12 @@ GEOMETRIES = [
 
 
 def table():
-    """Every row of every set, in order: (set, x, y, left, right, tilt)."""
+    """Every row of every set, in order: (set, x, y, left, right, tilt, converged)."""
     for n, (d, diameter, height, step) in enumerate(GEOMETRIES):
         m = Movement(d, diameter)
         for x, y in path(m.width, height, step):
             left, right, gamma = m.getBeltLengths(x, y)
-            yield n, x, y, left, right, gamma
+            yield n, x, y, left, right, gamma, int(m.converged)
 
 
 def check(tolerance=1e-9):
@@ -193,7 +198,7 @@ def check(tolerance=1e-9):
     with open(OUT, encoding="utf-8") as f:
         committed = [tuple(float(v) for v in row)
                      for row in re.findall(r"\{([-+.\deE]+), ([-+.\deE]+), ([-+.\deE]+), "
-                                           r"([-+.\deE]+), ([-+.\deE]+)\},", f.read())]
+                                           r"([-+.\deE]+), ([-+.\deE]+), ([01])\},", f.read())]
     fresh = [row[1:] for row in table()]
     if len(committed) != len(fresh):
         print("reference.h has %d rows, the script makes %d - regenerate it"
@@ -218,7 +223,7 @@ def main():
         "#ifndef KINEMATICS_REFERENCE_H",
         "#define KINEMATICS_REFERENCE_H",
         "",
-        "struct ReferencePoint { double x, y, left, right, tilt; };",
+        "struct ReferencePoint { double x, y, left, right, tilt; int converged; };",
         "struct ReferenceSet { double anchorDistance, pulleyDiameter; int count; const ReferencePoint *points; };",
         "",
     ]
@@ -228,7 +233,8 @@ def main():
         rows = []
         for x, y in path(m.width, height, step):
             left, right, gamma = m.getBeltLengths(x, y)
-            rows.append("    {%.17g, %.17g, %.17g, %.17g, %.17g}," % (x, y, left, right, gamma))
+            rows.append("    {%.17g, %.17g, %.17g, %.17g, %.17g, %d},"
+                        % (x, y, left, right, gamma, m.converged))
         lines.append("static const ReferencePoint REFERENCE_%d[] = {" % n)
         lines += rows
         lines.append("};")

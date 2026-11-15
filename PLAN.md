@@ -313,12 +313,18 @@ Each phase ends with something checkable on the device, not with a green build.
    - **Limit cycle at standstill.** The 0.2° search grid is anchored at the warm start, so solving
      the same point repeatedly alternates between two grid values (22.4° ↔ 22.6° at a top corner)
      — ~0.07 mm of belt, i.e. several microsteps of chatter when the planner's 5–10 ms slices
-     barely move. **Next step:** a continuous solver (bisection or Brent on the torque residual,
-     bracketed by the same window), tested against the reference within one grid step (≤ 0.2°,
-     ≤ 0.15 mm) and for smoothness along a path. A deliberate departure from Mural, to be
-     recorded in `Kinematics.cpp`.
+     barely move.
+   *Both fixed 2026-11-15* by a continuous solver (`Model::solve()`: bracket the root of the full
+   torque balance, refine with Illinois) — within 0.11° / 0.072 mm of Mural wherever Mural
+   converges, identical for any route to a point, smooth along a line (second difference
+   4e-4 mm vs. Mural's 0.13 mm). Mural's solver stays as `solveMural()` for the reference test.
 3. **Motors** — TMC2209 over UART (`test_connection`, current, microsteps, StealthChop), FastAccelStepper,
    jog endpoints, the Jog tab. Debug tab shows driver status (`DRV_STATUS`, temperature flags).
+   *Built 2026-11-15, not yet on hardware:* the board has TMC2240 over SPI instead (`Driver`),
+   FastAccelStepper 2.0.1 (`Motion`), belt jog and stop, driver status — all in a Hardware tab
+   behind the expert lock rather than a separate Jog tab; the user-facing jog comes with the
+   state machine in phase 4. Also built: `Pen` (non-blocking ramp), `Display`, `Imu` (BMI270,
+   complementary filter).
 4. **Calibration flow** — state machine, Setup wizard, settings persisted. Draw a 100 mm square
    in four positions of the wall; pulley-diameter calibration from the measured result.
 5. **Jobs** — SD, chunked upload, `JobRunner` with Mural-compatible format, progress, pause/stop.
