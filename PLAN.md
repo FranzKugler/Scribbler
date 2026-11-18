@@ -59,7 +59,7 @@ references to copy from:
 | Microstep / mode straps | SPREAD → GND (StealthChop default), INDEX unconnected or to a test pad, CLK → GND (internal clock) |
 | ENN | one shared MCU pin, pulled **up** (10 kΩ) so the motors stay off while the ESP32 boots and its pins float |
 | DIAG | to MCU (StallGuard homing) — or to test pads only, StallGuard can also be polled over UART (`SG_RESULT`) |
-| Thermal | exposed pad → ≥ 9 vias into a GND plane on the bottom; 2 layers suffice at 0.7 A, 4 layers if the current is to go above 1 A |
+| Thermal | exposed pad → ≥ 9 vias into a GND plane on the bottom; 2 layers suffice at 0.7 A, 4 layers if the current is to go above 1 A (*decided:* 4 layers, §0.6) |
 | Motor connectors | JST-XH 4-pin, coil order as on the stepper datasheet — check the coil pairing of the actual motors with a multimeter before the first power-up |
 
 Power path of the whole board: USB-C PD sink (**CH224K**, voltage set by resistor: 20 V or 15 V)
@@ -169,6 +169,70 @@ Part of the build: 0.91" SSD1306, 128 × 32, I2C (as in Mural). It shows what th
 there is no network: in portal mode the AP name and `192.168.4.1`; otherwise hostname/IP, state,
 progress and the current error code. Optional at runtime — a missing display is detected and
 skipped, never a boot failure.
+
+### 0.6 PCB: stackup and net classes
+
+Decided 2026-11-18: **four layers**, JLCPCB's standard stackup **JLC04161H-7628**, 1.6 mm, no
+impedance control ordered. Signals outside, planes inside:
+
+| Layer | Use | Material | Thickness | εr |
+|---|---|---|---|---|
+| F.Cu | signals | copper 1 oz | 0.035 mm | |
+| prepreg | | 7628 | 0.2104 mm | 4.4 |
+| In1.Cu | **GND**, solid | copper 0.5 oz | 0.0152 mm | |
+| core | | FR4 | 1.065 mm | 4.6 |
+| In2.Cu | power: VS (20 V) everywhere, islands +5V, +5VD, +3.3V | copper 0.5 oz | 0.0152 mm | |
+| prepreg | | 7628 | 0.2104 mm | 4.4 |
+| B.Cu | signals | copper 1 oz | 0.035 mm | |
+
+B.Cu references In2, which is split into islands: a B.Cu trace crossing an island boundary loses
+its return path. USB runs on F.Cu over the solid GND throughout; B.Cu takes short and slow nets,
+or runs along island boundaries.
+
+The islands as routed (2026-11-18), each fed through vias, priority above the VS fill:
+
+- **+5V**: the buck output - a strip right of centre (x 109.5-116 from y 86.5 down) to D1's anode
+  vias, widening under the buck and L1. The servo headers sit over VS, so their +5V is a 1 mm
+  F.Cu trace from D1's +5V vias.
+- **+5VD** (after D1): the strip's upper end (x 109.5-116, y 61.5-86.1), from D1's cathode via up
+  to the XIAO's 5V pad. It replaced a B.Cu +5VD trace that walled off the XIAO from U5: with it
+  gone, the left-column signals for U5 run on B.Cu under the module.
+- **+3.3V**: around the LDO, IMU and pull-ups (x 92.5-109, y 84-105); farther 3.3 V loads (TMC
+  SLEEPN/VCC_IO, display, index header, SD card) hang on B.Cu traces from it.
+
+SPI and the TMC control lines needed B.Cu to cross each other and the I2C pair (U6's SPI pins
+face the board edge, and the XIAO's pad order differs from both TMCs'); SD CLK/D0 run on F.Cu
+between the USB pair and the 3.3 V feed, CMD on B.Cu. All of them are slow next to their
+rise times over these lengths (SPI a few MHz, SD at most 40 MHz over ~50 mm), and In1 GND sits
+under every B.Cu run as well, one core further away.
+
+Net classes (mm; vias within JLCPCB's standard, drill ≥ 0.3, ring ≥ 0.15):
+
+| Class | Track | Clearance | Via Ø / drill | Nets |
+|---|---|---|---|---|
+| Default | 0.20 | 0.20 | 0.6 / 0.3 | signals |
+| USB | 0.30, pair gap 0.20 | 0.20 | 0.6 / 0.3 | `USB_D+`, `USB_D-` |
+| Motor | 0.80 | 0.25 | 0.8 / 0.4 | coil nets `/MOT_L_*`, `/MOT_R_*` |
+| Power_VS | 1.00 | 0.25 | 0.8 / 0.4 | `VS`, buck switch node - not 0.30: the TMC2240's VS pins sit 0.25 mm from its coil outputs |
+| Power_5V | 1.00 | 0.20 | 0.8 / 0.4 | `+5V`, `+5VD` (servos) |
+| Power_3V3 | 0.50 | 0.20 | 0.6 / 0.3 | `+3.3V` |
+| GND | 0.50 | 0.20 | 0.6 / 0.3 | `GND` |
+
+Why these numbers: the USB pair is ~90 Ω differential on the 0.21 mm prepreg (Hammerstad and
+IPC-2141, with solder mask) - check it in JLCPCB's impedance calculator. 0.30 / 0.20 rather than
+0.25 / 0.15 (also ~90 Ω): a pair gap below the class clearance is a DRC error along the whole
+pair. The S3 runs USB full speed only, so length match and short routing matter more than the
+exact impedance; the pair is matched XIAO pad to J1's B pad, the A-pad branches are stubs. 1 A RMS coil
+current (peaks ~1.4 A) would take 0.5 mm on 1 oz; 0.8 mm leaves margin, and a layer change takes
+two vias. VS carries both motors, +5V up to four servos.
+
+Konnect (≥ 0.13; `create_netclass`, `assign_net_to_class`, written to the `.kicad_pro` while
+KiCad is closed) holds the class values and the patterns: `USB_D*` and `*ESP_USB_D*` (both sides
+of the 22 Ω resistors), `/MOT*` (schematic labels carry the sheet path), the power nets by name.
+Konnect cannot set the diff-pair width/gap nor the physical stackup (it reads the stackup with
+`get_board_stackup`); both are entered in Board Setup. `scripts/pcb_setup.py` sets the layer
+count through KiCad's IPC API - that API's `SetNetClasses` drops class values (KiCad 10.0.5), so
+the script only reports what is missing.
 
 ---
 

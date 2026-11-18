@@ -4,4 +4,5 @@
   (lib (name "Scribbler") (type "KiCad") (uri "c:\Users\Franz\Workspace\Scribbler\hardware\pcb\Scribbler.kicad_sym") (options "") (descr ""))
 
   (lib (name "Seeed_Studio_XIAO_Series") (type "KiCad") (uri "c:/Users/Franz/Workspace/Scribbler/hardware/pcb/libs/symbols/Seeed_Studio_XIAO_Series.kicad_sym") (options "") (descr ""))
+  (lib (name "JLCImport")(type "KiCad")(uri "${KIPRJMOD}/JLCImport.kicad_sym")(options "")(descr ""))
 )

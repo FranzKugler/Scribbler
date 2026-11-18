@@ -5,7 +5,8 @@
     "Driver ENN is one shared MCU pin with a 10k pull-up to VCC_IO, so the motors stay disabled while the ESP32 boots and its pins float. Driver VCC_IO comes from the XIAO 3V3, not from the driver's 5VOUT.",
     "The board's 5 V rail reaches the XIAO 5V pin only through a Schottky or ideal diode, because the XIAO ties its 5V pin to USB VBUS and would otherwise back-feed into a connected PC.",
     "microSD runs in SD_MMC 1-bit mode on its own pins, never on a shared SPI bus with the drivers or encoders. I2C bus carries the SSD1306 OLED (0x3C) and the BMI270 IMU (0x68/0x69); one set of pull-ups for the bus.",
-    "Driver exposed pad: at least 9 thermal vias into a bottom-side GND plane. Shaft encoders (MT6701 or AS5047P) are footprints only, marked DNP, centred under the motor shafts. Driver choice (TMC2209/TMC2226 via UART or TMC2240 via SPI) is open - see PLAN.md 0.4."
+    "Driver exposed pad: at least 9 thermal vias into a bottom-side GND plane. Shaft encoders (MT6701 or AS5047P) are footprints only, marked DNP, centred under the motor shafts. Driver choice (TMC2209/TMC2226 via UART or TMC2240 via SPI) is open - see PLAN.md 0.4.",
+    "Four layers, JLCPCB JLC04161H-7628, 1.6 mm: F.Cu and B.Cu signals, In1.Cu solid GND, In2.Cu power islands (VS 20 V, +5V, +3.3V, GND elsewhere). Route USB, SPI and SD on F.Cu over GND; B.Cu traces must not cross In2 island boundaries. Net classes (track/clearance/via, mm): Default 0.2/0.2/0.6-0.3, USB 0.25 pair gap 0.15 (~90 ohm diff), Motor 0.8/0.25/0.8-0.4, Power_VS 1.0/0.3/0.8-0.4, Power_5V 1.0/0.2/0.8-0.4, Power_3V3 0.5/0.2/0.6-0.3, GND 0.5/0.2/0.6-0.3 - see PLAN.md 0.6, set by scripts/pcb_setup.py."
   ],
   "fab_constraints": {},
   "naming_conventions": {}

@@ -10,3 +10,9 @@ node_modules/
 
 # espota password, per checkout
 src/Secrets.h
+
+# Datasheets and other reference documents, kept locally only (vendor copyright)
+datasheets/
+
+# Python bytecode from the scripts
+__pycache__/

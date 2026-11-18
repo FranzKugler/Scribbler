@@ -62,6 +62,16 @@ authority. When the schematic changes, export the netlist (`kicad-cli sch export
 compare it with `Board.h`; nothing does that automatically. Keep STEP/DIR/ENN off strapping pins
 (GPIO0, 3, 45, 46). GPIO43/44 stay free for a UART console.
 
+The PCB has four layers, JLCPCB's JLC04161H-7628 (1.6 mm): signals on F.Cu/B.Cu, solid GND on
+In1, power islands (VS, +5V, +5VD, +3.3V) on In2; net classes Default, USB (diff pair), Motor,
+Power_VS, Power_5V, Power_3V3, GND - values and reasons in PLAN.md §0.6.
+Class values and patterns go through Konnect (≥ 0.13: `create_netclass`, `assign_net_to_class`,
+with KiCad closed - they write the `.kicad_pro`); diff-pair width/gap and the stackup's
+thicknesses have no tool and are set in Board Setup. Konnect 0.2.x wrote net classes into the
+`.kicad_pcb` and could not read KiCad 10 boards - check `get_installation_info` when a Konnect
+result looks wrong. [scripts/pcb_setup.py](scripts/pcb_setup.py) sets the layer count through
+KiCad's IPC API (KiCad writes the file, so the never-as-text rule holds).
+
 No shaft encoders: the finished schematic dropped the optional J7/J8 and grounds the TMC2240's
 ENCA/B/N inputs — PLAN.md §0.3. The
 BMI270 measures the bot's tilt γ (validation and calibration of the kinematics, sway, "off the
@@ -287,6 +297,7 @@ pio test -e native                # host tests (Kinematics, JobFormat, Planner) 
 npm test                          # host tests of the SVG -> job pipeline (node --test)
 python scripts/kinematics_reference.py [--check]   # regenerate / verify the reference table
 python scripts/icon.py            # regenerate the icons (then copy three of them to docs/)
+python scripts/pcb_setup.py [--dry-run]   # PCB layers + net classes into the running KiCad (pip install kicad-python)
 ```
 
 Three traps on this machine, all hit on 2026-11-15:
