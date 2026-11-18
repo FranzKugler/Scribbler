@@ -12380,12 +12380,6 @@
 			(uuid "766f5f9d-c9a3-4d08-a562-3ea7980f21db")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR059")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR059")
@@ -12618,12 +12612,6 @@
 			(uuid "4548994f-1c44-48b1-a269-a368320e50dc")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR016")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR016")
@@ -12713,12 +12701,6 @@
 			(uuid "5ecfd750-3cf8-4eab-8297-981eac6c5ea9")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C29")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C29")
@@ -12797,12 +12779,6 @@
 			(uuid "70bfcd64-6502-43ec-9f45-c51810ce9507")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR040")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR040")
@@ -12881,12 +12857,6 @@
 			(uuid "b21e8f4d-f91a-4445-9777-911a9dcd5119")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR015")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR015")
@@ -12976,12 +12946,6 @@
 			(uuid "eac343bb-b26b-42fa-b4d3-608c99d8dded")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C28")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C28")
@@ -13059,12 +13023,6 @@
 			(uuid "90abd309-f373-41bc-a8ab-0b41f402ac71")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR018")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR018")
@@ -13143,12 +13101,6 @@
 			(uuid "645684b8-0f12-47ec-9202-c6dd881938ee")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR09")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR09")
@@ -13226,12 +13178,6 @@
 			(uuid "149c7dac-bc97-4c36-8669-01bc43a8210e")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR075")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR075")
@@ -13321,12 +13267,6 @@
 			(uuid "e89f400c-20e6-444f-a8b8-65ce73a21aa6")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "R20")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "R20")
@@ -13506,12 +13446,6 @@
 			(uuid "e87474f6-388c-4380-ab84-4d5b79dbf415")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "R5")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "R5")
@@ -13589,12 +13523,6 @@
 			(uuid "91a62e29-2acf-4dcf-9347-9629ab4eec0d")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR055")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR055")
@@ -13684,12 +13612,6 @@
 			(uuid "ab14c4e4-5da3-46b9-96ae-e8bfc7858aa1")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C16")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C16")
@@ -13806,12 +13728,6 @@
 			(uuid "47c6ea58-0a08-42be-aa2b-cd59557b082b")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "U1")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "U1")
@@ -13901,12 +13817,6 @@
 			(uuid "da051704-de12-40a3-9b48-8867d550be88")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C6")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C6")
@@ -13996,12 +13906,6 @@
 			(uuid "7cccb904-0a1e-48b3-9dfd-e37412011354")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C5")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C5")
@@ -14079,12 +13983,6 @@
 			(uuid "7be5d953-e036-4204-9665-1a5e737d4f1b")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR043")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR043")
@@ -14164,12 +14062,6 @@
 			(uuid "a0d024f3-9d3e-4cce-b2f5-a6206ada4e22")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR033")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR033")
@@ -14247,12 +14139,6 @@
 			(uuid "84f6f5f6-a47c-4c2d-8035-b21b19326f8d")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR023")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR023")
@@ -14435,12 +14321,6 @@
 			(uuid "6869899d-4543-4268-9cd6-f15fc28736c4")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "U5")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "U5")
@@ -14701,12 +14581,6 @@
 			(uuid "291eb189-f457-4136-9bbc-41bf9e867bdf")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "U6")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "U6")
@@ -14786,12 +14660,6 @@
 			(uuid "f7e82d17-c48b-43a0-a4bf-e42a2852b98c")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR034")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR034")
@@ -14870,12 +14738,6 @@
 			(uuid "c14a9fc2-d2e6-41e5-b59d-fcfe4d8c19c9")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#FLG04")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#FLG04")
@@ -14953,12 +14815,6 @@
 			(uuid "37287f4e-c65b-483d-a958-8491a4f8790d")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR012")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR012")
@@ -15048,12 +14904,6 @@
 			(uuid "019fd0da-6f0c-4a6e-99b1-6b3532c9079a")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "D3")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "D3")
@@ -15131,12 +14981,6 @@
 			(uuid "4d656221-0c35-4ec9-bc70-2b4d06861ddd")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR052")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR052")
@@ -15214,12 +15058,6 @@
 			(uuid "534c19a9-4632-4111-af11-7cee1719c6d4")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR017")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR017")
@@ -15297,12 +15135,6 @@
 			(uuid "ee2c100b-557c-4680-8bb2-920ce2c1ecf4")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR065")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR065")
@@ -15382,12 +15214,6 @@
 			(uuid "f5162b32-e1b8-4a41-b890-e974cf2ff2e5")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR072")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR072")
@@ -15477,12 +15303,6 @@
 			(uuid "bfd9dead-bae9-4d4d-b077-f1aae41cfe5c")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "R9")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "R9")
@@ -15561,12 +15381,6 @@
 			(uuid "3a8107dd-cbb4-43fc-9947-255d4c2dcded")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR062")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR062")
@@ -15745,12 +15559,6 @@
 			(uuid "ed324f48-c6c3-4879-b307-f5966e4bb916")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "R12")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "R12")
@@ -15840,12 +15648,6 @@
 			(uuid "654f081b-66e8-4ec2-9bed-eef0a362f4c3")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "R14")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "R14")
@@ -15924,12 +15726,6 @@
 			(uuid "cd8094e4-ef1c-4952-9a89-3078f3d6d290")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR026")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR026")
@@ -16008,12 +15804,6 @@
 			(uuid "67b54178-8dc5-420b-9ce6-671aabeb2463")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR022")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR022")
@@ -16092,12 +15882,6 @@
 			(uuid "a718aa7e-3713-4393-9be1-11f6634d9329")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR058")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR058")
@@ -16187,12 +15971,6 @@
 			(uuid "7f081d7a-ec58-44d6-9725-ab75915dd9a6")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "R7")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "R7")
@@ -16282,12 +16060,6 @@
 			(uuid "720266c8-24ae-41f7-b1e2-6cb982af56e9")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C14")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C14")
@@ -16384,12 +16156,6 @@
 			(uuid "4ecc4d43-7a8d-4685-8fd1-fc31b5bf786b")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "J2")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "J2")
@@ -16467,12 +16233,6 @@
 			(uuid "78d72773-cbba-443e-9900-71427e188dd6")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR068")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR068")
@@ -16551,12 +16311,6 @@
 			(uuid "a63a2117-fe55-4fa9-885d-6cf8e2b7ff62")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR027")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR027")
@@ -16723,12 +16477,6 @@
 			(uuid "626ab696-51a5-44b2-82d5-668cc3ed883e")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "R6")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "R6")
@@ -16854,12 +16602,6 @@
 			(uuid "56666811-939d-4df2-b845-7c55643c18de")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "U7")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "U7")
@@ -16949,12 +16691,6 @@
 			(uuid "ab3b4a4f-a1c4-4de6-83a9-98fdb306aed0")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C3")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C3")
@@ -17113,12 +16849,6 @@
 			(uuid "e5dc8835-00e5-480a-be0d-f95e404d5727")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR036")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR036")
@@ -17198,12 +16928,6 @@
 			(uuid "c2482193-1346-47ce-93f8-d39bac7abf37")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR038")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR038")
@@ -17293,12 +17017,6 @@
 			(uuid "627fce21-2e61-4ffc-8407-fbb77658f5ac")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C20")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C20")
@@ -17377,12 +17095,6 @@
 			(uuid "3b0d0243-08be-49bb-b539-a60f99f7d0fe")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR024")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR024")
@@ -17472,12 +17184,6 @@
 			(uuid "78d8c213-2968-4a58-8d2f-6588451c788b")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "R8")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "R8")
@@ -17556,12 +17262,6 @@
 			(uuid "c030fca5-83c8-446f-8c0a-a81e1e036a08")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR066")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR066")
@@ -17639,12 +17339,6 @@
 			(uuid "68e30151-ab00-4f4d-a8e7-7b8ecec57fe8")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR071")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR071")
@@ -17737,12 +17431,6 @@
 			(uuid "d5008bf5-728b-4ce9-bffb-7158b4206ebd")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "J5")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "J5")
@@ -17832,12 +17520,6 @@
 			(uuid "94501dd5-05b5-4e6b-974d-212960099ad1")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C7")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C7")
@@ -17915,12 +17597,6 @@
 			(uuid "5da8c3dd-24f8-4ea5-8cec-a3b24dee9107")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR044")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR044")
@@ -18055,12 +17731,6 @@
 			(uuid "36e284a2-6ff4-45e6-a9f7-2f63ad766f7e")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "J1")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "J1")
@@ -18139,12 +17809,6 @@
 			(uuid "76a29ea1-a898-445d-aa32-7eb48cb3d978")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR028")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR028")
@@ -18234,12 +17898,6 @@
 			(uuid "c25a6e26-2f6b-49b7-92cc-dc656405d2f8")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C31")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C31")
@@ -18329,12 +17987,6 @@
 			(uuid "1fe56e2e-fff5-45f5-ac63-854d042f333a")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C1")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C1")
@@ -18424,12 +18076,6 @@
 			(uuid "59be0930-43d5-4d1e-a595-493b19c5e0ba")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C22")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C22")
@@ -18509,12 +18155,6 @@
 			(uuid "d23f5cea-14d2-4aa4-b610-59859a53e96c")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR039")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR039")
@@ -18593,12 +18233,6 @@
 			(uuid "97cfa877-c393-4751-8695-107e03d3bb0b")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR030")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR030")
@@ -18688,12 +18322,6 @@
 			(uuid "f32a706c-6240-4359-bdd1-c97a4a434767")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "R21")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "R21")
@@ -18783,12 +18411,6 @@
 			(uuid "b87562cd-581c-42b9-828e-0b3873f34562")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C17")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C17")
@@ -18878,12 +18500,6 @@
 			(uuid "a8abc803-1088-433c-967d-ede7e8cd303a")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C27")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C27")
@@ -18963,12 +18579,6 @@
 			(uuid "caf9a06e-b844-4848-b275-35913e9e9a0a")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR048")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR048")
@@ -19047,12 +18657,6 @@
 			(uuid "09de177c-a0c0-4c0c-8c3d-dc8c96e94fe2")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR05")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR05")
@@ -19145,12 +18749,6 @@
 			(uuid "af4103a9-0862-42e7-8250-8d6ca6558ed1")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "U3")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "U3")
@@ -19240,12 +18838,6 @@
 			(uuid "b02f9c4a-e9d4-4832-a3d5-a4b953c0e304")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C10")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C10")
@@ -19335,12 +18927,6 @@
 			(uuid "5c6b0a98-aec4-4974-9418-adbd1f9d11e0")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C4")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C4")
@@ -19419,12 +19005,6 @@
 			(uuid "9afca038-33f0-4c5e-a860-2d8c45f6bcd6")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR064")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR064")
@@ -19514,12 +19094,6 @@
 			(uuid "b1c4f956-0923-4ce1-bf15-2259ecfbe8f6")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C26")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C26")
@@ -19599,12 +19173,6 @@
 			(uuid "3e85304e-90c3-46ff-8d9f-5c2a78c40e29")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR060")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR060")
@@ -19694,12 +19262,6 @@
 			(uuid "aa9cbe9f-9726-4aa7-8410-0fb51581d8f0")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C21")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C21")
@@ -19789,12 +19351,6 @@
 			(uuid "1f4abbfd-1d33-45f3-85dc-3b6894282d6f")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "R17")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "R17")
@@ -19873,12 +19429,6 @@
 			(uuid "a5feb23b-3a4c-4251-b929-f163329518d6")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR03")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR03")
@@ -19958,12 +19508,6 @@
 			(uuid "ac0b5f20-a754-4efd-a70a-8f29b635cd4b")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR054")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR054")
@@ -20053,12 +19597,6 @@
 			(uuid "2065ce09-d899-4119-b08d-4d098a91df57")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C15")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C15")
@@ -20155,12 +19693,6 @@
 			(uuid "555474e7-386b-4770-9edc-e4b091f2b4cb")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "J3")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "J3")
@@ -20250,12 +19782,6 @@
 			(uuid "616251fa-0c41-4c98-9b8b-08093981ae7d")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "R18")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "R18")
@@ -20334,12 +19860,6 @@
 			(uuid "01f0e3d2-be5a-4d26-afae-b6b3df2d873b")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR046")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR046")
@@ -20429,12 +19949,6 @@
 			(uuid "b9590c87-0ddd-460f-91a9-b5bfed1c831f")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C18")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C18")
@@ -20512,12 +20026,6 @@
 			(uuid "ccdf20fc-dce4-42c5-9371-56024f26dfbe")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR021")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR021")
@@ -20703,12 +20211,6 @@
 			(uuid "524dda22-0383-46df-a18a-6eb168a3b364")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "R23")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "R23")
@@ -20801,12 +20303,6 @@
 			(uuid "f14cc579-5c1e-4c99-8432-aec59bda5e58")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "J7")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "J7")
@@ -20884,12 +20380,6 @@
 			(uuid "e5832d64-4c05-466f-b232-eb0e07ddccbc")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR010")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR010")
@@ -20979,12 +20469,6 @@
 			(uuid "9c666256-c8ed-463c-a025-1e83ff7cc526")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C13")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C13")
@@ -21074,12 +20558,6 @@
 			(uuid "195d63d8-d67c-4234-85dd-f36fb63d2402")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C12")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C12")
@@ -21169,12 +20647,6 @@
 			(uuid "2b2b156b-0783-41fa-9dad-683d970a939d")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C25")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C25")
@@ -21342,12 +20814,6 @@
 			(uuid "57b38532-0084-4e53-b905-b4e9e544567a")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "U8")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "U8")
@@ -21425,12 +20891,6 @@
 			(uuid "e5da739b-5149-4b97-874b-8129d99e1721")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR073")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR073")
@@ -21510,12 +20970,6 @@
 			(uuid "f12a5bee-a56a-4036-809a-191e0383a057")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR037")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR037")
@@ -21593,12 +21047,6 @@
 			(uuid "95aeb6ec-2869-4d4b-b29a-4d5e51e3b0c5")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR045")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR045")
@@ -21688,12 +21136,6 @@
 			(uuid "da4a7aea-ea51-4571-bc32-3f0663260a8c")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "D2")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "D2")
@@ -21772,12 +21214,6 @@
 			(uuid "91794f4f-b480-4c12-b0fd-cc3f753fe7ff")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR042")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR042")
@@ -21857,12 +21293,6 @@
 			(uuid "2a53008e-e589-46e0-8181-b78155959f0a")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR074")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR074")
@@ -21952,12 +21382,6 @@
 			(uuid "d3fa1333-255e-496e-a976-c846b9fc270f")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "R3")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "R3")
@@ -22035,12 +21459,6 @@
 			(uuid "ce1c8c34-7815-4795-aec5-f668928edf02")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR049")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR049")
@@ -22130,12 +21548,6 @@
 			(uuid "c3c9f0d8-0951-40f4-a82a-f666137892bb")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "L1")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "L1")
@@ -22214,12 +21626,6 @@
 			(uuid "f77145a0-ac97-46dc-b3d8-943dc24974c1")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR04")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR04")
@@ -22298,12 +21704,6 @@
 			(uuid "e542e58f-0aee-4858-b6f3-8337edd4b40d")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR08")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR08")
@@ -22383,12 +21783,6 @@
 			(uuid "873daa0c-c691-40a3-8925-83884bd23d40")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#FLG01")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#FLG01")
@@ -22467,12 +21861,6 @@
 			(uuid "156af5a2-f4fe-4200-a223-9364dd19c52e")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR032")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR032")
@@ -22562,12 +21950,6 @@
 			(uuid "5c237fcf-ca1f-4c2f-b844-452ddf756800")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C19")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C19")
@@ -22647,12 +22029,6 @@
 			(uuid "0fe34bca-ff9d-41b4-846c-9a453a04922c")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR051")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR051")
@@ -22742,12 +22118,6 @@
 			(uuid "478bcc8d-44b4-4a13-887e-df8fdd315fb3")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C8")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C8")
@@ -22825,12 +22195,6 @@
 			(uuid "928716dd-460d-411d-84d3-592cad80460e")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR020")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR020")
@@ -22908,12 +22272,6 @@
 			(uuid "ad0d83c4-a4a6-4fe6-9990-03b9c5a6da72")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR07")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR07")
@@ -23006,12 +22364,6 @@
 			(uuid "4069fb5c-70aa-46b6-8a8b-cb4f0e4cf26f")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "J4")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "J4")
@@ -23101,12 +22453,6 @@
 			(uuid "42b10c0b-286c-4f15-b7c9-9588d71fd7aa")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "R16")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "R16")
@@ -23196,12 +22542,6 @@
 			(uuid "6f200766-7ab4-483b-931d-8ef698feff56")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "R13")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "R13")
@@ -23291,12 +22631,6 @@
 			(uuid "0daa8df9-084d-469d-8e18-0bb808a8de24")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C30")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C30")
@@ -23375,12 +22709,6 @@
 			(uuid "39e154ed-a020-4edc-8190-a9cfdc42fa00")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR041")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR041")
@@ -23470,12 +22798,6 @@
 			(uuid "1b70a56e-e550-492c-8709-a500f7340b1b")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "D4")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "D4")
@@ -23565,12 +22887,6 @@
 			(uuid "0d75ba6b-cc90-4b95-b6a9-9f3315ac9e69")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "R19")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "R19")
@@ -23649,12 +22965,6 @@
 			(uuid "43cd08f4-5563-43f9-a4b0-d22ee25c4476")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR014")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR014")
@@ -23822,12 +23132,6 @@
 			(uuid "4a7642c9-723e-41cc-af6a-0b2deaa9d8fe")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR061")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR061")
@@ -23917,12 +23221,6 @@
 			(uuid "ecea3584-c758-46eb-a4fd-7424042092cd")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "R4")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "R4")
@@ -24012,12 +23310,6 @@
 			(uuid "0ce90889-34b8-4a13-bdb4-6c8659e22718")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C24")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C24")
@@ -24095,12 +23387,6 @@
 			(uuid "4832849b-8e04-4217-8359-682037fb103b")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR067")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR067")
@@ -24178,12 +23464,6 @@
 			(uuid "df505a0d-722a-4012-85c6-6d0ba4ee7539")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR069")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR069")
@@ -24355,12 +23635,6 @@
 			(uuid "6797ccdc-573e-4673-b971-adc5acac72fa")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR070")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR070")
@@ -24450,12 +23724,6 @@
 			(uuid "dd13aec3-300e-488d-80c3-93fc429f5875")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "R10")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "R10")
@@ -24545,12 +23813,6 @@
 			(uuid "8c8365fe-757e-4d2a-8fb3-530af41d10b1")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "R11")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "R11")
@@ -24640,12 +23902,6 @@
 			(uuid "aa22a380-9135-404e-9de2-fc7eddc6d581")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "D1")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "D1")
@@ -24724,12 +23980,6 @@
 			(uuid "a1c858ff-d363-4249-91c4-b60e444e47f3")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR01")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR01")
@@ -24819,12 +24069,6 @@
 			(uuid "afccce10-9e25-4f51-a262-85ce351b267e")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "R15")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "R15")
@@ -24903,12 +24147,6 @@
 			(uuid "aab5f83b-5cd6-4f8f-aba9-83fdf82b874a")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR047")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR047")
@@ -24986,12 +24224,6 @@
 			(uuid "36a25ebb-616b-4f30-a6b8-8ed570205251")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR031")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR031")
@@ -25159,12 +24391,6 @@
 			(uuid "d7d8c31d-bfca-4541-a23d-72f53d1fc930")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR050")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR050")
@@ -25502,12 +24728,6 @@
 			(uuid "cbc676be-4d17-4fe8-9ad6-5c0f2e1bce17")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR06")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR06")
@@ -25586,12 +24806,6 @@
 			(uuid "290cf2de-1cd4-47cc-8c07-883bbca0b71b")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR056")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR056")
@@ -25681,12 +24895,6 @@
 			(uuid "4308d896-5a6c-409c-b2e6-255510241c85")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C23")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C23")
@@ -25782,12 +24990,6 @@
 			(uuid "99fe7adf-913d-4017-87fa-cdb6850e81cc")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "J8")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "J10")
@@ -25865,12 +25067,6 @@
 			(uuid "4e6828fd-07b9-41d1-a36d-cab262db228d")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR011")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR011")
@@ -25950,12 +25146,6 @@
 			(uuid "e1102f3c-fe17-4cc0-9b30-d80d2a2f18ed")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR035")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR035")
@@ -26110,12 +25300,6 @@
 			(uuid "015182b2-b4de-4111-8117-dafff6fd73ad")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR019")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR019")
@@ -26226,12 +25410,6 @@
 			(uuid "837b5579-4342-413d-9720-11db40cb2e10")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "J9")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "J9")
@@ -26309,12 +25487,6 @@
 			(uuid "65c49cff-244e-48a1-9a50-2361382acdb5")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR025")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR025")
@@ -26416,12 +25588,6 @@
 			(uuid "852b7739-8504-414c-a2b2-03c3e4b8df9c")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "U2")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "U2")
@@ -26514,12 +25680,6 @@
 			(uuid "95d5f3ef-788e-4bb5-ac9e-e85655cac7ec")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "J6")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "J6")
@@ -26597,12 +25757,6 @@
 			(uuid "4eb635c5-55ec-48fd-8165-21cfa77a7b29")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR057")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR057")
@@ -26782,12 +25936,6 @@
 			(uuid "119ba162-beff-41c6-a46f-1ee6b2d13960")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "R22")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "R22")
@@ -26877,12 +26025,6 @@
 			(uuid "7554943b-63ea-4fc1-a234-0ff80d73a515")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C11")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C11")
@@ -27040,12 +26182,6 @@
 			(uuid "203d7d1b-fb75-41c6-bdf3-cc73a659e337")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#FLG02")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#FLG02")
@@ -27123,12 +26259,6 @@
 			(uuid "f8c9d252-096f-4159-8ad7-6b9127a0e527")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR053")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR053")
@@ -27218,12 +26348,6 @@
 			(uuid "68fe040a-7110-44ec-ac4b-2a11b3d5b9b5")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "C9")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "C9")
@@ -27302,12 +26426,6 @@
 			(uuid "6baa21c3-f54b-4949-bf34-53635c4f985a")
 		)
 		(instances
-			(project "Scribbler_pretty"
-				(path "/5ac247f0-a1a4-476a-9cef-70716d7700ea"
-					(reference "#PWR013")
-					(unit 1)
-				)
-			)
 			(project "Scribbler"
 				(path "/ed567391-c897-4143-b981-a16453ce31fc"
 					(reference "#PWR013")
